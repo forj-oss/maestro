@@ -17,6 +17,15 @@ module.exports = {
     },
     tools: {
       type: 'json'
+    },
+    defect_tracker: {
+      type: 'json'
+    },
+    auth: {
+      type: 'json'
+    },
+    projects: {
+      type: 'json'
     }
   }
 

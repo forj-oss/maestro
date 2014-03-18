@@ -68,13 +68,15 @@
       "dname": "Launchpad",
       "name": "launchpad",
       "desc": "Launchpad defect tracker",
-      "active": "true"
+      "active": "true",
+      "icon": "true"
     },
     {
       "dname": "Bugzilla",
       "name": "bugzilla",
       "desc": "Bugzilla defect tracker",
-      "active": "false"
+      "active": "false",
+      "icon": "true"
     }
   ]
 }

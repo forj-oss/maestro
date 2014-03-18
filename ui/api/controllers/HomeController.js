@@ -26,16 +26,35 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
-    var data =  require('../../node_modules/config/config.js').get_config_data();
-    if(data instanceof Error){
-      res.view(500);
-    }else{
-      res.view({ tools: data.tools, defect_tracker: data.defect_tracker });
-    }
+    var bpm = require('../../node_modules/blueprint/blueprint.js');
+    
+    var bp = bpm.get_blueprint('en', function(err){
+      console.log('Error in blueprint search: '+err);
+      res.send(500, err);
+    }, function(result){
+      if(result){
+        res.view({ tools: result.tools, defect_tracker: result.defect_tracker }, 200);
+      }else{
+        var data =  require('../../node_modules/config/config.js').get_config_data();
+        if(data instanceof Error){
+          res.send(500, 'Error reading the configuration file.');
+        }else{
+          bpm.create_blueprint('en', data.tools, data.defect_tracker, data.auth, data.projects, function(errc){
+            console.log('Error creating the blueprint record from the json file: '+errc);
+            res.send(500, errc);
+          }, function(resultc){
+            res.view({ tools: resultc.tools, defect_tracker: resultc.defect_tracker }, 200);
+          });
+        }
+      }
+    });
   },
   statics: function(req, res){
     //TODO: integrate nagios
     var data = { cpu: 90, memory: 75, disk: 75, users: 32, commits_24: 11, gates: 4  };
     res.view(data, 200);
+  },
+  tutorial: function(req, res){
+    res.view();
   }
 };
