@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     
-    <!--  
+    <!--
         Stylesheets and Preprocessors
         ==============================
 
@@ -30,14 +30,58 @@
     <!--STYLES-->
     <link rel="stylesheet" href="/linker/styles/bootstrap-theme.css">
     <link rel="stylesheet" href="/linker/styles/bootstrap.css">
+    <link rel="stylesheet" href="/linker/styles/vtabs.css">
     <!--STYLES END-->
   </head>
 
   <body>
-    <%- body %>
+    <section class="header">
+    <div class="container" style="padding-top: 10px;">
+    <div class="row">
+        <div class="col-md-1 forj-logo" style="float:left; width: 62px; height: 61px; background-image: url('../images/forj-62.png');"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
+          <input type="text" class="form-control search-query" placeholder="Search..."/>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+          <div class="row">
+            <div class="col-md-4">
+              <div style="background-color: #7DC068;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div>
+              <h5 style="font-weight: bold;margin-bottom: 0;">System Health</h5>
+              <span style="font-size: 10px;">Everything is OK</span>
+            </div>
+            <div class="col-md-4">
+              <div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div>
+              <h5 style="font-weight: bold;margin-bottom: 0;">System Backup</h5>
+              <span style="font-size: 10px;">No Backup</span>
+            </div>
+            <div class="col-md-4">
+              <div class="btn-group">
+                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                  More <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Sing out</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    </div>
+    </section>
+    <section class="container">
+      <%- body %>
+    </section>
 
-
-
+    <footer>
+      
+    </footer>
     <!--
         Client-side Templates
         ========================
@@ -70,7 +114,7 @@
       ========================
 
       You can always bring in JS files manually with `script` tags, or asynchronously
-      on the client using a solution like AMD (RequireJS).  Or, if you like, you can 
+      on the client using a solution like AMD (RequireJS).  Or, if you like, you can
       take advantage of Sails' boilerplate asset management.
 
       By default, filesin your `assets/linker/js` folder are included here
@@ -93,6 +137,8 @@
     <script src="/linker/js/jquery-1.9.0.js"></script>
     <script src="/linker/js/bootstrap.js"></script>
     <script src="/linker/js/bootstrap.min.js"></script>
+    <script src="/linker/js/dropdown.js"></script>
+    <script src="/linker/js/tab.js"></script>
     <!--SCRIPTS END-->
   </body>
 </html>

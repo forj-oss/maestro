@@ -1,4 +1,6 @@
 ---
+ blueprint:
+  layout_path: 'config/config.json'
  runtime:
   protocol: 'http'
   ip: '127.0.0.1'
