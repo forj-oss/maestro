@@ -26,19 +26,27 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
+    console.log('index');
     var bpm = require('../../node_modules/blueprint/blueprint.js');
     
-    var bp = bpm.get_blueprint('en', function(err){
-      console.log('Error in blueprint search: '+err);
-      res.send(500, err);
-    }, function(result){
-      if(result){
-        res.view({ tools: result.tools, defect_tracker: result.defect_tracker }, 200);
-      }else{
+    console.log(bpm);
+    var bp = undefined;
+    bpm.get_blueprint('en', function(error){
+      
+    }, function(bp_){
+      bp = bp_
+      res.view({ tools: bp_.tools, defect_tracker: bp_.defect_tracker }, 200);
+    });
+    if(bp instanceof Error){
+      console.log('Error trying to get the Blueprint');
+      res.send(500, bp);
+    }else{
+      if(bp === undefined){
         var data =  require('../../node_modules/config/config.js').get_config_data();
         if(data instanceof Error){
           res.send(500, 'Error reading the configuration file.');
         }else{
+          console.log('create');
           bpm.create_blueprint('en', data.tools, data.defect_tracker, data.auth, data.projects, function(errc){
             console.log('Error creating the blueprint record from the json file: '+errc);
             res.send(500, errc);
@@ -47,7 +55,7 @@ module.exports = {
           });
         }
       }
-    });
+    }
   },
   statics: function(req, res){
     //TODO: integrate nagios
