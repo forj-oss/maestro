@@ -32,5 +32,10 @@ module.exports = {
     }else{
       res.view({ tools: data.tools, defect_tracker: data.defect_tracker });
     }
+  },
+  statics: function(req, res){
+    //TODO: integrate nagios
+    var data = { cpu: 90, memory: 75, disk: 75, users: 32, commits_24: 11, gates: 4  };
+    res.view(data, 200);
   }
 };
