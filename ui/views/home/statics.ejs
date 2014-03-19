@@ -1,4 +1,4 @@
-<div style="border: 1px solid #CCC;padding: 10px; width: 540px;">
+<div style="border: 1px solid #CCC;padding: 10px; width: 567px;">
   <div>
     <div style="padding-bottom: 10px;">
       <div style="width: 60px;height: 70px;border: 1px solid #CCC;float: left;margin-right: 10px; position:relative; cursor: pointer;">
@@ -13,14 +13,17 @@
   <div>
     <div style="line-height: 27px;"><div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div><span style="vertical-align: sub;">CPU ussage has reached 90%</span></div>
     <div>
-      <div style="float:left;">
-        <canvas id="cpu" width="120" height="120">
+      <div style="float:left; padding-top:5px;">
+        <span style="display: block;text-align: center;font-weight: bold;">CPU</span>
+        <canvas id="cpu" width="120" height="120" data-current="90">
       </div>
-      <div style="float:left;">
-        <canvas id="mem" width="120" height="120">
+      <div style="float:left; padding-top:5px;">
+        <span style="display: block;text-align: center;font-weight: bold;">Memory</span>
+        <canvas id="mem" width="120" height="120" data-current="65">
       </div>
-      <div style="float:left;">
-        <canvas id="disk" width="120" height="120">
+      <div style="float:left; padding-top:5px;">
+        <span style="display: block;text-align: center;font-weight: bold;">Disk</span>
+        <canvas id="disk" width="120" height="120" data-current="30">
       </div>
       <div style="clear:both;"></div>
       <div style="padding-left: 255px;"><a>Monitoring Page</a></div>
@@ -61,8 +64,8 @@
 </div>
 <script>
   $(document).ready(function(){
-    progress('cpu', 90);
-    progress('mem', 65);
-    progress('disk', 30);
+    progress('cpu', 90, 'new');
+    progress('mem', 65, 'new');
+    progress('disk', 30, 'new');
   });
 </script>

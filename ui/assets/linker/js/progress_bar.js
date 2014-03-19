@@ -1,13 +1,23 @@
-function progress(control, percentage){
+function progress(control, percentage, task){
 	//canvas initialization
 	var canvas = document.getElementById(control);
+	var current = document.getElementById(control).getAttribute("data-current");
+	var new_degrees = 0;
+	var degrees = 0;
+	if(task === 'move_to'){
+    if(current !== undefined){
+      degrees = current*3.6;
+      degrees = Math.round(degrees);
+      new_degrees = percentage*3.6;
+      new_degrees = Math.round(new_degrees);
+      document.getElementById(control).setAttribute("data-current", ""+percentage+"");
+    }
+	}
 	var ctx = canvas.getContext("2d");
 	//dimensions
 	var W = canvas.width;
 	var H = canvas.height;
 	//Variables
-	var degrees = 0;
-	var new_degrees = 0;
 	var difference = 0;
 	var color = "#0096d6"; //green looks better to me
 	var bgcolor = "#CCC";
@@ -30,7 +40,7 @@ function progress(control, percentage){
 		//Angle in radians = angle in degrees * PI / 180
 		var radians = degrees * Math.PI / 180;
 		ctx.beginPath();
-		if(percentage<50){
+		if(percentage<=50){
       ctx.strokeStyle = '#0096d6';
       ctx.fillStyle = '#0096d6';
 		}
@@ -38,7 +48,7 @@ function progress(control, percentage){
       ctx.strokeStyle = '#EE7836';
       ctx.fillStyle = '#EE7836';
 		}
-		if(percentage>75){
+		if(percentage>=75){
       ctx.strokeStyle = '#DA3610';
       ctx.fillStyle = '#DA3610';
 		}
@@ -68,6 +78,7 @@ function progress(control, percentage){
     if(typeof animation_loop !== undefined) clearInterval(animation_loop);
 		
 		new_degrees = percentage*3.6;
+		new_degrees = Math.round(new_degrees);
 		difference = new_degrees - degrees;
 		//This will animate the gauge to new positions
 		//The animation will take 1 second
@@ -79,13 +90,15 @@ function progress(control, percentage){
 	function animate_to()
 	{
 		//clear animation loop if degrees reaches to new_degrees
+		//console.log('deg:'+degrees+', new_degrees:'+new_degrees);
 		if(degrees == new_degrees)
 			clearInterval(animation_loop);
 		
-		if(degrees < new_degrees)
+		if(degrees < new_degrees){
 			degrees++;
-		else
+		}else{
 			degrees--;
+		}
 		init();
 	}
 	

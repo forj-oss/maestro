@@ -26,10 +26,7 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
-    console.log('index');
     var bpm = require('../../node_modules/blueprint/blueprint.js');
-    
-    console.log(bpm);
     var bp = undefined;
     bpm.get_blueprint('en', function(error){
       
@@ -60,9 +57,12 @@ module.exports = {
   statics: function(req, res){
     //TODO: integrate nagios
     var data = { cpu: 90, memory: 75, disk: 75, users: 32, commits_24: 11, gates: 4  };
-    res.view(data, 200);
+    res.view({ layout: null }, data);
   },
   tutorial: function(req, res){
+    res.view({ layout: null }, 200);
+  },
+  projects: function(req, res){
     res.view();
   }
 };
