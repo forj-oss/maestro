@@ -86,6 +86,7 @@
   }
 
   Modal.prototype.hide = function (e) {
+    e.stopPropagation();
     if (e) e.preventDefault()
 
     e = $.Event('hide.bs.modal')
