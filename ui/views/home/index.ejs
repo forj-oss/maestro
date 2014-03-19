@@ -32,7 +32,7 @@
               <div style="width: 60px;float: right;font-size: 11px;text-align: center;">
                 <div style="background-color: #F0D705;">Workload</div>
                 <div style="background-color: #7DC068;  color: white;">Backup</div>
-                <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;">
+                <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-toggle="modal" data-target="#myModal" onclick="loadStats('<%=tool.name%>');">
                   <span>></span>
                 </div>
               </div>
@@ -90,3 +90,24 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Service Stats</h4>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function loadStats(service){
+    $(".modal-body").load('../home/statics');
+  }
+</script>
