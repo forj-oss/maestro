@@ -77,15 +77,9 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane" id="b" style="max-height: 700px;overflow: scroll;">
-          
-        </div>
-        <div class="tab-pane" id="c" style="max-height: 700px;overflow: scroll;">Thirdamuno, ipsum dolor sit amet, consectetur adipiscing elit. Duis pharetra varius quam sit amet vulputate.
-          Quisque mauris augue, molestie tincidunt condimentum vitae.
-        </div>
-        <div class="tab-pane" id="d" style="max-height: 700px;overflow: scroll;">
-          Docs placeholder
-        </div>
+        <div class="tab-pane" id="b" style="max-height: 700px;height: 700px;"></div>
+        <div class="tab-pane" id="c" style="max-height: 700px;height: 700px;"></div>
+        <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;"></div>
       </div>
     </div>
   </div>
@@ -113,10 +107,10 @@ $(document).ready(function(){
     $(".modal-body").load('../home/statics?service='+service);
   });
   $("#projects").click(function(){
-    $("#b").load('../home/projects');
+    $("#b").load('../admin/projects');
   });
   $("#users").click(function(){
-    $("#c").load('../home/users');
+    $("#c").load('../admin/users');
   });
   //$("#docs").click(function(){
   //  $("#d").load('../home/tutorial');
