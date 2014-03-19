@@ -60,9 +60,9 @@ module.exports = {
     res.view({ layout: null }, data);
   },
   tutorial: function(req, res){
-    res.view({ layout: null }, 200);
+    res.view({ layout: null });
   },
   projects: function(req, res){
-    res.view();
+    res.view({ layout: null });
   }
 };
