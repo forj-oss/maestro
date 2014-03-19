@@ -77,9 +77,9 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane" id="b" style="max-height: 700px;height: 700px;overflow: scroll;overflow-x: hidden;"></div>
-        <div class="tab-pane" id="c" style="max-height: 700px;height: 700px;overflow: scroll;overflow-x: hidden;"></div>
-        <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;overflow: scroll;overflow-x: hidden;"></div>
+        <div class="tab-pane" id="b" style="max-height: 700px;height: 700px;"></div>
+        <div class="tab-pane" id="c" style="max-height: 700px;height: 700px;"></div>
+        <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;"></div>
       </div>
     </div>
   </div>
@@ -107,10 +107,10 @@ $(document).ready(function(){
     $(".modal-body").load('../home/statics?service='+service);
   });
   $("#projects").click(function(){
-    $("#b").load('../home/projects');
+    $("#b").load('../admin/projects');
   });
   $("#users").click(function(){
-    $("#c").load('../home/users');
+    $("#c").load('../admin/users');
   });
   //$("#docs").click(function(){
   //  $("#d").load('../home/tutorial');
