@@ -30,16 +30,18 @@
     </div>
   </div>
   <div>
-    <div style="line-height: 27px;"><div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div><span style="vertical-align: sub;">No Backup</span></div>
-    <div>
-      <a href="#" style="padding: 5px 30px 5px 30px;">Tool Backup</a>
-      <a href="#" style="padding: 5px 30px 5px 30px;">Backup Logs</a>
-    </div>
+    <%if(has_backups){%>
+      <div>
+        <a href="#" style="padding: 5px 30px 5px 0px;" id="tool_backups">Tool Backup</a>
+        <a href="#" style="padding: 5px 30px 5px 30px;">Backup Logs</a>
+      </div>
+    <% } %>
+
   </div>
-  <div>
-  <table class="table table-hover">
+  <div id="table_container">
+  <table id="table_stats" class="table table-hover">
     <thead>
-      <th>
+      <th id="table_stats_title">
         Kit Stats
       </th>
       <th>
@@ -61,11 +63,75 @@
       </tr>
     </tbody>
   </table>
+  <div id="no_back" style="text-align: center;font-weight: bold;padding-top: 20px;padding-bottom: 20px; display: none;"><span style="display:block">This service has no backups enabled.</span><a href="#" id="go_back">[Go back]</a></div>
 </div>
 <script>
   $(document).ready(function(){
     progress('cpu', 90, 'new');
     progress('mem', 65, 'new');
     progress('disk', 30, 'new');
+    
+    <%if(has_backups){%>
+      loadTools();
+    <% } %>
   });
+  <%if(has_backups){%>
+  function loadTools(){
+      $("#tool_backups").on('click', function(){
+        socket.get('/status/display',{
+          type: 'tools',
+          service: '<%=backup_service%>'
+        }, function (response) {
+          if(response.success){
+            if(response.has_backups){
+              var timestp = response.message.backup.time + '';
+              var year = timestp.substring(0,4);
+              var month = timestp.substring(4,6);
+              var day = timestp.substring(6,8);
+              var complete_date = year+'/'+month+'/'+day
+              var html_size = '<tr><td>Backup Size</td><td>'+response.message.backup.size+'</td></tr>'
+              var html_time = '<tr><td>Last Backup</td><td>'+complete_date+'</td></tr>'
+              var html_fs = '<tr><td>File System Usage</td><td>'+response.message['fs-usage']+'</td></tr>'
+              
+              $("#table_container").fadeOut(500,function(){
+                $("#table_stats_title").html('Backup Stats')
+                var old_html = $("#table_stats").children('tbody').html();
+                old_html = encodeURIComponent(old_html);
+                $("#table_stats").children('tbody').attr('data-old-html', old_html);
+                $("#table_stats").children('tbody').html(html_size+html_time+html_fs);
+                $('#tool_backups').text('Go Back');
+                $('#tool_backups').off();
+                $('#tool_backups').on('click', function(){
+                  $("#table_container").fadeOut(500,function(){
+                    var change_html = $("#table_stats").children('tbody').attr('data-old-html');
+                    change_html = decodeURIComponent(change_html);
+                    console.log(change_html);
+                    $("#table_stats").children('tbody').html(change_html);
+                    $('#tool_backups').text('Tool Backup');
+                    $("#table_stats_title").text('Kit Stats');
+                    $('#tool_backups').off();
+                    loadTools();
+                  }).fadeIn(1000);
+                });
+              }).fadeIn(1000);
+            }else{
+              console.log('do no backups');
+              $("#table_container").fadeOut(500,function(){
+                $("#table_stats").fadeOut();
+                $("#no_back").fadeIn();
+                $("#go_back").on('click', function(){
+                  $("#table_container").fadeOut(500,function(){
+                    $("#no_back").fadeOut();
+                    $("#table_stats").fadeIn();
+                  }).fadeIn(1000);
+                });
+              }).fadeIn(1000);
+            }
+          }else{
+            console.log('no success');
+          }
+        });
+    });
+  }
+  <% } %>
 </script>

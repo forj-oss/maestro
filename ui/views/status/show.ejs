@@ -1,0 +1,20 @@
+<div>
+  <span>Size: <span id="size_disp"></span></span>
+  <span>Time: <span id="time_disp"></span></span>
+  <span>Fail System Usage: <span id="fs"></span></span>
+</div>
+<script>
+  socket.get('/status/display',{
+    type: 'tools',
+    service: 'gerrit'
+  }, function (response) {
+    console.log(response.message);
+    $("#size_disp").text(response.message.backup.size);
+    var timestp = response.message.backup.time + '';
+    var year = timestp.substring(0,4);
+    var month = timestp.substring(4,6);
+    var day = timestp.substring(6,8);
+    $("#time_disp").text(year+'/'+month+'/'+day);
+    $("#fs").text(response.message['fs-usage']);
+  });
+</script>

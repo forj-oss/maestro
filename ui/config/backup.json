@@ -1,0 +1,47 @@
+{
+  "status": 1,
+  "util": {
+    "fs-usage": 20
+  },
+  "ci": {
+    "fs-usage": 60
+  },
+  "zuul": {
+    "backup": {
+      "time": 20131203,
+      "size": "10Gig"
+    },
+    "fs-usage": 30
+  },
+  "review": {
+    "fs-usage": 30
+  },
+  "gerrit": {
+    "backup": {
+      "time": 20131203,
+      "size": "10Gig"
+    },
+    "fs-usage": 30
+  },
+  "pastebin": {
+    "backup": {
+      "time": 20131203,
+      "size": "10Gig"
+    },
+    "fs-usage": 30
+  },
+  "maestro": {
+    "fs-usage": 45
+  },
+  "jenkins": {
+    "backup": {
+      "time": 20131203,
+      "size": "10gig"
+    },
+    "fs-usage": 30
+  },
+  "backup": {
+    "location": "/mnt/forj-bck/",
+    "fs-usage": 60
+  }
+}
