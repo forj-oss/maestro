@@ -44,7 +44,7 @@ module.exports = {
           res.send(500, 'Error reading the configuration file.');
         }else{
           console.log('create');
-          bpm.create_blueprint('en', data.tools, data.defect_tracker, data.auth, data.projects, function(errc){
+          bpm.create_blueprint('en', data.tools, data.defect_tracker, data.auth, data.projects, data.documentation, function(errc){
             console.log('Error creating the blueprint record from the json file: '+errc);
             res.send(500, errc);
           }, function(resultc){

@@ -26,6 +26,9 @@ module.exports = {
     },
     projects: {
       type: 'json'
+    },
+    documentation: {
+      type: 'json'
     }
   }
 

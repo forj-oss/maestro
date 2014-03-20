@@ -78,5 +78,28 @@
       "active": "false",
       "icon": "true"
     }
-  ]
+  ],
+  "documentation": [
+      {
+      "dname": "Forj Documentation",
+      "name": "doclink1",
+      "desc": "My Kit community",
+      "url": "#",
+      "category": "community"
+      },
+      {
+      "dname": "Kit Tutorial",
+      "name": "doclink2",
+      "desc": "My Kit community",
+      "url": "#",
+      "category": "tutorial"
+      },
+      {
+      "dname": "Kit FAQ",
+      "name": "doclink3",
+      "desc": "My Kit FAQ",
+      "url": "#",
+      "category": "faq"
+      }
+   ]
 }

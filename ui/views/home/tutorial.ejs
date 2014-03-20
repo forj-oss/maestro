@@ -162,7 +162,7 @@
 			display: block;
 			width: 180px;
 			height: 260px;
-			background: url(../assets/tutorial_images/tutorial.openstack.png) no-repeat;
+			background: url(../tutorial_images/tutorial.openstack.png) no-repeat;
 			position: absolute;
 			right: 0;
 			top: 0;
@@ -189,7 +189,7 @@ text-justify:inter-word;
     	<a href="https://wiki.openstack.org/wiki/GerritJenkinsGit" class="openstack"></a>
         <h1>"A La Openstack" - the simple guide</h1>
         <p>A simple guide for getting started with developing like the Openstack project.</p>
-        <img src="../assets/tutorial_images/arrow.png" alt="">
+        <img src="../tutorial_images/arrow.png" alt="">
     </div>
     <!-- intro -->
     <a name="intro"></a>
@@ -224,10 +224,10 @@ text-justify:inter-word;
         <p>
             On Windows, download <a href="http://users.ugent.be/~bpuype/cgi-bin/fetch.pl?dl=wget/wget-1.10.2.exe">wget.exe</a> to your "Downloads" folder. Make sure that you replace each 'wget' below by '~/Downloads/wget'.<br>Start GIT bash.<br>
         		&gt;<code><p2>mkdir .ssh</p2></code><br>
-        		When connected directly to the internet:<br>	
+        		When connected directly to the internet:<br>
 				&gt;<code><p2>wget --no-check-certificate https://raw.github.com/miqui/pet-clinic/stackato/keys/demo_keys -O ~/.ssh/demo_keys</p2></code> <br>
 			
-			Or, behind a web proxy:<br>	
+			Or, behind a web proxy:<br>
 				&gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://raw.github.com/miqui/pet-clinic/stackato/keys/demo_keys  -O ~/.ssh/demo_keys</p2> </code><br>
 			You now have a "demo_keys" file in your home/.ssh directory ($HOME on Linux, %HOMEPATH% on Windows)<br>
         </p>
@@ -252,7 +252,7 @@ text-justify:inter-word;
 				&gt;<code><p2>git clone ssh://demouser@<font color="33FF33">15.185.237.61</font>:29418/pet-clinic.git</p2></code><br>
         </p>
         <p>
-            This will download the code locally on the folder you are in you command line so that you can edit it. 
+            This will download the code locally on the folder you are in you command line so that you can edit it.
         </p>
         <p>
             You actually get all the history and metadata of the code: this is great to work completely disconnected from the remote repository. Check by yourself:<br>
@@ -267,7 +267,7 @@ text-justify:inter-word;
     <div class="scrollblock block-4">
         <h2>configure the repository to work with Gerrit</h2>
         <p>
-            Our workflow requires code to be reviewed at several stages using Gerrit. Let's prepare to take advantage of Gerrit and commit to the 
+            Our workflow requires code to be reviewed at several stages using Gerrit. Let's prepare to take advantage of Gerrit and commit to the
             <a href="https://review.openstack.org/Documentation/intro-quick.html#_creating_the_review">magic branch</a>:<br>
             &gt;<code><p2>git config remote.origin.push refs/heads/*:refs/for/*</p2></code><br>
             Install the commit hook which automatically generates unique Change-Ids in commit messages for Gerrit<br>
@@ -325,7 +325,7 @@ text-justify:inter-word;
 				<a href="http://15.185.241.138/"><code><p2><font color="33FF33">http://15.185.241.138</font></p2></code></a>
             
         </p>
-        <img src="../assets/tutorial_images/zuul.1.jpg" alt="">
+        <img src="../tutorial_images/zuul.1.jpg" alt="">
         <p>
         	As you can see, we have 2 verifications in the check pipeline: packaging and security scan using <a href="http://www.hp.com/go/fortify">Fortify</a>.
         </p>
@@ -341,7 +341,7 @@ text-justify:inter-word;
             Verifying is checking that the code actually compiles, unit tests pass etc. Verification is done by Jenkins jobs configured in the "check" Zuul pipeline.<br>
             The check is automated and adds a +1 under "Verified".
         </p>
-        <img src="../assets/tutorial_images/gerrit.1.jpg" alt="">
+        <img src="../tutorial_images/gerrit.1.jpg" alt="">
     </div>
     <a name="merge"></a>
     <div class="scrollblock block-10">
@@ -350,17 +350,17 @@ text-justify:inter-word;
 			As a reviewer, look at the code, comment it and make yourself an opinion about the change.<br>
 			Now click on the <i>Review</i> button.<br>
 			Voting +1 or -1 provides an opinion.<br>
-			-2 rejects the change and +2 accepts it.<br>            	
+			-2 rejects the change and +2 accepts it.<br>
         </p>
         <p>
-        	Go ahead: vote +2 for this example, add your comment and click on the "Publish and Submit". The code gets merged. 
+        	Go ahead: vote +2 for this example, add your comment and click on the "Publish and Submit". The code gets merged.
         </p>
     </div>
     <a name="gate"></a>
     <div class="scrollblock block-11">
         <h2>Zuul "gate" pipeline</h2>
         <p>
-			Once a reviewer approved the changes, Zuul will make the change go through the <i>gate</i> pipeline. 
+			Once a reviewer approved the changes, Zuul will make the change go through the <i>gate</i> pipeline.
         </p>
         <p>
         	More...

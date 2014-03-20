@@ -1,0 +1,105 @@
+{
+  "tools": [
+    {
+      "dname": "Gerrit",
+      "name": "gerrit",
+      "desc": "Code review",
+      "settings_url": "https://15.185.237.61/#/settings/",
+      "tool_url": "https://15.185.237.61/",
+      "node": {
+        "name": "review"
+      },
+      "category": "dev"
+    },
+    {
+      "dname": "Jenkins",
+      "name": "jenkins",
+      "desc": "Continuous integration",
+      "settings_url": "https://15.185.241.138/manage",
+      "tool_url": "https://15.185.241.138/",
+      "node": {
+        "name": "ci"
+      },
+      "category": "dev"
+    },
+    {
+      "dname": "Zuul",
+      "name": "zuul",
+      "desc": "Pipeline oriented project gating",
+      "tool_url": "http://15.185.241.138",
+      "node": {
+        "name": "ci"
+      },
+      "category": "dev"
+    },
+    {
+      "dname": "Pastebin",
+      "name": "pastebin",
+      "desc": "Store, share and compare text snippets",
+      "tool_url": "http://15.185.241.138",
+      "node": {
+        "name": "ci"
+      },
+      "category": "dev"
+    },
+    {
+      "dname": "Puppet Dashboard",
+      "name": "puppet-dashboard",
+      "desc": "View managed nodes",
+      "tool_url": "http://15.185.241.138",
+      "node": {
+        "name": "ci"
+      },
+      "category": "dev"
+    },
+    {
+      "dname": "Graphite",
+      "name": "graphite",
+      "desc": "View graphs",
+      "tool_url": "http://15.185.241.138",
+      "node": {
+        "name": "ci"
+      },
+      "category": "dev"
+    }
+  ],
+  "defect_tracker": [
+    {
+      "dname": "Launchpad",
+      "name": "launchpad",
+      "desc": "Launchpad defect tracker",
+      "active": "true",
+      "icon": "true"
+    },
+    {
+      "dname": "Bugzilla",
+      "name": "bugzilla",
+      "desc": "Bugzilla defect tracker",
+      "active": "false",
+      "icon": "true"
+    }
+  ],
+  "documentation": [
+      {
+      "dname": "Forj Documentation",
+      "name": "doclink1",
+      "desc": "My Kit community",
+      "url": "#",
+      "category": "community"
+      },
+      {
+      "dname": "Kit Tutorial",
+      "name": "doclink2",
+      "desc": "My Kit community",
+      "url": "#",
+      "category": "tutorial"
+      },
+      {
+      "dname": "Kit FAQ",
+      "name": "doclink3",
+      "desc": "My Kit FAQ",
+      "url": "#",
+      "category": "faq"
+      }
+   ]
+}
