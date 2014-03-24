@@ -26,7 +26,7 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
-    var blueprint_utils = require('../../node_modules/blueprint/blueprint.js');
+    var blueprint_utils = require('../../node_modules/blueprint/blueprint');
     blueprint_utils.get_kit_blueprint(function(err){
       res.view('500', { layout: null, errors: [ err ] });
     }, function(bp){
@@ -36,7 +36,7 @@ module.exports = {
   statics: function(req, res){
     //TODO: integrate nagios
     var service = req.param('service');
-    var backups = require('../../node_modules/backup/backup.js').get_backup_data();
+    var backups = require('../../node_modules/backup/backup').get_backup_data();
     var has_backups = true;
     if(!backups[service]){
         has_backups = false;
