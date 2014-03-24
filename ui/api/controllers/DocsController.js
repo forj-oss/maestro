@@ -23,7 +23,7 @@ module.exports = {
    *    `/docs/disp`
    */
    index : function (req, res) {
-    var blueprint_utils = require('../../node_modules/blueprint/blueprint');
+    var blueprint_utils = require('blueprint/blueprint');
     blueprint_utils.get_kit_blueprint(function(err){
       res.view('500', { layout: null, errors: [ err ] });
     }, function(bp){
