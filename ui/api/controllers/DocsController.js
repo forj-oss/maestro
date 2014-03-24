@@ -23,12 +23,12 @@ module.exports = {
    *    `/docs/disp`
    */
    index : function (req, res) {
-      var bpm = require('../../node_modules/blueprint/blueprint.js');
-      bpm.get_blueprint('en', function(error){
-        res.view({ layout: null }, 500);
-      }, function(bp){
-        res.view({ layout: null, documentation: bp.documentation }, 200);
-      });
+    var blueprint_utils = require('../../node_modules/blueprint/blueprint.js');
+    blueprint_utils.get_kit_blueprint(function(err){
+      res.view('500', { layout: null, errors: [ err ] });
+    }, function(bp){
+      res.view({ layout: null, documentation: bp.documentation }, 200);
+    });
   },
 
 
