@@ -1,0 +1,3 @@
+---
+ blueprint:
+  layout_path: 'config/config.json'

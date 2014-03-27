@@ -1,0 +1,69 @@
+{
+  "site": {
+    "node": [
+      {
+        "node_name": "default",
+        "tools": [
+          {
+            "name": "gerrit",
+            "status": "offline",
+            "settings_url": "#",
+            "category": "dev",
+            "tool_url": "#"
+          },
+          {
+            "name": "pastebin",
+            "status": "offline",
+            "settings_url": "#",
+            "category": "dev",
+            "tool_url": "#"
+          },
+          {
+            "name": "graphite",
+            "status": "offline",
+            "settings_url": "#",
+            "category": "dev",
+            "tool_url": "#"
+          }
+        ]
+      },
+      {
+        "node_name": "maestro.42.localhost",
+        "tools": [
+          {
+            "name": "puppet",
+            "status": "online",
+            "settings_url": "#",
+            "category": "dev",
+            "tool_url": "http://10.0.2.15:3000"
+          }
+        ]
+      },
+      {
+        "node_name": "ci-node",
+        "tools": [
+          {
+            "name": "jenkins",
+            "dname": "Jenkins",
+            "status": "online",
+            "settings_url": "https://jenkinsurl/config",
+            "category": "dev",
+            "desc": "Continuous CI",
+            "tool_url": "https://jenkinsurl"
+          },
+          {
+            "name": "zuul",
+            "dname": null,
+            "status": "online",
+            "settings_url": "#",
+            "category": null,
+            "desc": null,
+            "tool_url": "https://zullurl"
+          }
+        ]
+      }
+    ],
+    "id": "42",
+    "blueprint": "openstack"
+  }
+}
