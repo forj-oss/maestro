@@ -1,5 +1,5 @@
 /**
- * DocsController
+ * AuthController
  *
  * @module      :: Controller
  * @description	:: A set of functions called `actions`.
@@ -18,20 +18,27 @@
 module.exports = {
     
   
+
+
   /**
-   * Action blueprints:
-   *    `/docs/disp`
-   */
-   index : function (req, res) {
-    res.view({ layout: null, documentation: null }, 200);
-  },
-
-
-/**
    * Overrides for the settings in `config/controllers.js`
-   * (specific to DocsController)
+   * (specific to AuthController)
    */
-  _config: {}
-
+  _config: {},
+  index: function(req, res){
+    res.view({ layout: 'login_layout' });
+  },
+  sign_up: function(req, res){
+    res.view({ layout: 'login_layout' });
+  },
+  sign_in: function(req, res){
+    res.view({ layout: 'login_layout' });
+  },
+  login: function(req, res){
+    res.view({ layout: 'login_layout' });
+  },
+  first_admin: function(req, res){
+    res.view({ layout: 'login_layout' });
+  }
   
 };
