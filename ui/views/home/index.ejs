@@ -15,64 +15,80 @@
         <div class="tab-pane active" id="a">
           <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Services</a></div>
           <div class="col-md-10">
-          <% tools.forEach(function(tool)  { %>
-            <%if(tool.category == 'dev'){%>
-            <div class="col-sm-4">
-              <div style="width: 100%;margin-bottom:10px; border:1px solid #CCC; min-height: 70px; position: relative">
-              <%if(tool.icon){%>
-                <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                  <img src="../tools_images/<%tool.name%>42.png" style="float: left;margin-right: 5px;" />
+          <% if(tools !== undefined && tools !== null){ %>
+            <% tools.forEach(function(tool)  { %>
+              <%if(tool.category == 'dev'){%>
+              <div class="col-sm-4">
+                <div style="width: 100%;margin-bottom:10px; border:1px solid #CCC; min-height: 70px; position: relative">
+                <%if(tool.icon){%>
+                  <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
+                    <img src="../tools_images/<%tool.name%>42.png" style="float: left;margin-right: 5px;" />
+                  </div>
+                <% }else{ %>
+                  <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
+                    <img src="../images/default_tool.png" />
+                  </div>
+                <% } %>
+                <%if(tool.tool_url){%>
+                
+                  <% if(tool.dname !== undefined && tool.dname !== null) { %>
+                    <a href="<%=tool.tool_url%>" target="_blank"><%=tool.dname%></a>
+                  <% }else{ %>
+                    <a href="<%=tool.tool_url%>" target="_blank"><%=tool.name%></a>
+                  <% } %>
+                  
+                <% }else{ %>
+                
+                  <% if(tool.dname !== undefined && tool.dname !== null){ %>
+                      <a><%=tool.dname%></a>
+                  <% }else{ %>
+                    <a><%=tool.name%></a>
+                  <% } %>
+                  
+                <% } %>
+                <div style="width: 60px;float: right;font-size: 11px;text-align: center;">
+                  <div style="background-color: #F0D705;">Workload</div>
+                  <div style="background-color: #7DC068;  color: white;">Backup</div>
+                  <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-service="<%=tool.name%>" data-toggle="modal" data-target="#myModal">
+                    <span>></span>
+                  </div>
                 </div>
-              <% }else{ %>
-                <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                  <img src="../images/default_tool.png" />
+                  <!--<p><%=tool.desc%></p>-->
+                 <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
                 </div>
-              <% } %>
-              <%if(tool.tool_url){%>
-                <a href="<%=tool.tool_url%>" target="_blank"><%=tool.dname%></a>
-              <% }else{ %>
-                <a><%=tool.dname%></a>
-              <% } %>
-              <div style="width: 60px;float: right;font-size: 11px;text-align: center;">
-                <div style="background-color: #F0D705;">Workload</div>
-                <div style="background-color: #7DC068;  color: white;">Backup</div>
-                <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-service="<%=tool.name%>" data-toggle="modal" data-target="#myModal">
-                  <span>></span>
-                </div>
+               
               </div>
-                <!--<p><%=tool.desc%></p>-->
-               <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
-              </div>
-             
-            </div>
-            <% } %>
-          <% }); %>
+              <% } %>
+            <% }); %>
+          <% } %>
           </div>
           
           <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Defect tracker integrations</a></div>
           <div class="col-md-10">
-            <% defect_tracker.forEach(function(df)  { %>
-              <div class="col-sm-4">
-                <div style="width: 100%; height: 90px; margin-bottom:10px; border:1px solid #CCC; position: relative;">
-                  <%if(df.icon){%>
-                  <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                    <%var path_ico = '../tools_images/' + df.name + '42.png';%>
-                    <img src="<%=path_ico%>" style="float: left;margin-right: 5px; height: 42px;" />
-                  </div>
-                  <% }else{ %>
+            <% if(defect_tracker !== undefined && defect_tracker !== null){ %>
+              <% defect_tracker.forEach(function(df)  { %>
+                <div class="col-sm-4">
+                  <div style="width: 100%; height: 90px; margin-bottom:10px; border:1px solid #CCC; position: relative;">
+                    <%if(df.icon){%>
                     <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                      <img src="../images/default_tool.png" />
+                      <%var path_ico = '../tools_images/' + df.name + '42.png';%>
+                      <img src="<%=path_ico%>" style="float: left;margin-right: 5px; height: 42px;" />
                     </div>
-                  <% } %>
-                  <%if(df.tool_url){%>
-                    <a href="<%=df.tool_url%>" target="_blank"><%=df.dname%></a>
-                  <% }else{ %>
-                    <a><%=df.dname%></a>
-                  <% } %>
-                  <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
+                    <% }else{ %>
+                      <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
+                        <img src="../images/default_tool.png" />
+                      </div>
+                    <% } %>
+                    <%if(df.tool_url){%>
+                      <a href="<%=df.tool_url%>" target="_blank"><%=df.dname%></a>
+                    <% }else{ %>
+                      <a><%=df.dname%></a>
+                    <% } %>
+                    <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
+                  </div>
                 </div>
-              </div>
-            <% }); %>
+              <% }); %>
+            <% } %>
           </div>
           <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Authentication provider</a></div>
           <div class="col-md-10">

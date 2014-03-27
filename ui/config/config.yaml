@@ -1,6 +1,9 @@
 ---
  blueprint:
-  layout_path: 'config/config.json'
+  protocol: 'http'
+  ip: '127.0.0.1'
+  port: '3180'
+  resource_uri: '/bp'
  runtime:
   protocol: 'http'
   ip: '127.0.0.1'

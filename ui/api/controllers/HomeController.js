@@ -14,6 +14,7 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
+ var async = require('async');
 
 module.exports = {
     
@@ -27,10 +28,53 @@ module.exports = {
   _config: {},
   index: function(req, res){
     var blueprint_utils = require('blueprint/blueprint');
-    blueprint_utils.get_kit_blueprint(function(err){
-      res.view('500', { layout: null, errors: [ err ] });
-    }, function(bp){
-      res.view({ tools: bp.tools, defect_tracker: bp.defect_tracker }, 200);
+    blueprint_utils.get_blueprint_id(function(err){
+      console.log('Unable to get the instance_id of the kit: '+err.message);
+      res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+    }, function(result){
+      if(res === undefined){
+        res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+      }else{
+        result = JSON.parse(result);
+        if(result instanceof Error){
+          res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+        }else{
+          var tools = [];
+          var defect_tracker = [];
+          
+          async.series({
+              tools: function(callback){
+                blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
+                  //Suppress the error and log the exception
+                  console.log('Unable to retrieve the tools:'+err.message);
+                  callback();
+                }, function(res_tools){
+                  tools = JSON.parse(res_tools);
+                  callback(null, tools);
+                })
+              },
+              defect_tracker: function(callback){
+                blueprint_utils.get_blueprint_section(result.id, 'defect_tracker', function(err){
+                  //Suppress the error and log the exception
+                  console.log('Unable to retrieve the defect_tracker:'+err.message);
+                  callback();
+                }, function(res_dt){
+                  defect_tracker = JSON.parse(res_dt);
+                  callback(null, defect_tracker);
+                })
+              }
+          }, function(errasync, results) {
+              if (errasync) {
+                console.log('Error getting the tools and defect tracker: '+errasync.message)
+                res.view('500', { errors: [ errasync.message ]});
+              }else{
+                res.view(results, 200);
+              }
+          });
+          
+        }
+        
+      }
     });
   },
   statics: function(req, res){
