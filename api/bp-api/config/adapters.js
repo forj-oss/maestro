@@ -16,12 +16,17 @@ module.exports.adapters = {
 
   // If you leave the adapter config unspecified
   // in a model definition, 'default' will be used.
-  'default': 'disk',
+  'default': 'mysql',
 
   // Persistent adapter for DEVELOPMENT ONLY
   // (data is preserved when the server shuts down)
-  disk: {
-    module: 'sails-disk'
+  mysql: {
+    module   : 'sails-mysql',
+    host     : '127.0.0.1',
+    port     : 3306,
+    user     : 'kitusr',
+    password : '$Changeme01',
+    database : 'kit_bp'
   },
 
   // MySQL is the world's most popular relational database.
