@@ -84,7 +84,7 @@ module.exports = {
     if(config_content === undefined){
       res.json('We could not read the configuration file.', 500);
     }else{
-      blueprint_utils.get_kit_blueprint(function(err){
+      blueprint_utils.get_kit_blueprint_sync(function(err){
         res.json(err, 500);
       }, function(bp){
         res.json({ id: bp.id }, 200);

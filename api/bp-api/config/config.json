@@ -12,13 +12,6 @@
             "tool_url": "#"
           },
           {
-            "name": "pastebin",
-            "status": "offline",
-            "settings_url": "#",
-            "category": "dev",
-            "tool_url": "#"
-          },
-          {
             "name": "graphite",
             "status": "offline",
             "settings_url": "#",
