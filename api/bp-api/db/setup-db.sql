@@ -16,7 +16,7 @@ CREATE DATABASE IF NOT EXISTS `kit_bp`;
 
 USE kit_bp;
 
-CREATE TABLE IF NO EXISTS `kit_bp`.`blueprints` (
+CREATE TABLE IF NOT EXISTS `kit_bp`.`blueprints` (
   `id` VARCHAR(5) NOT NULL,
   `tools` TEXT NULL,
   `defect_tracker` TEXT NULL,
