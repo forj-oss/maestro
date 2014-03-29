@@ -67,6 +67,15 @@
     <script src="/linker/js/progress_bar.js"></script>
     <script src="/linker/js/tab.js"></script>
     <!--SCRIPTS END-->
+    <script>
+      $(document).ready(function(){
+        $("#register").click(function(){
+          $("#body").fadeOut(500, function(){
+            $(this).load('../kitops/register');
+          }).fadeIn(1000);
+        });
+      });
+    </script>
   </head>
 
   <body>
@@ -92,14 +101,12 @@
               <span style="font-size: 10px;">No Backup</span>
             </div>
             <div class="col-md-4">
-              <div class="btn-group">
+              <div class="btn-group" style="float:right;">
                 <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                   More <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
+                  <li id="register"><a href="#">Register</a></li>
                   <li class="divider"></li>
                   <li><a href="#">Sing out</a></li>
                 </ul>
@@ -110,7 +117,7 @@
     </div>
     </div>
     </section>
-    <section class="container">
+    <section id="body" class="container">
       <%- body %>
     </section>
 

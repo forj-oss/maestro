@@ -1,0 +1,106 @@
+<div class="row" style="padding-top: 30px;">
+  <div class="col-md-2">
+    
+  </div>
+  <div class="col-md-8">
+    <div class="panel panel-default">
+      <div class="panel-body" style="font-size: 12px; padding: 0px 15px 15px 15px;">
+        <div class="row">
+          <div class="col-md-6">
+            <div>
+              <div>
+                <h4 class="title">Registration Benefits</h4>
+              </div>
+              <div class="benefits">
+                <p>
+                  <strong style="color:#3071a9;">Ownership:</strong> If you register we can <b>associate</b> the development kit to you and all the nodes that compose it.
+                </p>
+                <p>
+                  <strong style="color:#3071a9;">Support & Help:</strong> We can <b>contact you</b> or you can <b>contact us</b> if you have any issue.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div>
+                <div>
+                  <h4 class="form-title">Register</h4>
+                </div>
+                <div class="form-group">
+                  <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="name" placeholder="Name">
+                </div>
+                <div class="form-group" style="margin-bottom: 0px;">
+                  <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="email" placeholder="Enter email">
+                </div>
+                <div>
+                  <label class="validator-label" style="font-size:12px;padding-top: 10px;margin-bottom: 10px;">Please register bla bla</label>
+                </div>
+                <div style="width: 100%;">
+                  <div>
+                    <button id="submit-register" type="button" class="btn btn-primary btn-sm">Register</button>
+                    <button id="cancel-register" type="button" class="btn btn-default btn-sm">Cancel</button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2"></div>
+</div>
+<script>
+  $(document).ready(function(){
+    $("#cancel-register").click(function(){
+        $("#body").fadeOut(500, function(){
+          $("#body").load('../home/index');
+        }).fadeIn(1000);
+    });
+    
+    $("#submit-register").click(function(){
+      $(".validator-label").fadeOut(500);
+        //Validate input
+        var name = $("#name").val();
+        var email = $("#email").val();
+        var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        var valid_email = String(email).search (pattern) != -1;
+        if(valid_email===true && (name !== undefined || name !== null)){
+            $.ajax('/kitops/do_register', {
+                data: { name: name, email: email },
+                async: true,
+                cache: false,
+                success: function (response, status, jqXHR) {
+                    var data = $.parseJSON(response);
+                    if(data.Valid === 1){
+                        $('.form-parts').fadeOut(500);
+                        $('.form-parts').remove();
+
+                        $('.form').css({'background-color':'#58CB73', color:'white'});
+                        $('.form-title').fadeOut(500, function(){
+                            $('.form-title').text('Registered');
+                            $('#reg-button').fadeOut(500).remove();
+                        }).fadeIn(500);
+                    }else if(data.Valid === -1){
+                        $(".validator-label").fadeOut(500, function(){
+                            $(".validator-label").text(data.Message);
+                            $("#submit").on('click', doRegister);
+                        }).fadeIn(600);
+                    }
+                },
+                error: function (request, data, error) {
+                    $(".validator-label").fadeOut(500, function(){
+                        $(".validator-label").text("We couldn't register your kit at this time.");
+                        $("#submit").on('click', doRegister);
+                    }).fadeIn(600);
+                },
+                dataType: "html"
+            });
+        }else{
+            $(".validator-label").fadeOut(500, function(){
+                $(".validator-label").text('Invalid values for name or email.');
+                $("#submit").on('click', doRegister);
+            }).fadeIn(600);
+        }
+    });
+  });
+</script>

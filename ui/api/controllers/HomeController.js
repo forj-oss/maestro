@@ -35,9 +35,15 @@ module.exports = {
       if(res === undefined){
         res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
       }else{
-        result = JSON.parse(result);
+        
+        try{
+          result = JSON.parse(result);
+        }catch(e){
+          result = new Error('Unable to parse malformed JSON');
+        }
+        
         if(result instanceof Error){
-          res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+          res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
         }else{
           var tools = [];
           var defect_tracker = [];
@@ -62,7 +68,14 @@ module.exports = {
                   defect_tracker = JSON.parse(res_dt);
                   callback(null, defect_tracker);
                 })
-              }
+              },
+              layout: function(callback){
+                if(req.isAjax){
+                  callback(null, null);
+                }else{
+                  callback(null, 'layout')
+                }
+              },
           }, function(errasync, results) {
               if (errasync) {
                 console.log('Error getting the tools and defect tracker: '+errasync.message)
