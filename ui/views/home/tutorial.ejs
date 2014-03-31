@@ -1,173 +1,173 @@
 <style>
-		@font-face {
-		  font-family: 'Original Surfer', cursive;
-		  font-style: normal;
-		  font-weight: 400;
-		}
-		#tbody {
-			background: #FFF;
-			font-family: Georgia, Times New Roman, Times, serif;
-			font-size: 25px;
-			text-align: center;
-			margin: 0;
-			padding: 0;
-		}
+    @font-face {
+      font-family: 'Original Surfer', cursive;
+      font-style: normal;
+      font-weight: 400;
+    }
+    #tbody {
+      background: #FFF;
+      font-family: Georgia, Times New Roman, Times, serif;
+      font-size: 25px;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
 
-		#tbody h1 {
-			font-size: 60px;
-			font-weight: normal;
-			margin: 0;
-			font-family: 'Original Surfer', Georgia, serif;
-			color: #000;
-			line-height: 1;
-		}
+    #tbody h1 {
+      font-size: 60px;
+      font-weight: normal;
+      margin: 0;
+      font-family: 'Original Surfer', Georgia, serif;
+      color: #000;
+      line-height: 1;
+    }
 
-		#tbody h2 {
-			font-size: 70px;
-			font-weight: normal;
-			margin: 0;
-			color: #FFB000;
-			font-family: 'Original Surfer', Georgia, serif;
-			text-transform: lowercase;
-			line-height: 1;
-		}
+    #tbody h2 {
+      font-size: 70px;
+      font-weight: normal;
+      margin: 0;
+      color: #FFB000;
+      font-family: 'Original Surfer', Georgia, serif;
+      text-transform: lowercase;
+      line-height: 1;
+    }
 
-		#tbody h3 {
-			font-size: 40px;
-			font-weight: normal;
-			margin: 0;
-			margin-top: 40px;
-			text-transform: lowercase;
-		}
+    #tbody h3 {
+      font-size: 40px;
+      font-weight: normal;
+      margin: 0;
+      margin-top: 40px;
+      text-transform: lowercase;
+    }
 
-		#tbody p {
-			width: 960px;
-			margin: 40px auto;
-			color: #000;
-			line-height: 200%;
-		}
+    #tbody p {
+      width: 960px;
+      margin: 40px auto;
+      color: #000;
+      line-height: 200%;
+    }
 
-		#tbody a, a:visited {
-			color: #000;
-			font-size: 12px;
-			text-decoration: none;
-		}
+    #tbody a, a:visited {
+      color: #000;
+      font-size: 26px;
+      text-decoration: none;
+    }
 
-		#tbody a:hover {
-			text-decoration: underline;
-		}
+    #tbody a:hover {
+      text-decoration: underline;
+    }
 
-		#tbody ul {
-			list-style: none;
-		}
-		
-		#tbody li {
-			line-height: 150%;
-		}
+    #tbody ul {
+      list-style: none;
+    }
+    
+    #tbody li {
+      line-height: 150%;
+    }
 
-		#tbody .download {
-			padding: 10px;
-		}
+    #tbody .download {
+      padding: 10px;
+    }
 
-		#tbody pre {
-			font-size: 18px;
-		}
+    #tbody pre {
+      font-size: 18px;
+    }
 
-		#tbody blockquote {
-			text-align: left;
-			width: 720px;
-			margin: 10px auto;
-			background: #C5C3DE;
-			border: solid 2px #69697A;
-			padding: 0 40px;
-		}
+    #tbody blockquote {
+      text-align: left;
+      width: 720px;
+      margin: 10px auto;
+      background: #C5C3DE;
+      border: solid 2px #69697A;
+      padding: 0 40px;
+    }
 
-		#tbody code {
-			background-color: #000;
-			font-style: normal;
-			border-radius: 10px;
-			color: white;
-			padding: 5px 15px;
-			font-size: 18px;
-			font-family: menlo, monospace;
-		}
+    #tbody code {
+      background-color: #000;
+      font-style: normal;
+      border-radius: 10px;
+      color: white;
+      padding: 5px 15px;
+      font-size: 18px;
+      font-family: menlo, monospace;
+    }
 
-		/*----------------------------------------  BLOCKS */
+    /*----------------------------------------  BLOCKS */
 
-		#tbody .scrollblock {
-			position: relative;
-			margin: 0;
-			width: 100%;
-			color: white;
-			padding-top: 80px;
-			padding-bottom: 80px;
-		}
+    #tbody .scrollblock {
+      position: relative;
+      margin: 0;
+      width: 100%;
+      color: white;
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
 
-		#tbody .scrollblock h2 {
+    #tbody .scrollblock h2 {
 
-		}
+    }
 
-		#tbody .block-1 { background-color: #FFF; padding-bottom: 50px; position: relative; }
-		#tbody .block-1 h2 { color: #000; }
-		#tbody .block-1 .meta { font-size: 16px; color: #999; }
-		#tbody .block-1 .meta a { font-size: 16px; color: #333; }
-		#tbody .block-2 { background-color: #348fd4; }
-		#tbody .block-2 h2 { color: #06406c; }
-		#tbody .block-2 h2 a { background: none; padding: 0; font-size: normal; }
-		#tbody .block-2 a { color: #FFF; font-size: 40px; font-weight: normal;font-style: normal; background-color: #06406c; padding: 10px 15px; border-radius: 10px; text-decoration: none; }
-		#tbody .block-2 a:hover { text-decoration: underline; }
-		#tbody .block-3 { background-color: #06406c; }
-		#tbody .block-3 h2 { color: #FFF; }
-		#tbody .block-3 p { color: #FFF; }
-		#tbody .block-3 code { background-color: #000; color: #FFF; }
-		#tbody .block-4 { background-color: #FFF; }
-		#tbody .block-4 h2 { color: #000; }
-		#tbody .block-5 { background-color: #4c0d09; }
-		#tbody .block-5 h2 { color: #d3b2af; }
-		#tbody .block-5 p { color: #d3b2af; }
-		#tbody .block-5 code { color: #000; background-color: white; }
-		#tbody .block-6 { background-color: #cc4037; }
-		#tbody .block-6 h2, .block-6 p { color: #4c0d09; }
-		#tbody .block-7 { background-color: #ffc19f; }
-		#tbody .block-7 h2 { color: #cc4037; }
-		#tbody .block-8 { background-color: #000; }
-		#tbody .block-8 h2 { color: #FFF; }
-		#tbody .block-8 p { color: #DDD; }
-		#tbody .block-8 code { color: #000; background-color: white; }
-		#tbody .block-8 a { color: #FFF; font-size: 30px; }
-		#tbody .block-9 { background-color: #F2F2F2; }
-		#tbody .block-9 h2 { color: #666; }
-		#tbody .block-10 { background-color: #F2F2F2; }
-		#tbody .block-10 h2 { color: #FFF; }
-		#tbody .block-10 { background-color: #348fd4; }
-		#tbody .block-10 h2 { color: #06406c; }
-		#tbody .block-11 { background-color: #06406c; }
-		#tbody .block-11 h2 { color: #FFF; }
-		#tbody .block-11 p { color: #FFF; }
-		#tbody .block-11 code { background-color: #000; color: #FFF; }
-		#tbody .block-12 { background-color: #ffc19f; }
-		#tbody .block-12 h2 { color: #cc4037; }
-		#tbody .block-12 h3 { color: #7d1f19; }
-		#tbody .block-12 ul { list-style: disc; margin: 0; padding: 0; }
-		#tbody .block-12 ul li a { font-size: 24px; color: #cc4037; }
-		#tbody .block-13 { background-color: #fff8c9; }
-		#tbody .block-13 h2 { color: #2d2700; }
-		#tbody .block-13 p { color: #615400; }
-		#tbody .block-14 { background-color: #FFF; padding-bottom: 50px; font-size: 14px; color: #000; }
-		#tbody .block-14 h2 { color: #000; }
-		#tbody .block-14 h3 { font-size: 16px; }
+    #tbody .block-1 { background-color: #FFF; padding-bottom: 50px; position: relative; }
+    #tbody .block-1 h2 { color: #000; }
+    #tbody .block-1 .meta { font-size: 16px; color: #999; }
+    #tbody .block-1 .meta a { font-size: 16px; color: #333; }
+    #tbody .block-2 { background-color: #348fd4; }
+    #tbody .block-2 h2 { color: #06406c; }
+    #tbody .block-2 h2 a { background: none; padding: 0; font-size: normal; }
+    #tbody .block-2 a { color: #FFF; font-size: 40px; font-weight: normal;font-style: normal; background-color: #06406c; padding: 10px 15px; border-radius: 10px; text-decoration: none; }
+    #tbody .block-2 a:hover { text-decoration: underline; }
+    #tbody .block-3 { background-color: #06406c; }
+    #tbody .block-3 h2 { color: #FFF; }
+    #tbody .block-3 p { color: #FFF; }
+    #tbody .block-3 code { background-color: #000; color: #FFF; }
+    #tbody .block-4 { background-color: #FFF; }
+    #tbody .block-4 h2 { color: #000; }
+    #tbody .block-5 { background-color: #4c0d09; }
+    #tbody .block-5 h2 { color: #d3b2af; }
+    #tbody .block-5 p { color: #d3b2af; }
+    #tbody .block-5 code { color: #000; background-color: white; }
+    #tbody .block-6 { background-color: #cc4037; }
+    #tbody .block-6 h2, .block-6 p { color: #4c0d09; }
+    #tbody .block-7 { background-color: #ffc19f; }
+    #tbody .block-7 h2 { color: #cc4037; }
+    #tbody .block-8 { background-color: #000; }
+    #tbody .block-8 h2 { color: #FFF; }
+    #tbody .block-8 p { color: #DDD; }
+    #tbody .block-8 code { color: #000; background-color: white; }
+    #tbody .block-8 a { color: #FFF; font-size: 30px; }
+    #tbody .block-9 { background-color: #F2F2F2; }
+    #tbody .block-9 h2 { color: #666; }
+    #tbody .block-10 { background-color: #F2F2F2; }
+    #tbody .block-10 h2 { color: #FFF; }
+    #tbody .block-10 { background-color: #348fd4; }
+    #tbody .block-10 h2 { color: #06406c; }
+    #tbody .block-11 { background-color: #06406c; }
+    #tbody .block-11 h2 { color: #FFF; }
+    #tbody .block-11 p { color: #FFF; }
+    #tbody .block-11 code { background-color: #000; color: #FFF; }
+    #tbody .block-12 { background-color: #ffc19f; }
+    #tbody .block-12 h2 { color: #cc4037; }
+    #tbody .block-12 h3 { color: #7d1f19; }
+    #tbody .block-12 ul { list-style: disc; margin: 0; padding: 0; }
+    #tbody .block-12 ul li a { font-size: 24px; color: #cc4037; }
+    #tbody .block-13 { background-color: #fff8c9; }
+    #tbody .block-13 h2 { color: #2d2700; }
+    #tbody .block-13 p { color: #615400; }
+    #tbody .block-14 { background-color: #FFF; padding-bottom: 50px; font-size: 14px; color: #000; }
+    #tbody .block-14 h2 { color: #000; }
+    #tbody .block-14 h3 { font-size: 16px; }
 
 
-		#tbody .openstack {
-			display: block;
-			width: 180px;
-			height: 260px;
-			background: url(../tutorial_images/tutorial.openstack.png) no-repeat;
-			position: absolute;
-			right: 0;
-			top: 0;
-		}
-		
+    #tbody .openstack {
+      display: block;
+      width: 180px;
+      height: 260px;
+      background: url(../tutorial_images/tutorial.openstack.png) no-repeat;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    
 
 p
 {
@@ -182,11 +182,11 @@ text-align:left;
 text-justify:inter-word;
 }
 
-	</style>
-	<link href="http://fonts.googleapis.com/css?family=Original+Surfer" rel="stylesheet" type="text/css">
+  </style>
+  <link href="http://fonts.googleapis.com/css?family=Original+Surfer" rel="stylesheet" type="text/css">
 <div id="tbody" style="z-index: 0;">
     <div class="scrollblock block-1">
-    	<a href="https://wiki.openstack.org/wiki/GerritJenkinsGit" class="openstack"></a>
+      <a href="https://wiki.openstack.org/wiki/GerritJenkinsGit" class="openstack"></a>
         <h1>"A La Openstack" - the simple guide</h1>
         <p>A simple guide for getting started with developing like the Openstack project.</p>
         <img src="../tutorial_images/arrow.png" alt="">
@@ -195,8 +195,8 @@ text-justify:inter-word;
     <a name="intro"></a>
     <div class="scrollblock block-8">
         <h2>introduction</h2>
-        <p>Throughout this tutorial, we'll walk you through the modification of a demo application (the Pet Clinic)</p>
-        <p>You will go hands on and modify the code before pushing it to GERRIT, see ZUUL and JENKINS pass your changes through an automated security scan leveraging HP FORTIFY, approve the changes for inclusion and eventually publish the updated version of the Pet Clinic to the HP CLOUD.</p>
+        <p>Throughout this tutorial, we'll walk you through the modification of a demo application Tutorial.</p>
+        <p>You will go hands on and modify the code before pushing it to GERRIT, see ZUUL and JENKINS pass your changes through an automated security scan leveraging HP FORTIFY, approve the changes for inclusion and eventually publish the updated version of the Tutorial to the HP CLOUD.</p>
     </div>
     <!-- setup -->
     <a name="setup"></a>
@@ -212,10 +212,12 @@ text-justify:inter-word;
             <a href="http://git-scm.com/download/linux">Download git for Linux</a>
         </p>
         <p>
-			        After downloading and installing git for you apropiate system open a git command line, this is where you'll mainly be working<br>
+              After downloading and installing git for you apropiate system open a git command line, this is where you'll mainly be working<br>
+              If you have difficulty installing git, for example on Ubuntu, make sure you have already added the repository:<br>
+              ><code><p2>sudo add-apt-repository ppa:git-core/ppa</p2></code><br>
+              ><code><p2>sudo apt-get update</p2></code><br>
+              At this point you should be able to install git following the link above.
         </p>
-
-
            
     </div>
     <a name="sshconfig"></a>
@@ -223,33 +225,37 @@ text-justify:inter-word;
         <h2>Configure ssh</h2>
         <p>
             On Windows, download <a href="http://users.ugent.be/~bpuype/cgi-bin/fetch.pl?dl=wget/wget-1.10.2.exe">wget.exe</a> to your "Downloads" folder. Make sure that you replace each 'wget' below by '~/Downloads/wget'.<br>Start GIT bash.<br>
-        		&gt;<code><p2>mkdir .ssh</p2></code><br>
-        		When connected directly to the internet:<br>
-				&gt;<code><p2>wget --no-check-certificate https://raw.github.com/miqui/pet-clinic/stackato/keys/demo_keys -O ~/.ssh/demo_keys</p2></code> <br>
-			
-			Or, behind a web proxy:<br>
-				&gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://raw.github.com/miqui/pet-clinic/stackato/keys/demo_keys  -O ~/.ssh/demo_keys</p2> </code><br>
-			You now have a "demo_keys" file in your home/.ssh directory ($HOME on Linux, %HOMEPATH% on Windows)<br>
+            &gt;<code><p2>mkdir .ssh</p2></code><br>
+            When connected directly to the internet:<br>
+        &gt;<code><p2>wget --no-check-certificate https://raw.github.com/miqui/tutorial/stackato/keys/demo_keys -O ~/.ssh/demo_keys</p2></code> <br>
+      
+      Or, behind a web proxy:<br>
+        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://raw.github.com/miqui/tutorial/stackato/keys/demo_keys  -O ~/.ssh/demo_keys</p2> </code><br>
+      You now have a "demo_keys" file in your home/.ssh directory ($HOME on Linux, %HOMEPATH% on Windows)<br>
+      Let's modify the permissions of this file for linux systems:<br>
+      ><code><p2>chmod 600 ~/.ssh/demo_keys</p2></code><br>
+      Now let's install connect-proxy for linux systems:<br>
+      ><code><p2>sudo apt-get install connect-proxy</p2></code><br>
         </p>
         <p>
-            Create a "config" file with you favorite text editor (you might need to make hidden files visible)<br>
-            <code><p2>vi ~/.ssh/config</p2></code> or <br>
-            <code><p2>notepad ~/.ssh/config</p2></code><br>
-            add those lines to the "config" file (note that the file doesn't have an extension such as .txt)<br>
-				<code><p2>Host <font color="33FF33">15.185.237.61</font></p2></code><br>
-            <!--  <code>Host 15.185.255.105</code><br/> -->
+            Create a "config" file with your favorite text editor (you might need to make hidden files visible)<br>
+            ><code><p2>vi ~/.ssh/config</p2></code> for linux systems or <br>
+            ><code><p2>notepad ~/.ssh/config</p2></code> for Windows systems and<br>
+            add these lines to the "config" file (note that the file doesn't have an extension such as .txt)<br>
+            <code><p2>Host <font color="33FF33">review</font></p2></code><br>
+            <code><p2>  Hostname my review server ip</code><br/>
             <code><p2>  User demouser</p2></code><br>
             <code><p2>  Port 29418</p2></code><br>
             <code><p2>  identityfile ~/.ssh/demo_keys</p2></code><br>
             Add this line if you are behind a web proxy:<br>
-            <code><p2>  ProxyCommand connect -H web-proxy:8080 %h %p</p2></code><br>
+            <code><p2>  ProxyCommand connect -H web-proxy:8080 %h %p</p2></code> replacing 'web-proxy:8080' with your proxy hostname and port.<br>
     </p></div>
     <a name="checkout"></a>
     <div class="scrollblock block-3">
-        <h2>checkout the Pet Clinic repository</h2>
+        <h2>checkout the Tutorial repository</h2>
         <p>
-            create a working copy of the Pet Clinic repository by running the command<br>
-				&gt;<code><p2>git clone ssh://demouser@<font color="33FF33">15.185.237.61</font>:29418/pet-clinic.git</p2></code><br>
+            create a working copy of the Tutorial repository by running the command<br>
+        &gt;<code><p2>git clone ssh://demouser@<font color="33FF33">review</font>:29418/tutorial.git</p2></code><br>
         </p>
         <p>
             This will download the code locally on the folder you are in you command line so that you can edit it.
@@ -257,7 +263,7 @@ text-justify:inter-word;
         <p>
             You actually get all the history and metadata of the code: this is great to work completely disconnected from the remote repository. Check by yourself:<br>
             Code history:<br>
-            &gt;<code><p2>cd  pet-clinic</p2></code><br>
+            &gt;<code><p2>cd  tutorial</p2></code><br>
             &gt;<code><p2>git log</p2></code><br>
             Details of a specific change:<br>
             &gt;<code><p2>git show 50c20eca5efa70f2e157a1a83527396c055dc07e</p2></code>
@@ -271,12 +277,12 @@ text-justify:inter-word;
             <a href="https://review.openstack.org/Documentation/intro-quick.html#_creating_the_review">magic branch</a>:<br>
             &gt;<code><p2>git config remote.origin.push refs/heads/*:refs/for/*</p2></code><br>
             Install the commit hook which automatically generates unique Change-Ids in commit messages for Gerrit<br>
-				&gt;<code><p2>wget --no-check-certificate https://<font color="33FF33">15.185.237.61</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg</p2></code><br>
-			If you are on a private network you have to specify a proxy so your command will be:<br>
-			
-				&gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://proxy.atlanta.hp.com:8080  https://<font color="33FF33">15.185.237.61</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg </p2></code><br>
+        &gt;<code><p2>wget --no-check-certificate https://<font color="33FF33">review</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg</p2></code><br>
+      If you are on a private network you have to specify a proxy so your command will be:<br>
+      
+        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://proxy.atlanta.hp.com:8080  https://<font color="33FF33">review</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg </p2></code><br>
 
-			now run this command <br>
+      now run this command <br>
             &gt;<code><p2>chmod u+x .git/hooks/commit-msg</p2></code><br>
             now change the git user email <br>
             &gt;<code><p2>git config user.email "demouser@localhost"</p2></code><br>
@@ -287,7 +293,7 @@ text-justify:inter-word;
         <h2>modify a file</h2>
         <p>
             modify the file at <br>
-            <code><p2>/path/to/repository/pet-clinic/src/main/webapp/WEB-INF/jsp/welcome.jsp</p2></code><br>
+            <code><p2>/path/to/repository/tutorial/src/main/webapp/WEB-INF/jsp/welcome.jsp</p2></code><br>
             and change any text you want.
         </p>
     </div>
@@ -322,12 +328,12 @@ text-justify:inter-word;
         <p>
             The change goes through Zuul's <i>check</i> pipeline which verifies automatically any change. If the check fails, the change is rejected.<br>
             Open Zuul interface to see the pipelines and the change as it goes through Zuul:<br>
-				<a href="http://15.185.241.138/"><code><p2><font color="33FF33">http://15.185.241.138</font></p2></code></a>
+            <a href="http://15.185.241.138/"><code><p2><font color="33FF33">http://15.185.241.138</font></p2></code></a>
             
         </p>
         <img src="../tutorial_images/zuul.1.jpg" alt="">
         <p>
-        	As you can see, we have 2 verifications in the check pipeline: packaging and security scan using <a href="http://www.hp.com/go/fortify">Fortify</a>.
+          As you can see, we have 2 verifications in the check pipeline: packaging and security scan using <a href="http://www.hp.com/go/fortify">Fortify</a>.
         </p>
     </div>
     <a name="review"></a>
@@ -335,7 +341,7 @@ text-justify:inter-word;
         <h2>Review the change</h2>
         <p>
             Go to Gerrit to open your change:<br>
-				<a href="https://15.185.237.61//"><code><p2><font color="33FF33">https://15.185.237.61/</font></p2></code></a><br>
+        <a href="https://15.185.237.61//"><code><p2><font color="33FF33">https://15.185.237.61/</font></p2></code></a><br>
             
             The change needs to be "Verified", "Code-Review" and "Approved" (the "Need" lines).<br>
             Verifying is checking that the code actually compiles, unit tests pass etc. Verification is done by Jenkins jobs configured in the "check" Zuul pipeline.<br>
@@ -347,23 +353,23 @@ text-justify:inter-word;
     <div class="scrollblock block-10">
         <h2>Submitting the change</h2>
         <p>
-			As a reviewer, look at the code, comment it and make yourself an opinion about the change.<br>
-			Now click on the <i>Review</i> button.<br>
-			Voting +1 or -1 provides an opinion.<br>
-			-2 rejects the change and +2 accepts it.<br>
+      As a reviewer, look at the code, comment it and make yourself an opinion about the change.<br>
+      Now click on the <i>Review</i> button.<br>
+      Voting +1 or -1 provides an opinion.<br>
+      -2 rejects the change and +2 accepts it.<br>
         </p>
         <p>
-        	Go ahead: vote +2 for this example, add your comment and click on the "Publish and Submit". The code gets merged.
+          Go ahead: vote +2 for this example, add your comment and click on the "Publish and Submit". The code gets merged.
         </p>
     </div>
     <a name="gate"></a>
     <div class="scrollblock block-11">
         <h2>Zuul "gate" pipeline</h2>
         <p>
-			Once a reviewer approved the changes, Zuul will make the change go through the <i>gate</i> pipeline.
+      Once a reviewer approved the changes, Zuul will make the change go through the <i>gate</i> pipeline.
         </p>
         <p>
-        	More...
+          More...
         </p>
     </div>
     <a name="resources"></a>
