@@ -91,5 +91,13 @@ module.exports = {
       });
     }
 
+  },
+  current_raw_bp: function(req, res){
+    var config_content = config.get_config_data();
+    if(config_content === undefined){
+      res.json('We could not read the configuration file.', 500);
+    }else{
+      res.json(JSON.parse(config_content), 200);
+    }
   }
 };

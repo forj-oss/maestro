@@ -6,7 +6,7 @@
     <div class="panel panel-default">
       <div class="panel-body" style="font-size: 12px; padding: 0px 15px 15px 15px;">
         <div class="row">
-          <div class="col-md-6">
+          <div id="benefits" class="col-md-6">
             <div>
               <div>
                 <h4 class="title">Registration Benefits</h4>
@@ -22,26 +22,40 @@
             </div>
           </div>
           <div class="col-md-6">
-            <div>
+          <% if(error_message !== null){ %>
+            <div style="padding-top: 50px;text-align: center;">
+              <%=error_message%>
+            </div>
+          <% }else{ %>
+            <% if(registered !== 0){ %>
+              <div class="div-register" style="display: block; background-color: rgb(125, 192, 104); color: white; height: 127px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
                 <div>
-                  <h4 class="form-title">Register</h4>
+                  <h4 id="div-register-title" class="form-title" style="text-align: center; line-height: 127px;">Registered</h4>
                 </div>
-                <div class="form-group">
+              </div>
+            <% }else{ %>
+              <div class="div-register">
+                <div>
+                  <h4 id="div-register-title" class="form-title">Register</h4>
+                </div>
+                <div id="div-register-name" class="form-group">
                   <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="name" placeholder="Name">
                 </div>
-                <div class="form-group" style="margin-bottom: 0px;">
+                <div id="div-register-email" class="form-group" style="margin-bottom: 0px;">
                   <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="email" placeholder="Enter email">
                 </div>
-                <div>
-                  <label class="validator-label" style="font-size:12px;padding-top: 10px;margin-bottom: 10px;">Please register bla bla</label>
+                <div id="div-register-label" style="padding-top: 10px;margin-bottom: 10px;">
+                  <label id="validator-label" style="font-size:12px; margin: 0px; color: #7DC068; display: none;"></label>
                 </div>
-                <div style="width: 100%;">
+                <div id="div-register-controls" style="width: 100%;">
                   <div>
                     <button id="submit-register" type="button" class="btn btn-primary btn-sm">Register</button>
                     <button id="cancel-register" type="button" class="btn btn-default btn-sm">Cancel</button>
                   </div>
                 </div>
-            </div>
+              </div>
+            <% } %>
+          <% } %>
           </div>
         </div>
       </div>
@@ -58,48 +72,36 @@
     });
     
     $("#submit-register").click(function(){
-      $(".validator-label").fadeOut(500);
-        //Validate input
         var name = $("#name").val();
         var email = $("#email").val();
-        var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        var valid_email = String(email).search (pattern) != -1;
-        if(valid_email===true && (name !== undefined || name !== null)){
-            $.ajax('/kitops/do_register', {
-                data: { name: name, email: email },
-                async: true,
-                cache: false,
-                success: function (response, status, jqXHR) {
-                    var data = $.parseJSON(response);
-                    if(data.Valid === 1){
-                        $('.form-parts').fadeOut(500);
-                        $('.form-parts').remove();
-
-                        $('.form').css({'background-color':'#58CB73', color:'white'});
-                        $('.form-title').fadeOut(500, function(){
-                            $('.form-title').text('Registered');
-                            $('#reg-button').fadeOut(500).remove();
-                        }).fadeIn(500);
-                    }else if(data.Valid === -1){
-                        $(".validator-label").fadeOut(500, function(){
-                            $(".validator-label").text(data.Message);
-                            $("#submit").on('click', doRegister);
-                        }).fadeIn(600);
-                    }
-                },
-                error: function (request, data, error) {
-                    $(".validator-label").fadeOut(500, function(){
-                        $(".validator-label").text("We couldn't register your kit at this time.");
-                        $("#submit").on('click', doRegister);
-                    }).fadeIn(600);
-                },
-                dataType: "html"
-            });
+        if(name.length === 0 && email.length === 0){
+          $("#validator-label").fadeOut(500, function(){
+            $(this).text('Please provide your name and email.');
+          }).fadeIn(500);
         }else{
-            $(".validator-label").fadeOut(500, function(){
-                $(".validator-label").text('Invalid values for name or email.');
-                $("#submit").on('click', doRegister);
-            }).fadeIn(600);
+          socket.get('/kitops/do_register', {
+            name: name,
+            email: email
+          }, function(response) {
+              if(response.success == 'failed'){
+                $("#validator-label").fadeOut(500, function(){
+                  $(this).css({'color':'#E16138'});
+                  $(this).text('Kit Registration Failed');
+                }).fadeIn(500);
+              }
+              if(response.success == 'success'){
+                var benefits_height = $("#benefits").height();
+                $(".div-register").fadeOut(500, function(){
+                  $("#div-register-name").remove();
+                  $("#div-register-email").remove();
+                  $("#div-register-label").remove();
+                  $("#div-register-controls").remove();
+                  $(this).css({'background-color':'#7DC068', color:'white', height: ''+benefits_height+'px', 'border-radius': '5px'});
+                  $("#div-register-title").css({'text-align':'center', 'line-height': ''+benefits_height+'px'});
+                  $("#div-register-title").text('Registered');
+                }).fadeIn(1000);
+              }
+          });
         }
     });
   });

@@ -14,7 +14,8 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
-
+ var validator = require('validator');
+ var register_module = require('kit-reg/kit-reg');
 module.exports = {
     
   
@@ -26,11 +27,26 @@ module.exports = {
    */
   _config: {},
   register: function(req, res){
-    res.view({ layout: null });
+    register_module.is_registered(function(err){
+      console.log(err);
+      res.view({ layout: null, registered: 0, error_message: err });
+    }, function(result){
+      res.view({ layout: null, registered: result.result, error_message: null });
+    })
   },
   do_register: function(req, res){
-    res.view({ layout: null });
+    var name = req.param('name');
+    var email = req.param('email');
+    if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
+      register_module.do_register(name, email, function(err){
+        console.log("Kit Registration Failed: "+err);
+        res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
+      }, function(result){
+        console.log("Kit Registration: "+result.state+", (If Error)Stacktrace:"+result.stacktrace);
+        res.json({ success: result.state, message: result.stacktrace }, 200);
+      })
+    }else{
+      res.json('Invalid name or email address.', 409);
+    }
   }
-
-  
 };
