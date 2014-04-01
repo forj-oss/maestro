@@ -47,12 +47,14 @@ module.exports = {
         }else{
           var tools = [];
           var defect_tracker = [];
+          var projects = false;
+          var users = false;
           
           async.series({
               tools: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the tools:'+err.message);
+                  console.log('Unable to retrieve the list of tools:'+err.message);
                   callback();
                 }, function(res_tools){
                   tools = JSON.parse(res_tools);
@@ -62,13 +64,34 @@ module.exports = {
               defect_tracker: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'defect_tracker', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the defect_tracker:'+err.message);
+                  console.log('Unable to retrieve the list of defect_trackers:'+err.message);
                   callback();
                 }, function(res_dt){
                   defect_tracker = JSON.parse(res_dt);
                   callback(null, defect_tracker);
                 })
               },
+              projects: function(callback){
+                blueprint_utils.get_blueprint_section(result.id, 'projects', function(err){
+                  //Suppress the error and log the exception
+                  console.log('Unable to retrieve the value of projects:'+err.message);
+                  callback();
+                }, function(res_pj){
+                  projects = JSON.parse(res_pj);
+                  callback(null, projects);
+                })
+              },
+              users: function(callback){
+                blueprint_utils.get_blueprint_section(result.id, 'users', function(err){
+                  //Suppress the error and log the exception
+                  console.log('Unable to retrieve the value of users:'+err.message);
+                  callback();
+                }, function(res_us){
+                  users = JSON.parse(res_us);
+                  callback(null, res_us);
+                })
+              },
+              auth: function(callback){callback(null, null);},
               layout: function(callback){
                 if(req.isAjax){
                   callback(null, null);

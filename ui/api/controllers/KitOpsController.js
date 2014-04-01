@@ -31,7 +31,6 @@ module.exports = {
       console.log(err);
       res.view({ layout: null, registered: 0, error_message: err });
     }, function(result){
-      console.log(result);
       res.view({ layout: null, registered: result.result, error_message: null });
     })
   },
@@ -44,7 +43,7 @@ module.exports = {
         console.log("Kit Registration Failed: "+err);
         res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
       }, function(result){
-        console.log("Kit Registration: "+result.state+", (If Error)Stacktrace:"+result.stacktrace);
+        console.log("Kit Registration: "+result.state+", Stacktrace:"+result.stacktrace);
         res.json({ success: result.state, message: result.stacktrace }, 200);
       })
     }else{

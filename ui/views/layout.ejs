@@ -71,16 +71,59 @@
       $(document).ready(function(){
         $("#register").click(function(){
           $("#body").fadeOut(500, function(){
-            $(this).html('');
-            $(this).load('../kitops/register', function(){
-              $(this).fadeIn(1000);
+            $(this).html('<div class="progress" style="width: 80%;margin: auto;margin-top: 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span class="sr-only">0% Complete</span></div></div>').fadeIn(200, function(){
+              $('.progress-bar').animate({width: '50%'});
+            });
+            $.ajax({
+              url: '../kitops/register',
+              success: function(data) {
+                $('.progress-bar').animate({width: '100%'}, 500, function(){
+                  $('#body').delay(500).queue(
+                    function(c) {
+                        $(this).html(data);
+                        c();
+                    });
+                });
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.status == 404) {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Requested resource not found.</strong></p></div>');
+                } else if (XMLHttpRequest.status == 500) {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Oh snap!</strong> we could not load the resource!</p></div>');
+                }  else {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Unknow Error.\n' + XMLHttpRequest.responseText+ '</strong></p></div>');
+                }
+              }
             });
           });
         });
         $(".forj-logo").click(function(){
           $("#body").fadeOut(500, function(){
-            $("#body").load('../home/index');
-          }).fadeIn(1000);
+            $(this).html('<div class="progress" style="width: 80%;margin: auto;margin-top: 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span class="sr-only">0% Complete</span></div></div>').fadeIn(200, function(){
+              $('.progress-bar').animate({width: '50%'});
+            });
+            $.ajax({
+              url: '../home/index',
+              success: function(data) {
+                $('.progress-bar').animate({width: '100%'}, 500, function(){
+                  $('#body').delay(500).queue(
+                    function(c) {
+                        $(this).html(data);
+                        c();
+                    });
+                });
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.status == 404) {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Requested resource not found.</strong></p></div>');
+                } else if (XMLHttpRequest.status == 500) {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Oh snap!</strong> we could not load the resource!</p></div>');
+                }  else {
+                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Unknow Error.\n' + XMLHttpRequest.responseText+ '</strong></p></div>');
+                }
+              }
+            });
+          });
         });
       });
     </script>
@@ -90,7 +133,9 @@
     <section class="header">
     <div class="container" style="padding-top: 10px;">
     <div class="row">
-        <div class="col-md-1 forj-logo" style="float:left; cursor: pointer; width: 62px; height: 61px; background-image: url('../images/forj.gif');"></div>
+        <div class="col-md-1">
+          <div class="forj-logo" style="float:left; cursor: pointer; width: 62px; height: 61px; background-image: url('../images/forj.gif');"></div>
+        </div>
         <div class="col-md-1"></div>
         <div class="col-md-4">
           <input type="text" class="form-control search-query" placeholder="Search..."/>
@@ -114,9 +159,10 @@
                   More <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Sign In</a></li>
                   <li id="register"><a href="#">Register</a></li>
                   <li class="divider"></li>
-                  <li><a href="#">Sing out</a></li>
+                  <li><a href="#">Sign Out</a></li>
                 </ul>
               </div>
             </div>
@@ -125,8 +171,10 @@
     </div>
     </div>
     </section>
-    <section id="body" class="container">
-      <%- body %>
+    <section id="body-wrapper">
+      <div id="body" class="container">
+        <%- body %>
+      </div>
     </section>
 
     <footer>
