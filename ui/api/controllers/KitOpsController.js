@@ -31,6 +31,7 @@ module.exports = {
       console.log(err);
       res.view({ layout: null, registered: 0, error_message: err });
     }, function(result){
+      console.log(result);
       res.view({ layout: null, registered: result.result, error_message: null });
     })
   },
@@ -38,6 +39,7 @@ module.exports = {
     var name = req.param('name');
     var email = req.param('email');
     if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
+      name = validator.toString(name);
       register_module.do_register(name, email, function(err){
         console.log("Kit Registration Failed: "+err);
         res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
