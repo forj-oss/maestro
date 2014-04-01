@@ -1,62 +1,97 @@
 {
   "site": {
+    "blueprint": "openstack",
+    "id": "g3",
     "node": [
       {
-        "node_name": "default",
-        "tools": [
-          {
-            "name": "gerrit",
-            "status": "offline",
-            "settings_url": "#",
-            "category": "dev",
-            "tool_url": "#"
-          },
-          {
-            "name": "graphite",
-            "status": "offline",
-            "settings_url": "#",
-            "category": "dev",
-            "tool_url": "#"
-          }
-        ]
-      },
-      {
-        "node_name": "maestro.42.localhost",
         "tools": [
           {
             "name": "puppet",
-            "status": "online",
+            "tool_url": "http://15.185.255.86:3000",
+            "dname": "Puppet Dashboard",
+            "statistics": "false",
+            "icon": "true",
             "settings_url": "#",
-            "category": "dev",
-            "tool_url": "http://10.0.2.15:3000"
+            "status": "online",
+            "desc": "View managed nodes",
+            "category": "dev"
           }
-        ]
+        ],
+        "node_name": "maestro.g3.forj.io"
       },
       {
-        "node_name": "ci-node",
         "tools": [
           {
             "name": "jenkins",
+            "tool_url": "https://15.185.228.148/",
             "dname": "Jenkins",
+            "statistics": "false",
+            "icon": "true",
+            "settings_url": "https://15.185.228.148/manage",
             "status": "online",
-            "settings_url": "https://jenkinsurl/config",
-            "category": "dev",
-            "desc": "Continuous CI",
-            "tool_url": "https://jenkinsurl"
+            "desc": "Continuous integration",
+            "category": "dev"
           },
           {
             "name": "zuul",
-            "dname": null,
-            "status": "online",
+            "tool_url": "http://15.185.228.148",
+            "dname": "Zuul",
+            "statistics": "false",
+            "icon": "true",
             "settings_url": "#",
-            "category": null,
-            "desc": null,
-            "tool_url": "https://zullurl"
+            "status": "online",
+            "desc": "Pipeline oriented project gating",
+            "category": "dev"
           }
-        ]
+        ],
+        "node_name": "ci.g3.forj.io"
+      },
+      {
+        "tools": [
+          {
+            "email": "review@g3.forj.io",
+            "name": "gerrit",
+            "tool_url": "https://15.185.253.144/",
+            "dname": "Gerrit",
+            "statistics": "false",
+            "icon": "true",
+            "settings_url": "https://15.185.253.144/#/settings/",
+            "status": "online",
+            "desc": "Code review",
+            "category": "dev"
+          }
+        ],
+        "node_name": "review.g3.forj.io"
+      },
+      {
+        "tools": [
+          {
+            "name": "pastebin",
+            "tool_url": "http://15.185.241.160:80",
+            "dname": "Pastebin",
+            "statistics": "false",
+            "icon": "true",
+            "settings_url": "#",
+            "status": "online",
+            "desc": "Store, share and compare text snippets",
+            "category": "dev"
+          },
+          {
+            "name": "graphite",
+            "tool_url": "http://15.185.241.160:8081",
+            "dname": "Graphite",
+            "statistics": "false",
+            "icon": "true",
+            "settings_url": "http://15.185.241.160:8081/account/login",
+            "status": "online",
+            "desc": "View graphs",
+            "category": "dev"
+          }
+        ],
+        "node_name": "util.g3.forj.io"
       }
     ],
-    "id": "42",
-    "blueprint": "openstack"
+    "projects": "false",
+    "users": "false"
   }
 }
