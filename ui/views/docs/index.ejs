@@ -5,7 +5,7 @@
       <% documentation.forEach(function(doc){ %>
         <% if(doc.category == 'tutorial'){ %>
           <div>
-            <h5 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;float: left;margin-top: 0;padding-left: 10px; font-weight: bold;"><%=doc.dname%><a href="../home/tutorial" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</h5></a>
+            <h5 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;float: left;margin-top: 0;padding-left: 10px; font-weight: bold;"><%=doc.dname%><a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</h5></a>
           </div>
         <% } %>
       <% }); %>

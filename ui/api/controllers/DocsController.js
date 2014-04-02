@@ -14,7 +14,7 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
-
+var blueprint_utils = require('blueprint/blueprint');
 module.exports = {
     
   
@@ -23,7 +23,20 @@ module.exports = {
    *    `/docs/disp`
    */
    index : function (req, res) {
-    res.view({ layout: null, documentation: null }, 200);
+    blueprint_utils.get_blueprint_id(function(err){
+      console.log('Unable to get the instance_id of the kit: '+err.message);
+      res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+    }, function(result){
+      var id = JSON.parse(result).id;
+      blueprint_utils.get_blueprint_section(id, 'documentation', function(err){
+        //Suppress the error and log the exception
+        console.log('Unable to retrieve the documentation:'+err.message);
+        callback();
+      }, function(res_docs){
+        res_docs = JSON.parse(res_docs);
+        res.view({ layout: null, documentation: res_docs }, 200);
+      })
+    });
   },
 
 

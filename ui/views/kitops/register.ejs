@@ -28,7 +28,7 @@
             </div>
           <% }else{ %>
             <% if(registered !== '0'){ %>
-              <div class="div-register" style="display: block; background-color: rgb(125, 192, 104); color: white; height: 127px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
+              <div id="is_registered" class="div-register" style="display: block; cursor:pointer; background-color: rgb(125, 192, 104); color: white; height: 127px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
                 <div>
                   <h4 id="div-register-title" class="form-title" style="text-align: center; line-height: 127px;">Registered</h4>
                 </div>
@@ -71,6 +71,12 @@
         }).fadeIn(1000);
     });
     
+    $("#is_registered").on('click',function(){
+      $("#body").fadeOut(500, function(){
+          $("#body").load('../home/index');
+      }).fadeIn(1000);
+    });
+    
     $("#submit-register").click(function(){
         var name = $("#name").val();
         var email = $("#email").val();
@@ -96,9 +102,15 @@
                   $("#div-register-email").remove();
                   $("#div-register-label").remove();
                   $("#div-register-controls").remove();
-                  $(this).css({'background-color':'#7DC068', color:'white', height: ''+benefits_height+'px', 'border-radius': '5px'});
+                  $(this).css({'background-color':'#7DC068', color:'white', height: ''+benefits_height+'px', 'border-radius': '5px', cursor: 'pointer'});
                   $("#div-register-title").css({'text-align':'center', 'line-height': ''+benefits_height+'px'});
                   $("#div-register-title").text('Registered');
+                  $(this).attr('id', 'is_registered');
+                  $("#is_registered").on('click',function(){
+                    $("#body").fadeOut(500, function(){
+                      $("#body").load('../home/index');
+                    }).fadeIn(1000);
+                  });
                 }).fadeIn(1000);
               }
           });

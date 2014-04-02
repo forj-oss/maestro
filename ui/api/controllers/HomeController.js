@@ -15,7 +15,7 @@
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
  var async = require('async');
-
+ var blueprint_utils = require('blueprint/blueprint');
 module.exports = {
     
   
@@ -27,7 +27,6 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
-    var blueprint_utils = require('blueprint/blueprint');
     blueprint_utils.get_blueprint_id(function(err){
       console.log('Unable to get the instance_id of the kit: '+err.message);
       res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
