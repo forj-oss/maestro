@@ -67,11 +67,14 @@
                 <div style="width: 60px;float: right;font-size: 11px;text-align: center;">
                   <div style="background-color: #F0D705;">Workload</div>
                   <div style="background-color: #7DC068;  color: white;">Backup</div>
-                  <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-service="<%=tool.name%>" data-toggle="modal" data-target="#myModal">
-                    <span>></span>
-                  </div>
+                  <% if(tool.statistics){ %>
+                    <% if(tool.statistics === 'true'){ %>
+                     <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-service="<%=tool.name%>" data-toggle="modal" data-target="#myModal">
+                      <span>></span>
+                    </div>
+                    <% } %>
+                  <% } %>
                 </div>
-                  <!--<p><%=tool.desc%></p>-->
                  <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
                 </div>
                
