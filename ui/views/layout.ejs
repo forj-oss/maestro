@@ -161,10 +161,16 @@
             <div class="col-md-4">
               <div class="btn-group" style="float:right;">
                 <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                <% if(email !== undefined){ %>
+                  <%=email.split('@')[0]%>
+                <% }else{ %>
                   More <span class="caret"></span>
+                <% } %>
                 </button>
-                <ul class="dropdown-menu" role="menu">
+                <ul class="dropdown-menu" role="menu" style="font-size: 12px;">
+                  <% if(email === undefined){ %>
                   <li><a href="#">Sign In</a></li>
+                  <% } %>
                   <li id="register"><a href="#">Register</a></li>
                   <li class="divider"></li>
                   <li><a href="#">Sign Out</a></li>

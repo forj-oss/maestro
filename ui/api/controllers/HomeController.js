@@ -98,6 +98,9 @@ module.exports = {
                   callback(null, 'layout')
                 }
               },
+              email: function(callback){
+                callback(null, req.session.email);
+              }
           }, function(errasync, results) {
               if (errasync) {
                 console.log('Error getting the tools and defect tracker: '+errasync.message)
