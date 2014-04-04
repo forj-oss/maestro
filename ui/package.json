@@ -6,13 +6,26 @@
     "dependencies": {
         "sails": "0.9.11",
         "grunt": "0.4.1",
-        "sails-disk": "~0.9.0",
         "ejs": "0.8.4",
         "optimist": "0.3.4"
     },
     "scripts": {
         "start": "node app.js",
         "debug": "node debug app.js"
+    },
+    "jshintConfig": {
+        "boss":      false,
+        "node":      true,
+        "strict":    true,
+        "smarttabs": true,
+        "undef":     true,
+        "unused":    true,
+        "onecase":   true,
+        "lastsemic": false,
+        "newcap":    true,
+        "maxlen":    100,
+        "indent":    2,
+        "curly":     true
     },
     "main": "app.js",
     "repository": "",
