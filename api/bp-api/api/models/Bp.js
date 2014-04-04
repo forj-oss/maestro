@@ -32,6 +32,9 @@ module.exports = {
     },
     documentation: {
       type: 'json'
+    },
+    maestro_url: {
+      type: 'text'
     }
   }
 
