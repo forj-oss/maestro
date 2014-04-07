@@ -16,6 +16,7 @@
  */
   var openid = require('openid');
   var blueprint_utils = require('blueprint/blueprint');
+  var kit_ops = require('kit-ops/kit-ops');
 module.exports = {
     
   
@@ -43,40 +44,46 @@ module.exports = {
     res.view({ layout: 'login_layout' });
   },
   auth: function(req, res){
-    var identifier = 'https://www.google.com/accounts/o8/id'
-    if(identifier !== undefined){
-      getRelyingParty(function(err, relyingParty){
-        if(err){
-          res.view('500', { error: [ err.message ]});
+    kit_ops.get_opt('openid_url', function(open_err, identifier){
+      if(open_err){
+        res.view('500', { layout: null, errors: [ open_err.message ]});
+      }else{
+        var openid_url = identifier.option_value;
+        if(openid_url === undefined){
+          res.view('500', { layout: null, errors: [ 'We could not retrieve the openid provider' ]});
         }else{
-          relyingParty.authenticate(identifier, false, function(error, authUrl)
-          {
-            if (error)
-            {
-              res.writeHead(200);
-              res.end('Authentication failed: ' + error.message);
-            }
-            else if (!authUrl)
-            {
-              res.writeHead(200);
-              res.end('Authentication failed');
-            }
-            else
-            {
-              res.writeHead(302, { Location: authUrl });
-              res.end();
+          getRelyingParty(function(err, relyingParty){
+            if(err){
+              res.view('500', { layout: null, errors: [ err.message ]});
+            }else{
+              relyingParty.authenticate(openid_url, false, function(error, authUrl)
+              {
+                if (error)
+                {
+                  res.writeHead(200);
+                  res.end('Authentication failed: ' + error.message);
+                }
+                else if (!authUrl)
+                {
+                  res.writeHead(200);
+                  res.end('Authentication failed');
+                }
+                else
+                {
+                  res.writeHead(302, { Location: authUrl });
+                  res.end();
+                }
+              });
             }
           });
         }
-      })
-    }else{
-      res.view('500', { error: [ 'Error: identifier missing.']});
-    }
+      }
+    });
   },
   verify: function(req, res){
     getRelyingParty(function(err, relyingParty){
       if(err){
-        res.view('500', { error: [ 'Failed to autenticate:'+err.message ]});
+        res.view('500', { layout: null, errors: [ 'Failed to autenticate:'+err.message ]});
       }else{
         relyingParty.verifyAssertion(req, function(error, result)
         {

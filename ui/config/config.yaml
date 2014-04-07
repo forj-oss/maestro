@@ -7,7 +7,7 @@
  runtime:
   protocol: 'http'
   ip: '127.0.0.1'
-  port: '3131'
+  port: '8080'
   resource_uri: '/kitops/'
  registration:
   protocol: 'http'
