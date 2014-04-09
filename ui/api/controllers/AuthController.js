@@ -37,6 +37,10 @@ module.exports = {
     var message = req.param('message');
     res.view({ layout: 'login_layout', message: message });
   },
+  sign_out: function(req, res){
+    req.session.destroy();
+    res.view({ layout: 'login_layout' });
+  },
   login: function(req, res){
     res.view({ layout: 'login_layout' });
   },
@@ -83,17 +87,58 @@ module.exports = {
   verify: function(req, res){
     getRelyingParty(function(err, relyingParty){
       if(err){
+		console.error('Failed to autenticate:'+err.message);
         res.view('500', { layout: null, errors: [ 'Failed to autenticate:'+err.message ]});
       }else{
         relyingParty.verifyAssertion(req, function(error, result)
         {
+          if(error){
+            console.error(error.message);
+            res.view({ layout: null, errors: [ error.message ]}, '500');
+          }else{
             req.session.authenticated = result.authenticated;
             req.session.email = result.email;
             if(req.session.authenticated === true){
-              res.redirect('/', 301);
+              kit_ops.kit_has_admin(function(err_ka, result_ka){
+                if(err_ka){
+                  //Supress the error and send the user to index?
+                  console.error('Unable to check if the kit had an admin already: '+err_ka.message);
+                  res.redirect('/', 301);
+                }else{
+                  if(result_ka){
+                    //Yes
+                    kit_ops.is_admin(req.session.email, function(err_ia, result_ia){
+                      if(err_ia){
+                        //Supress the error and send the user to index?
+                        console.error('Unable to check is an admin: '+err_ia.message);
+                        res.redirect('/', 301);
+                      }else{
+                        //True or false
+                        req.session.is_admin = result_ia;
+                        res.redirect('/', 301);
+                      }
+                    });
+                  }else{
+                  //No
+                    kit_ops.create_kit_admin(req.session.email, function(err_ca, result_ca){
+                      if(err_ca){
+                        //Supress the error and send the user to index?
+                        console.error('Unable to create the kit admin: '+err_ca.message);
+                        res.redirect('/', 301);
+                      }else{
+                        //True or false
+                        req.session.is_admin = result_ca;
+                        res.redirect('/', 301);
+                      }
+                    });
+                  }
+                }
+              });
             }else{
-              res.redirect('/auth/sign_in',{ message: 'Unable to authenticate you.' }, 301) ;
+              console.error('Unable to authenticate the user');
+              res.redirect('/', 301);
             }
+          }
         });
       }
     });

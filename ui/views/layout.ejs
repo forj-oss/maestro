@@ -149,12 +149,12 @@
         <div class="col-md-5">
           <div class="row">
             <div class="col-md-4">
-              <div style="background-color: #7DC068;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div>
+              <div style="background-color: #7DC068;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;">X</div>
               <h5 style="font-weight: bold;margin-bottom: 0;">System Health</h5>
               <span style="font-size: 10px;">Everything is OK</span>
             </div>
             <div class="col-md-4">
-              <div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div>
+              <div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;">X</div>
               <h5 style="font-weight: bold;margin-bottom: 0;">System Backup</h5>
               <span style="font-size: 10px;">No Backup</span>
             </div>
@@ -169,11 +169,12 @@
                 </button>
                 <ul class="dropdown-menu" role="menu" style="font-size: 12px;">
                   <% if(email === undefined){ %>
-                  <li><a href="#">Sign In</a></li>
-                  <% } %>
-                  <li id="register"><a href="#">Register</a></li>
+                  <li><a href="../auth/sign_in">Sign In</a></li>
+                  <% }%>
+				  <% if(email === undefined){ %>
                   <li class="divider"></li>
-                  <li><a href="#">Sign Out</a></li>
+				  <% } %>
+                  <li><a href="../auth/sign_out">Sign Out</a></li>
                 </ul>
               </div>
             </div>
