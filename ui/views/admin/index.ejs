@@ -1,0 +1,49 @@
+<div class="col-md-10 category" style="border-bottom: 1px solid #BCCCCA;">
+  <div class="row">
+    <h5 class="section-header">> KIT ADMINISTRATION</h5>
+  </div>
+</div>
+<div class="col-md-10 category">
+  <div class="row" style="padding: 5px;">
+    <p class="admin-info">Welcome <strong>administrator</strong> in order to <strong>extend the lifetime</strong> of this kit you have to associate the set of servers with you.</p>
+  </div>
+  <div class="row" style="padding: 0px 5px 0px 5px;">
+    <h6 class="admin-subtitle">HOW DO I DO THAT?</h6>
+    <p class="admin-info">Lorem ipsum ad his scripta blandit partiendo, eum fastidii accumsan euripidis in, eum liber hendrerit an. Qui ut wisi vocibus suscipiantur, quo dicit ridens inciderint id. Quo mundi lobortis reformidans eu, legimus senserit definiebas an eos. Eu sit tincidunt incorrupte definitionem, vis mutat affert percipit cu, eirmod consectetuer signiferumque eu per. In usu latine equidem dolores. Quo no falli viris intellegam, ut fugit veritus placerat per.</p>
+  </div>
+  <div class="row" style="padding: 10px 5px 0px 5px; text-align: center;">
+    <button id="bnt-reg">KIT REGISTRATION</button>
+  </div>
+</div>
+<script>
+  $(document).ready(function(){
+    $("#bnt-reg").click(function(){
+      $("#body").fadeOut(500, function(){
+        $(this).html('<div class="progress" style="width: 80%;margin: auto;margin-top: 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span class="sr-only">0% Complete</span></div></div>').fadeIn(200, function(){
+          $('.progress-bar').animate({width: '50%'});
+        });
+        $.ajax({
+          url: '../kitops/register',
+          success: function(data) {
+            $('.progress-bar').animate({width: '100%'}, 500, function(){
+              $('#body').delay(500).queue(
+                function(c) {
+                    $(this).html(data);
+                    c();
+                });
+            });
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.status == 404) {
+              $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Requested resource not found.</strong></p></div>');
+            } else if (XMLHttpRequest.status == 500) {
+              $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Oh snap!</strong> we could not load the resource!</p></div>');
+            }  else {
+              $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Unknow Error.\n' + XMLHttpRequest.responseText+ '</strong></p></div>');
+            }
+          }
+        });
+      });
+    });
+  });
+</script>

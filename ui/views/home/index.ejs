@@ -13,7 +13,10 @@
             <li id="users"><a href="#c" data-toggle="tab">Users</a></li>
           <% } %>
         <% } %>
-        <li id="docs"><a href="#d" data-toggle="tab">Docs</a></li>
+        <% if(admin){ %>
+          <li id="admin"><a href="#d" data-toggle="tab">Admin</a></li>
+        <% } %>
+        <li id="docs"><a href="#e" data-toggle="tab">Docs</a></li>
         <div style="height: 100px;width: 80px;text-align: center;font-size: 11px; font-weight: bold; padding: 5px 5px 0px 5px;border: 1px solid #CCC;margin-top: 50px;">
           <p>Trial  expires in 12 days.</p>
           <p style="margin-bottom: 0px;"><a href="#">Rellocate</a> your FORJ.</p>
@@ -128,7 +131,10 @@
             <div class="tab-pane" id="c" style="max-height: 700px;height: 700px;"></div>
           <% } %>
         <% } %>
-        <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;"></div>
+        <% if(admin){ %>
+          <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;"></div>
+        <% } %>
+        <div class="tab-pane" id="e" style="max-height: 700px;height: 700px;"></div>
       </div>
     </div>
   </div>
@@ -161,8 +167,11 @@ $(document).ready(function(){
   $("#users").click(function(){
     $("#c").load('../admin/users');
   });
+  $("#admin").click(function(){
+    $("#d").load('../admin/index');
+  });
   $("#docs").click(function(){
-    $("#d").load('../docs/index');
+    $("#e").load('../docs/index');
   });
 });
 </script>

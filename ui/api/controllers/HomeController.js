@@ -91,6 +91,10 @@ module.exports = {
                 })
               },
               auth: function(callback){callback(null, null);},
+              admin: function(callback){
+                callback(null, req.session.is_admin);
+                //callback(null, true);
+              },
               layout: function(callback){
                 if(req.isAjax){
                   callback(null, null);

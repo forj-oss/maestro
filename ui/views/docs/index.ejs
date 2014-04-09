@@ -1,4 +1,4 @@
-<div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Get Started</a></div>
+<div class="col-md-10 category category-header"><a>Get Started</a></div>
 <div class="col-md-10">
   
     <% if(documentation !== undefined && documentation !== null){ %>
@@ -6,7 +6,13 @@
         <% if(doc.category == 'tutorial'){ %>
         <div class="row">
           <div>
-            <h5 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;float: left;margin-top: 0;padding-left: 10px; font-weight: bold;"><%=doc.dname%><a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</h5></a>
+            <h5 class="doc-item"><%=doc.dname%>
+            <%if(doc.url === '#'){%>
+                <a style="display: inline;padding-left: 10px;">[Not available]</a>
+              <% }else{ %>
+                <a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</a>
+            <% } %>
+            </h5>
           </div>
         </div>
         <% } %>
@@ -14,7 +20,7 @@
     <% } %>
   
 </div>
-<div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Community</a></div>
+<div class="col-md-10 category category-header"><a>Community</a></div>
 <div class="col-md-10">
   
     <% if(documentation !== undefined && documentation !== null){ %>
@@ -22,7 +28,7 @@
         <% if(doc.category == 'community'){ %>
         <div class="row">
           <div>
-            <h5 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;float: left;margin-top: 0;padding-left: 10px; font-weight: bold;"><%=doc.dname%>
+            <h5 class="doc-item"><%=doc.dname%>
               <%if(doc.url === '#'){%>
                 <a style="display: inline;padding-left: 10px;">[Not available]</a>
               <% }else{ %>
@@ -36,7 +42,7 @@
     <% } %>
   
 </div>
-<div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>FAQ</a></div>
+<div class="col-md-10 category category-header"><a>FAQ</a></div>
 <div class="col-md-10">
   
     <% if(documentation !== undefined && documentation !== null){ %>
@@ -44,7 +50,7 @@
         <% if(doc.category == 'faq'){ %>
         <div class="row">
           <div>
-            <h5 style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;float: left;margin-top: 0;padding-left: 10px; font-weight: bold;"><%=doc.dname%>
+            <h5 class="doc-item"><%=doc.dname%>
               <%if(doc.url === '#'){%>
                 <a style="display: inline;padding-left: 10px;">[Not available]</a>
               <% }else{ %>

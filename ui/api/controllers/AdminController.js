@@ -16,7 +16,14 @@
  */
 
 module.exports = {
-    
+   
+  /**
+   * Action blueprints:
+   *    `/admin/index`
+   */
+   index: function (req, res) {
+    res.view({ layout: null });
+  },
   
   /**
    * Action blueprints:

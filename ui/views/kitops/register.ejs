@@ -41,9 +41,6 @@
                 <div id="div-register-name" class="form-group">
                   <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="name" placeholder="Name">
                 </div>
-                <div id="div-register-email" class="form-group" style="margin-bottom: 0px;">
-                  <input type="email" class="form-control" style="padding: 5px;height: 25px;font-size: 12px;" id="email" placeholder="Enter email">
-                </div>
                 <div id="div-register-label" style="padding-top: 10px;margin-bottom: 10px;">
                   <label id="validator-label" style="font-size:12px; margin: 0px; color: #7DC068; display: none;"></label>
                 </div>
@@ -79,15 +76,13 @@
     
     $("#submit-register").click(function(){
         var name = $("#name").val();
-        var email = $("#email").val();
-        if(name.length === 0 && email.length === 0){
+        if(name.length === 0){
           $("#validator-label").fadeOut(500, function(){
-            $(this).text('Please provide your name and email.');
+            $(this).text('Please provide your name.');
           }).fadeIn(500);
         }else{
           socket.get('/kitops/do_register', {
-            name: name,
-            email: email
+            name: name
           }, function(response) {
               if(response.success == 'failed'){
                 $("#validator-label").fadeOut(500, function(){

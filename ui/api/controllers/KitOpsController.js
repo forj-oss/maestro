@@ -27,27 +27,35 @@ module.exports = {
    */
   _config: {},
   register: function(req, res){
-    register_module.is_registered(function(err){
-      console.log(err);
-      res.view({ layout: null, registered: 0, error_message: err });
-    }, function(result){
-      res.view({ layout: null, registered: result.result, error_message: null });
-    })
+    if(req.session.email === undefined){
+      res.redirect('/auth/sign_in', 301);
+    }else{
+      register_module.is_registered(function(err){
+        console.log(err);
+        res.view({ layout: null, registered: 0, error_message: err });
+      }, function(result){
+        res.view({ layout: null, registered: result.result, error_message: null });
+      })
+    }
   },
   do_register: function(req, res){
     var name = req.param('name');
-    var email = req.param('email');
-    if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
-      name = validator.toString(name);
-      register_module.do_register(name, email, function(err){
-        console.log("Kit Registration Failed: "+err);
-        res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
-      }, function(result){
-        console.log("Kit Registration: "+result.state+", Stacktrace:"+result.stacktrace);
-        res.json({ success: result.state, message: result.stacktrace }, 200);
-      })
+    var email = req.session.email;
+    if(email !== undefined){
+      if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
+        name = validator.toString(name);
+        register_module.do_register(name, email, function(err){
+          console.log("Kit Registration Failed: "+err);
+          res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
+        }, function(result){
+          console.log("Kit Registration: "+result.state+", Stacktrace:"+result.stacktrace);
+          res.json({ success: result.state, message: result.stacktrace }, 200);
+        })
+      }else{
+        res.json('Invalid name or email address.', 409);
+      }
     }else{
-      res.json('Invalid name or email address.', 409);
+      res.redirect('/auth/sign_in', 301);
     }
   }
 };

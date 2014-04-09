@@ -30,6 +30,7 @@
     <!--STYLES-->
     <link rel="stylesheet" href="/linker/styles/bootstrap-theme.css">
     <link rel="stylesheet" href="/linker/styles/bootstrap.css">
+    <link rel="stylesheet" href="/linker/styles/site.css">
     <link rel="stylesheet" href="/linker/styles/vtabs.css">
     <!--STYLES END-->
     
@@ -69,34 +70,6 @@
     <!--SCRIPTS END-->
     <script>
       $(document).ready(function(){
-        $("#register").click(function(){
-          $("#body").fadeOut(500, function(){
-            $(this).html('<div class="progress" style="width: 80%;margin: auto;margin-top: 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span class="sr-only">0% Complete</span></div></div>').fadeIn(200, function(){
-              $('.progress-bar').animate({width: '50%'});
-            });
-            $.ajax({
-              url: '../kitops/register',
-              success: function(data) {
-                $('.progress-bar').animate({width: '100%'}, 500, function(){
-                  $('#body').delay(500).queue(
-                    function(c) {
-                        $(this).html(data);
-                        c();
-                    });
-                });
-              },
-              error: function(XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.status == 404) {
-                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Requested resource not found.</strong></p></div>');
-                } else if (XMLHttpRequest.status == 500) {
-                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Oh snap!</strong> we could not load the resource!</p></div>');
-                }  else {
-                  $("#body").html('<div style="font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;"><p style="padding-top: 50px;text-align: center;"><strong>Unknow Error.\n' + XMLHttpRequest.responseText+ '</strong></p></div>');
-                }
-              }
-            });
-          });
-        });
         $(".forj-logo").click(function(){
           $("#body").fadeOut(500, function(){
             $(this).html('<div class="progress" style="width: 80%;margin: auto;margin-top: 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span class="sr-only">0% Complete</span></div></div>').fadeIn(200, function(){
@@ -149,17 +122,17 @@
         <div class="col-md-5">
           <div class="row">
             <div class="col-md-4">
-              <div style="background-color: #7DC068;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;">X</div>
-              <h5 style="font-weight: bold;margin-bottom: 0;">System Health</h5>
-              <span style="font-size: 10px;">Everything is OK</span>
+              <div style="background-color: #7DC068;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;"></div>
+              <h5 class="general-status">System Health</h5>
+              <span class="general-status-sub">Everything is OK</span>
             </div>
             <div class="col-md-4">
-              <div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;">X</div>
-              <h5 style="font-weight: bold;margin-bottom: 0;">System Backup</h5>
-              <span style="font-size: 10px;">No Backup</span>
+              <div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px; color: white;font-weight: bold;font-size: 15px;text-align: center;"></div>
+              <h5 class="general-status">System Backup</h5>
+              <span class="general-status-sub">No Backup</span>
             </div>
             <div class="col-md-4">
-              <div class="btn-group" style="float:right;">
+              <div class="btn-group top-more">
                 <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                 <% if(email !== undefined){ %>
                   <%=email.split('@')[0]%>
@@ -171,9 +144,9 @@
                   <% if(email === undefined){ %>
                   <li><a href="../auth/sign_in">Sign In</a></li>
                   <% }%>
-				  <% if(email === undefined){ %>
-                  <li class="divider"></li>
-				  <% } %>
+      				  <% if(email === undefined){ %>
+                        <li class="divider"></li>
+      				  <% } %>
                   <li><a href="../auth/sign_out">Sign Out</a></li>
                 </ul>
               </div>
