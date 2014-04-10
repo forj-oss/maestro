@@ -14,28 +14,64 @@
 #
 #TODO: create specs / test directory and move this.
 #
-# setup a wiki server
+# setup a test wiki server
 #
-node default {
-  include openstack_project::puppet_cron
-  class { 'openstack_project::server':
-    sysadmins => hiera('sysadmins'),
-  }
-}
 
 # info about mediawiki:
 #
 # https://www.mediawiki.org/wiki/MediaWiki
 #
 
-node /.*(wiki|precise32).*/ {
-  class { 'openstack_project::wiki':
-    mysql_root_password     => hiera('wiki_db_password'),
-    sysadmins               => hiera('sysadmins'),
-    ssl_cert_file_contents  => hiera('wiki_ssl_cert_file_contents'),
-    ssl_key_file_contents   => hiera('wiki_ssl_key_file_contents'),
-    ssl_chain_file_contents => hiera('wiki_ssl_chain_file_contents'),
+node default {
+  # we need to set it to what our vagrant hostname for fqdn will be
+  $instance_name = "maestro"
+  $instance_id = '42'
+  $instance_dom = 'localhost'
+  maestro::orchestrator::gencerts {$instance_name :
+      domain => $instance_dom,
+      instance_id => $instance_id,
+      serial_init => '01',
   }
+  $ssl_cert_file_contents = ''
+  $ssl_key_file_contents = ''
+  $ssl_chain_file_contents = ''
+  if $ssl_cert_file_contents == '' {
+    $ssl_cert_file_data = cacerts_getkey(join([$ca_certs_db ,
+                                          "/ca2013/certs/${instance_name}.${instance_id}.${instance_dom}.crt"]))
+  } else {
+    $ssl_cert_file_data = $ssl_cert_file_contents
+  }
+
+  if $ssl_key_file_contents == '' {
+    $ssl_key_file_data = cacerts_getkey(join([$ca_certs_db , "/ca2013/certs/${instance_name}.${instance_id}.${instance_dom}.key"]))
+  } else {
+    $ssl_key_file_data = $ssl_key_file_contents
+  }
+
+  if $ssl_chain_file_contents == '' {
+    $ssl_chain_file_data = cacerts_getkey(join([$ca_certs_db ,
+                                        '/ca2013/chain.crt']))
+  } else {
+    $ssl_chain_file_data = $ssl_chain_file_contents
+  }
+  if $ssl_cert_file_data == ''
+  {
+    class { 'openstack_project::wiki':
+  #    mysql_root_password     => hiera('wiki_db_password'),
+  #    sysadmins               => hiera('sysadmins'),
+  #    ssl_cert_file_contents  => hiera('wiki_ssl_cert_file_contents'),
+  #    ssl_key_file_contents   => hiera('wiki_ssl_key_file_contents'),
+  #    ssl_chain_file_contents => hiera('wiki_ssl_chain_file_contents'),
+      
+      mysql_root_password     => "changeme",
+      sysadmins               => [],
+      ssl_cert_file_contents  => $ssl_cert_file_data,
+      ssl_key_file_contents   => $ssl_key_file_data,
+      ssl_chain_file_contents => $ssl_chain_file_data,
+      require => Maestro::Orchestrator::Gencerts[$instance_name],
+    }
+  }
+  
 }
 
 
