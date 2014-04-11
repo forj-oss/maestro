@@ -153,63 +153,14 @@ node /^util.*/ inherits default {
 # this is the jenkins/zuul server
 node /^ci.*/ inherits default {
 
-  $gerrit_user = 'jenkins'
-  #TODO Read graphite_url from graphite not pastebin
-  $graphite_url = read_json('graphite','tool_url',$::json_config_location,true)
-  $ca_certs_db = '/opt/config/cacerts'
-  $jenkins_private_key = cacerts_getkey(join([$ca_certs_db , '/ssh_keys/jenkins']))
-
-  #last parameter is a flag to get the url as ip format only or include their
-  # prefix ex http:// or https://
-  $gerrit_url = read_json('gerrit','tool_url',$::json_config_location,true)
-    if ( $jenkins_private_key != '' )  and ( $gerrit_url != '') {
-      class { 'cdk_project::jenkins':
-        vhost_name                        => $node_vhost,
-        jenkins_jobs_password             => '',
-        manage_jenkins_jobs               => true,
-        ssl_cert_file_contents            => '',
-        ssl_key_file_contents             => '',
-        ssl_chain_file_contents           => '',
-        jenkins_ssh_private_key           => $jenkins_private_key,
-        zmq_event_receivers               => [],
-        sysadmins                         => [],
-        ca_certs_db                       => $ca_certs_db,
-        gerrit_server                     => $gerrit_url,
-        gerrit_user                       => $gerrit_user,
-        install_fortify                   => false,
-        job_builder_configs               => [  'config-layout.yaml',
-                                                'fortify-scan.yaml',
-                                                'tutorials.yaml',
-                                                'publish-to-stackato.yaml',
-                                                'puppet-checks.yaml'
-                                              ],
-        jenkins_solo                      => true,
-      }->
-      class { 'cdk_project::zuul':
-        vhost_name                        => $node_vhost,
-        gerrit_server                     => $gerrit_url,
-        gerrit_user                       => $gerrit_user,
-        zuul_ssh_private_key              => $jenkins_private_key,
-        ca_certs_db                       => $ca_certs_db,
-        url_pattern                       => '',
-        sysadmins                         => [],
-        statsd_host                       => $graphite_url,
-        replication_targets               => [
-          {
-            name => 'url1',
-            url  => "ssh://${gerrit_user}@${gerrit_url}:29418/"
-          }
-        ],
-        zuul_url                          => "http://${node_vhost}/p",
-        zuul_revision                     => '951d8f366ce68238e2988aadd913b2d12656bbb3',
-      }->
-      stackato_cli{'my-stackato-cli':
-      }
-    }
-    else
-    {
-      notify{'Waiting to install until the jenkins user credentials and gerrit server are ready..':}
-    }
+  #$iptables_rules = regsubst ($gearman_workers, '^(.*)$', '-m state --state NEW -m tcp -p tcp --dport 4730 -s \1 -j ACCEPT')
+  #$iptables_rule = regsubst ($zmq_event_receivers, '^(.*)$', '-m state --state NEW -m tcp -p tcp --dport 8888 -s \1 -j ACCEPT')
+  ::sysadmin_config::setup { 'setup jenkins, zuul and gearman ports':
+    iptables_public_tcp_ports   => [80, 443, 8080, 4730, 29418, 8139, 8140],
+    # iptables_rules6           => $iptables_rules,
+    # iptables_rules4           => $iptables_rules,
+    sysadmins                   => $sysadmins,
+  }
 }
 
 node /^wiki.*/ inherits default {
