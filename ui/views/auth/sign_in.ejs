@@ -1,26 +1,14 @@
-<section class="container">
   <div class="row">
-    <div class="col-md-4"></div>
-    <div class="col-md-4" id="login-div" style="margin-top: 70px; height: 700px; position: relative;border: 1px solid #D8D8D8;-webkit-box-shadow: 0 8px 6px -6px #D8D8D8;-moz-box-shadow: 0 8px 6px -6px #D8D8D8;box-sshadow: 0 8px 6px -6px #D8D8D8;">
-      <img src="../images/forj.gif" style="position: absolute;margin: auto;top: 100px;right: 0;left: 0;"/>
-      <div style="position: absolute;top: 220px; right: 0; left: 0;">
-        <div style="text-align: center; padding: 5px;">
-          <label class="openid-label" style="font-weight: 300;">
-            <img src="../images/openid.png" /> Sign In with OpenID.
-          </label>
-        </div>
-        <div id="btn-group" style="text-align: center;">
-          <button id="btn-signin" type="button" class="btn btn-primary" data-auth-method="1">Sign In</button>
-        </div>
+    <div class="col-md-8" style="background-color: #123146;height: 245px;min-width: 800px;color: #FFFFFF;margin-top: -100px;position: absolute;top: 50%;">
+      <div class="row" style="padding-left: 380px;">
+        <h3>Sign In</h3>
+      </div>
+      <div class="row" style="padding-left: 380px;">
+        <p style="color: #babfc3;">Sign in with OpenID.</p>
+      </div>
+      <img src="/images/google_logo.png" title="Google OpenID" alt="Google OpenID" style="padding: 10px 0px 20px 366px;"/>
+      <div class="row" style="padding: 10px;padding-left: 380px;">
+        <a href="../auth/auth" style="padding: 10px;background-color: #1d4e70;color: white;font-size: 16px;text-decoration: none;">Sign In</a>
       </div>
     </div>
-    <div class="col-md-4"></div>
   </div>
-</section>
-<script>
-  $(document).ready(function(){
-    $("#btn-signin").click(function(){
-      window.location.href = '../auth/auth';
-    });
-  });
-</script>

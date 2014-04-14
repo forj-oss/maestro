@@ -16,6 +16,10 @@
  */
  var async = require('async');
  var blueprint_utils = require('blueprint/blueprint');
+ 
+  var crypto = require('crypto');
+  var check_grav = require('check-grav/check-grav');
+ 
 module.exports = {
     
   
@@ -28,156 +32,98 @@ module.exports = {
   _config: {},
   index: function(req, res){
     blueprint_utils.get_blueprint_id(function(err){
-      console.log('Unable to get the instance_id of the kit: '+err.message);
-      res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
-    }, function(result){
-      if(result === undefined){
-        res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
-      }else{
-        
-        try{
-          result = JSON.parse(result);
-        }catch(e){
-          result = new Error('Unable to parse malformed JSON');
-        }
-        
-        if(result instanceof Error){
-          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+        console.log('Unable to get the instance_id of the kit: '+err.message);
+        res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+      }, function(result){
+        if(result === undefined){
+          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
         }else{
-          var tools = [];
-          var defect_tracker = [];
-          var projects = false;
-          var users = false;
           
-          async.series({
-              tools: function(callback){
-                blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
-                  //Suppress the error and log the exception
-                  console.error('Unable to retrieve the list of tools:'+err.message);
-                  callback(err.message, null);
-                }, function(res_tools){
-                  tools = JSON.parse(res_tools);
-                  if(tools instanceof Array){
+          try{
+            result = JSON.parse(result);
+          }catch(e){
+            result = new Error('Unable to parse malformed JSON');
+          }
+          
+          if(result instanceof Error){
+            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+          }else{
+            var tools = [];
+            async.series({
+                tools: function(callback){
+                  blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
+                    console.error('Unable to retrieve the list of tools:'+err.message);
+                    callback(err, tools);
+                  }, function(res_tools){
+                    tools = JSON.parse(res_tools);
                     callback(null, tools);
+                  })
+                },
+                layout: function(callback){
+                  if(req.isAjax){
+                    callback(null, null);
                   }else{
-                    callback(null, []);
+                    callback(null, 'layout')
                   }
-                })
-              },
-              defect_tracker: function(callback){
-                blueprint_utils.get_blueprint_section(result.id, 'defect_tracker', function(err){
-                  //Suppress the error and log the exception
-                  console.error('Unable to retrieve the list of defect_trackers:'+err.message);
-                  callback(err.message, null);
-                }, function(res_dt){
-                  defect_tracker = JSON.parse(res_dt);
-                  if(defect_tracker instanceof Array){
-                    callback(null, defect_tracker);
-                  }else{
-                    callback(null, []);
-                  }
-                })
-              },
-              projects: function(callback){
-                blueprint_utils.get_blueprint_section(result.id, 'projects', function(err){
-                  //Suppress the error and log the exception
-                  console.error('Unable to retrieve the value of projects:'+err.message);
-                  callback(err.message, null);
-                }, function(res_pj){
-                  projects = JSON.parse(res_pj);
-                  if(projects instanceof Array){
-                    callback(null, projects);
-                  }else{
-                    callback(null, []);
-                  }
-                })
-              },
-              users: function(callback){
-                blueprint_utils.get_blueprint_section(result.id, 'users', function(err){
-                  //Suppress the error and log the exception
-                  console.error('Unable to retrieve the value of users:'+err.message);
-                  callback(err.message, null);
-                }, function(res_us){
-                  users = JSON.parse(res_us);
-                  if(users instanceof Array){
-                    callback(null, users);
-                  }else{
-                    callback(null, []);
-                  }
-                })
-              },
-              auth: function(callback){callback(null, null);},
-              admin: function(callback){
-                callback(null, req.session.is_admin);
-                //callback(null, true);
-              },
-              layout: function(callback){
-                if(req.isAjax){
-                  callback(null, null);
-                }else{
-                  callback(null, 'layout')
                 }
-              },
-              email: function(callback){
-                callback(null, req.session.email);
-              }
-          }, function(errasync, results) {
-              if (errasync) {
-                console.error('Error getting the tools and defect tracker: '+errasync.message)
-                res.view('500', { layout: null, errors: [ errasync.message ]});
-              }else{
-                res.view(results, 200);
-              }
-          });
+            }, function(errasync, results) {
+                if (errasync) {
+                  console.error(errasync.message)
+                  res.view('500', { layout: null, errors: [ errasync.message ]});
+                }else{
+                  res.view(results, 200);
+                }
+            });
+            
+          }
           
         }
-        
-      }
-    });
+      });
   },
   statics: function(req, res){
-    //TODO: integrate nagios
     var service = req.param('service');
-    var backups = require('backup/backup').get_backup_data();
-    var has_backups = true;
-    if(!backups[service]){
-        has_backups = false;
-    }
-    res.view({ layout: null, backup_service: service, has_backups: has_backups });
+    res.view({ layout: null, service: service });
   },
   tutorial: function(req, res){
 	blueprint_utils.get_blueprint_id(
 	  function(err){
-        console.log('Unable to get the instance_id of the kit: '+err.message); 
-        res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });		
-      }, 
-	  function(result){ 	  	  
-	    result = JSON.parse(result);		  		  
-		blueprint_utils.get_blueprint_section(result.id, 'tools', 
+        console.log('Unable to get the instance_id of the kit: '+err.message);
+        res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
+      },
+	  function(result){
+	    result = JSON.parse(result);
+		blueprint_utils.get_blueprint_section(result.id, 'tools',
 		  function(err){
             console.log('Unable to retrieve the list of tools:'+err.message);
 			res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
           },
-		  function(result){              			
-			result = JSON.parse(result);			  
+		  function(result){
+			result = JSON.parse(result);
 			var gerrit_ip = 'my_gerrit_ip'
 			var zuul_ip = 'my_zuul_ip';
-			for (i=0; i<result.length; i++){			  
-			  if (result[i].name == "gerrit"){				    			
-                // Only nums and point			  
-				gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');				
+			for (i=0; i<result.length; i++){
+			  if (result[i].name == "gerrit"){
+                // Only nums and point
+				gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
 			  }
-			  if (result[i].name == "zuul"){				
-				zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');				
+			  if (result[i].name == "zuul"){
+				zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
 			  }
-			}	
+			}
             res.view({ layout: null, 'gerrit_ip': gerrit_ip, 'zuul_ip': zuul_ip });
           }
-        );        
-	  } 
-	);	    
+        );
+	  }
+	);
   },
   projects: function(req, res){
     res.view({ layout: null });
+  },
+  user_options: function(req, res){
+    if(req.session.authenticated){
+      res.view({ layout: null, guest: false })
+    }else{
+      res.view({ layout: null, guest: true })
+    }
   }
 };

@@ -15,13 +15,11 @@
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
   var openid = require('openid');
+  var crypto = require('crypto');
+  var check_grav = require('check-grav/check-grav');
   var blueprint_utils = require('blueprint/blueprint');
   var kit_ops = require('kit-ops/kit-ops');
 module.exports = {
-    
-  
-
-
   /**
    * Overrides for the settings in `config/controllers.js`
    * (specific to AuthController)
@@ -98,41 +96,45 @@ module.exports = {
           }else{
             req.session.authenticated = result.authenticated;
             req.session.email = result.email;
+            req.session.gravatar_hash = crypto.createHash('md5').update(result.email).digest('hex');
             if(req.session.authenticated === true){
-              kit_ops.kit_has_admin(function(err_ka, result_ka){
-                if(err_ka){
-                  //Supress the error and send the user to index?
-                  console.error('Unable to check if the kit had an admin already: '+err_ka.message);
-                  res.redirect('/', 301);
-                }else{
-                  if(result_ka){
-                    //Yes
-                    kit_ops.is_admin(req.session.email, function(err_ia, result_ia){
-                      if(err_ia){
-                        //Supress the error and send the user to index?
-                        console.error('Unable to check is an admin: '+err_ia.message);
-                        res.redirect('/', 301);
-                      }else{
-                        //True or false
-                        req.session.is_admin = result_ia;
-                        res.redirect('/', 301);
-                      }
-                    });
+              check_grav.gravatar_exist(req.session.gravatar_hash, function(has_grav){
+                req.session.has_gravatar = has_grav;
+                kit_ops.kit_has_admin(function(err_ka, result_ka){
+                  if(err_ka){
+                    //Supress the error and send the user to index?
+                    console.error('Unable to check if the kit had an admin already: '+err_ka.message);
+                    res.redirect('/', 301);
                   }else{
-                  //No
-                    kit_ops.create_kit_admin(req.session.email, function(err_ca, result_ca){
-                      if(err_ca){
-                        //Supress the error and send the user to index?
-                        console.error('Unable to create the kit admin: '+err_ca.message);
-                        res.redirect('/', 301);
-                      }else{
-                        //True or false
-                        req.session.is_admin = result_ca;
-                        res.redirect('/', 301);
-                      }
-                    });
+                    if(result_ka){
+                      //Yes
+                      kit_ops.is_admin(req.session.email, function(err_ia, result_ia){
+                        if(err_ia){
+                          //Supress the error and send the user to index?
+                          console.error('Unable to check is an admin: '+err_ia.message);
+                          res.redirect('/', 301);
+                        }else{
+                          //True or false
+                          req.session.is_admin = result_ia;
+                          res.redirect('/', 301);
+                        }
+                      });
+                    }else{
+                    //No
+                      kit_ops.create_kit_admin(req.session.email, function(err_ca, result_ca){
+                        if(err_ca){
+                          //Supress the error and send the user to index?
+                          console.error('Unable to create the kit admin: '+err_ca.message);
+                          res.redirect('/', 301);
+                        }else{
+                          //True or false
+                          req.session.is_admin = result_ca;
+                          res.redirect('/', 301);
+                        }
+                      });
+                    }
                   }
-                }
+                });
               });
             }else{
               console.error('Unable to authenticate the user');
@@ -199,6 +201,7 @@ function getRelyingParty(callback){
             console.log('Failed to parse the get_blueprint_section result into the maestro_url');
             callback(maestro_url.message, null);
           }else{
+            req.session.maestro_url = maestro_url;
             var relyingParty = new openid.RelyingParty(
               maestro_url+'/auth/verify', // Verification URL (yours)
               null, // Realm (optional, specifies realm for OpenID authentication)

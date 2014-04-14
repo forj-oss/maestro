@@ -1,7 +1,13 @@
+/*
+
+*/
+
 function progress(control, percentage, task){
 	//canvas initialization
 	var canvas = document.getElementById(control);
 	var current = document.getElementById(control).getAttribute("data-current");
+	var bg_color = document.getElementById(control).getAttribute("data-bg-color");
+	var font_color = document.getElementById(control).getAttribute("data-font-color");
 	var new_degrees = 0;
 	var degrees = 0;
 	if(task === 'move_to'){
@@ -19,8 +25,11 @@ function progress(control, percentage, task){
 	var H = canvas.height;
 	//Variables
 	var difference = 0;
-	var color = "#0096d6"; //green looks better to me
-	var bgcolor = "#CCC";
+	var bgcolor = "#E6E7E7";
+	if(bg_color){
+    bgcolor = bg_color;
+	}
+	
 	var text;
 	var animation_loop, redraw_loop;
 	
@@ -32,8 +41,8 @@ function progress(control, percentage, task){
 		//Background 360 degree arc
 		ctx.beginPath();
 		ctx.strokeStyle = bgcolor;
-		ctx.lineWidth = 11;
-		ctx.arc(W/2, H/2, 50, 0, Math.PI*2, false); //you can see the arc now
+		ctx.lineWidth = 8;
+		ctx.arc(W/2, H/2, (H-ctx.lineWidth)/2, 0, Math.PI*2, false); //you can see the arc now
 		ctx.stroke();
 		
 		//gauge will be a simple arc
@@ -41,35 +50,46 @@ function progress(control, percentage, task){
 		var radians = degrees * Math.PI / 180;
 		ctx.beginPath();
 		if(percentage<=50){
-      ctx.strokeStyle = '#0096d6';
-      ctx.fillStyle = '#0096d6';
+      ctx.strokeStyle = '#47CC3A';
+      ctx.fillStyle = '#666666';
+      if(font_color){
+        ctx.fillStyle = font_color;
+      }
+      
 		}
 		if(percentage>50){
-      ctx.strokeStyle = '#EE7836';
-      ctx.fillStyle = '#EE7836';
+      ctx.strokeStyle = '#F09101';
+      ctx.fillStyle = '#666666';
+      if(font_color){
+        ctx.fillStyle = font_color;
+      }
 		}
 		if(percentage>=75){
-      ctx.strokeStyle = '#DA3610';
-      ctx.fillStyle = '#DA3610';
+      ctx.strokeStyle = '#D6332C';
+      ctx.fillStyle = '#666666';
+      if(font_color){
+        ctx.fillStyle = font_color;
+      }
 		}
 		//ctx.strokeStyle = color;
-		ctx.lineWidth = 11;
+		ctx.lineWidth = 8;
 		//The arc starts from the rightmost end. If we deduct 90 degrees from the angles
 		//the arc will start from the topmost end
-		ctx.arc(W/2, H/2, 50, 0 - 90*Math.PI/180, radians - 90*Math.PI/180, false);
+		ctx.arc(W/2, H/2, (H-ctx.lineWidth)/2, 0 - 90*Math.PI/180, radians - 90*Math.PI/180, false);
 		//you can see the arc now
 		ctx.stroke();
 		
 		//Lets add the text
 		//ctx.fillStyle = color;
-		ctx.font = "30px sans-serif";
+		ctx.font = "24px Open Sans Semibold, sans-serif";
 		text = Math.round(degrees/360*100) + "%";
 		//Lets center the text
 		//deducting half of text width from position x
 		text_width = ctx.measureText(text).width;
-		//adding manual value to position y since the height of the text cannot
-		//be measured easily. There are hacks but we will keep it manual for now.
-		ctx.fillText(text, W/2 - text_width/2, H/2 + 10);
+		TH = parseInt(ctx.font);
+		ALW = ctx.lineWidth
+		//Fill the text to the center with the formula Canvas Height (H), Text Height (TH) and Arc LineWidth (ALW)
+		ctx.fillText(text, W/2 - text_width/2, ((H+TH)-ALW)/2);
 	}
 	
 	function draw()

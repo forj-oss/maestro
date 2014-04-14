@@ -1,3 +1,3 @@
 module.exports = {
-appName : 'My Developer Kit'
+  appName : 'My software forge'
 }

@@ -56,8 +56,10 @@ module.exports = function (grunt) {
     // automatic listener for incoming messages from Socket.io.
     'linker/js/app.js',
     
+    'linker/js/modernizr.custom.js',
+    
     //We have to load JQuery before bootstrap
-    'linker/js/jquery-1.9.0.js',
+    'linker/js/jquery.1.9.1.min.js',
 
     // *->    put other dependencies here   <-*
 

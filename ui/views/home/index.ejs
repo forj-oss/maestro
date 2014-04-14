@@ -1,177 +1,170 @@
-<div class="row" style="padding-top: 30px;">
-  <div class="col-md-12" style="padding-left: 0;">
-    <div class="tabbable tabs-left">
-      <ul class="nav nav-tabs" style="height: 700px;">
-        <li class="active"><a href="#a" data-toggle="tab">Tools</a></li>
-        <% if(projects){ %>
-          <% if(projects == true || projects == 'true'){ %>
-            <li id="projects"><a href="#b" data-toggle="tab">Projects</a></li>
-          <% } %>
-        <% } %>
-        <% if(users){ %>
-          <% if(users == true || users == 'true'){ %>
-            <li id="users"><a href="#c" data-toggle="tab">Users</a></li>
-          <% } %>
-        <% } %>
-        <% if(admin){ %>
-          <li id="admin"><a href="#d" data-toggle="tab">Admin</a></li>
-        <% } %>
-        <li id="docs"><a href="#e" data-toggle="tab">Docs</a></li>
-        <div style="height: 100px;width: 80px;text-align: center;font-size: 11px; font-weight: bold; padding: 5px 5px 0px 5px;border: 1px solid #CCC;margin-top: 50px;">
-          <p>Trial  expires in 12 days.</p>
-          <p style="margin-bottom: 0px;"><a href="#">Relocate</a> your forge.</p>
-        </div>
-      </ul>
-      <div class="tab-content">
-        <div class="tab-pane active" id="a">
-          <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Services</a></div>
-          <div class="col-md-10">
-          <% if(tools !== undefined && tools !== null){ %>
-            <% tools.forEach(function(tool)  { %>
-              <%if(tool.category == 'dev'){%>
-              <div class="col-sm-4">
-                <div style="width: 100%;margin-bottom:10px; border:1px solid #CCC; min-height: 70px; position: relative">
-                <%if(tool.icon){%>
-                  <% if(tool.icon === 'true'){ %>
-                    <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                      <img src="../tools_images/<%=tool.name%>42.png" style="float: left;margin-right: 5px;" />
-                    </div>
-                  <% }else{ %>
-                    <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                      <img src="../images/default_tool.png" />
-                    </div>
-                  <% } %>
-                <% }else{ %>
-                  <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                    <img src="../images/default_tool.png" />
-                  </div>
-                <% } %>
-                <%if(tool.tool_url){%>
-                
-                  <% if(tool.dname !== undefined && tool.dname !== null) { %>
-                    <%if(tool.tool_url !== '#'){%>
-                      <a href="<%=tool.tool_url%>" target="_blank"><%=tool.dname%></a>
-                    <% }else{ %>
-                      <a href="#"><%=tool.dname%></a>
-                    <% } %>
-                  <% }else{ %>
-                    <a href="<%=tool.tool_url%>" target="_blank"><%=tool.name%></a>
-                  <% } %>
-                  
-                <% }else{ %>
-                
-                  <% if(tool.dname !== undefined && tool.dname !== null){ %>
-                      <a><%=tool.dname%></a>
-                  <% }else{ %>
-                    <a><%=tool.name%></a>
-                  <% } %>
-                  
-                <% } %>
-                <div style="width: 60px;float: right;font-size: 11px;text-align: center;">
-                  <div style="background-color: #F0D705;">Workload</div>
-                  <div style="background-color: #7DC068;  color: white;">Backup</div>
-                  <% if(tool.statistics){ %>
-                    <% if(tool.statistics === 'true'){ %>
-                     <div class="stats" style="-webkit-transform: rotate(90deg);transform:rotate(90deg);-ms-transform:rotate(90deg); cursor: pointer;width: 10px;text-align: center;margin: auto;" data-service="<%=tool.name%>" data-toggle="modal" data-target="#myModal">
-                      <span>></span>
-                    </div>
-                    <% } %>
-                  <% } %>
-                </div>
-                 <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
-                </div>
-               
-              </div>
+<div id="container-tools" class="col-lg-10">
+  <div class="row">
+    <ul id="og-grid" class="og-grid">
+      <% if(tools !== undefined && (tools instanceof Array)){ %>
+        <% tools.forEach(function(tool){ %>
+          <li>
+          	<div class="tool-ops" style="width: 80px;float: right;">
+          	  <%if(tool.tool_url !== '#'){%>
+                <div class="ops-home"><a href="<%=tool.tool_url%>" target="_blank">Home</a></div>
+              <% }else{ %>
+                <div class="ops-home"><a href="<%=tool.tool_url%>">Home</a></div>
               <% } %>
-            <% }); %>
-          <% } %>
+              <div class="ops-workload ops-ok">Workload</div>
+              <div class="ops-backup ops-warning">Backup</div>
+            </div>
+            <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
+						  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+					  </a>
+	          <%if(tool.settings_url !== '#'){%>
+	            <a class="tool-desc-name" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+	          <% }else{ %>
+	            <a class="tool-desc-name" href="<%=tool.settings_url%>" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+	          <% } %>
+					  <span style="clear:both;"></span>
+          </li>
+        <% }); %>
+      <% } %>
+		</ul>
+  </div>
+</div>
+<div class="col-lg-2 right-menu">
+  <h4>Console</h4>
+  <div class="row">
+    <div class="row" style="margin: 0;margin-top: 10px;">
+      <div class="row" style="margin: 0;">
+        <h5 class="monitoring-option arrow-up"><span class="status-monitoring check-icon"></span>System Workload</h5>
+      </div>
+      <div class="row monitoring-contents">
+        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
+          <div class="col-md-12">
+            <canvas id="cpu" width="75" height="75" data-current="90" style="float: left;"></canvas>
+            <span class="stats-text">CPU Usage</span>
           </div>
-          
-          <% if(defect_tracker !== undefined && defect_tracker !== null){ %>
-          <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Defect tracker integrations</a></div>
-          <div class="col-md-10">
-            
-              <% defect_tracker.forEach(function(df)  { %>
-                <div class="col-sm-4">
-                  <div style="width: 100%; height: 90px; margin-bottom:10px; border:1px solid #CCC; position: relative;">
-                    <%if(df.icon){%>
-                    <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                      <%var path_ico = '../tools_images/' + df.name + '42.png';%>
-                      <img src="<%=path_ico%>" style="float: left;margin-right: 5px; height: 42px;" />
-                    </div>
-                    <% }else{ %>
-                      <div style="float: left;padding: 5px;position: relative;left: -15px;top: -15px;">
-                        <img src="../images/default_tool.png" />
-                      </div>
-                    <% } %>
-                    <%if(df.tool_url){%>
-                      <a href="<%=df.tool_url%>" target="_blank"><%=df.dname%></a>
-                    <% }else{ %>
-                      <a><%=df.dname%></a>
-                    <% } %>
-                    <div style="background-color: #7DC068;height: 15px;width: 100%;position: absolute;bottom: 0;"></div>
-                  </div>
-                </div>
-              <% }); %>
-          </div>
-          <% } %>
-          <% if(auth !== undefined && auth !== null){ %>
-          <div class="col-md-10 category" style="padding: 8px 15px;margin-bottom: 20px;list-style: none;background-color: #f5f5f5;border-radius: 4px;"><a>Authentication provider</a></div>
-          <div class="col-md-10">
-          </div>
-          <% } %>
         </div>
-        <% if(projects){ %>
-          <% if(projects == true || projects == 'true'){ %>
-            <div class="tab-pane" id="b" style="max-height: 700px;height: 700px;"></div>
-          <% } %>
-        <% } %>
-        <% if(users){ %>
-          <% if(users == true || users == 'true'){ %>
-            <div class="tab-pane" id="c" style="max-height: 700px;height: 700px;"></div>
-          <% } %>
-        <% } %>
-        <% if(admin){ %>
-          <div class="tab-pane" id="d" style="max-height: 700px;height: 700px;"></div>
-        <% } %>
-        <div class="tab-pane" id="e" style="max-height: 700px;height: 700px;"></div>
+        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
+          <div class="col-md-12">
+            <canvas id="mem" width="75" height="75" data-current="65" style="float: left;"></canvas>
+            <span class="stats-text">Memory Usage</span>
+          </div>
+        </div>
+        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
+          <div class="col-md-12">
+            <canvas id="disk" width="75" height="75" data-current="30" style="float: left;"></canvas>
+            <span class="stats-text">Disk Usage</span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Service Stats</h4>
+    <% if(req.session.is_admin){ %>
+    
+      <div class="row" style="margin: 0;margin-top: 10px;">
+        <div class="row" style="margin: 0;padding-top: 10px;">
+          <h5 class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>System Backup</h5>
+        </div>
+        <div class="row monitoring-contents" style="display:none;">
+          <div class="col-md-12">
+            <p>Backup Placeholder</p>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        
+      <div>
+    
+      <div class="row" style="margin: 0;margin-top: 10px;">
+        <div class="row" style="margin: 0;padding-top: 10px;">
+          <h5 class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>Registration</h5>
+        </div>
+        <div class="row monitoring-contents" style="display:none;">
+          <div class="col-md-12">
+            <div class="row" style="padding-left: 25px;padding-top: 15px;">
+              <input type="text" id="name" placeholder="Name" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
+              <div id="register-btn" style="padding: 7px;background-color: #0096d6;font-size: 13px;display: inline-block; cursor:pointer;color: #FFFFFF; text-decoration: none;vertical-align: top;">
+                <span>Register</span>
+              </div>
+            </div>
+            <div class="row" style="padding-top: 15px;text-align: center;">
+              <span id="validator-label" style="color: #797979; display: none;">This should take a few seconds..</span>
+              <div class="register-bar" style="display:none;">
+                <div class="bar" style="width: 0%;">
+                </div>
+              </div>
+              <span id="status-label" style="color: #797979; display:none;">Registering...</span>
+            </div>
+            <script>
+              $(document).ready(function(){
+                $('#register-btn').click(function(){
+                  var name = $("#name").val();
+                  if(name.length === 0){
+                    $("#validator-label").fadeOut(500, function(){
+                      $(this).text('Please provide your name.');
+                    }).fadeIn(500);
+                  }else{
+                    $('#validator-label').fadeOut(500, function(){
+                      $(this).text('This should take a few seconds..');
+                    }).fadeIn(500);
+                    $('.register-bar').fadeIn(500);
+                    $('.status-label').fadeIn(500, function(){
+                      $('.bar').css('width', '50%');
+                    });
+                    socket.get('/kitops/do_register', {
+                      name: name
+                    }, function(response) {
+                        if(response.success == 'failed'){
+                          $("#validator-label").fadeOut(500, function(){
+                            $(this).css({'color':'#E16138'});
+                            $('.bar').css('color', '#E16138');
+                            $(this).text('Kit Registration Failed');
+                          }).fadeIn(500);
+                        }
+                        if(response.success == 'success'){
+                          $('#status-label').fadeOut(500, function(){
+                            $('.bar').css('width', '100%');
+                            $(this).text('Done!');
+                          }).fadeIn(500);
+                        }
+                    });
+                  }
+                })
+              });
+            </script>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <div>
+    <% } %>
+    <div class="row" style="margin: 0;margin-top: 10px;">
+      <div class="col-md-12" style="background-color: #f2e1c7;min-height: 55px;">
+        <span class="trial-icon"></span>
+        <h5 class="trial">Trial expires in 12 Days!</h5>
+        <span class="rellocate-span">Rellocate yout FORJ - <a href="#">Click Here</a></span>
       </div>
     </div>
+    </div>
   </div>
+  
 </div>
+<script src="../js/grid.js"></script>
 <script>
-$(document).ready(function(){
-  $(".stats").click(function(){
-    var service = $(this).attr("data-service");
-    $(".modal-body").load('../home/statics?service='+service);
+  $(document).ready(function(){
+    
+    Grid.init();
+    
+    progress('cpu', 90, 'new');
+    progress('mem', 65, 'new');
+    progress('disk', 30, 'new');
+    
+    $('.monitoring-option').click(function () {
+      $option = $(this);
+      $content = $option.parent().next();
+      if($content.is(":visible")){
+        $option.removeClass('arrow-up');
+        $option.addClass('arrow-down');
+      }else{
+        $option.removeClass('arrow-down');
+        $option.addClass('arrow-up');
+      }
+      $content.slideToggle(500);
+
   });
-  $("#projects").click(function(){
-    $("#b").load('../admin/projects');
   });
-  $("#users").click(function(){
-    $("#c").load('../admin/users');
-  });
-  $("#admin").click(function(){
-    $("#d").load('../admin/index');
-  });
-  $("#docs").click(function(){
-    $("#e").load('../docs/index');
-  });
-});
 </script>

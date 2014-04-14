@@ -35,6 +35,9 @@ module.exports = {
     },
     maestro_url: {
       type: 'text'
+    },
+    blueprint_name: {
+      type: 'text'
     }
   }
 

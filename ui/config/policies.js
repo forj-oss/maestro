@@ -17,7 +17,6 @@ module.exports.policies = {
   // Default policy for all controllers and actions
   // (`true` allows public access)
   '*': true,
-
   /*
 	// Here's an example of adding some policies to a controller
 	RabbitController: {
@@ -36,8 +35,8 @@ module.exports.policies = {
 	}
 	*/
 	HomeController: {
-    '*':true
-    //tutorial: 'isAuthenticated'
+    '*':true,
+    index: 'isBlueprintNameSet',
 	}
 };
 

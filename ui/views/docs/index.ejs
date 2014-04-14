@@ -1,66 +1,45 @@
-<div class="col-md-10 category category-header"><a>Get Started</a></div>
-<div class="col-md-10">
-  
-    <% if(documentation !== undefined && documentation !== null){ %>
-      <% documentation.forEach(function(doc){ %>
-        <% if(doc.category == 'tutorial'){ %>
-        <div class="row">
-          <div>
-            <h5 class="doc-item"><%=doc.dname%>
+<div style="text-align: left;">
+  <h4 class="help-title">Help</h4>
+  <h3 style="font-size: 17px;color:white;">Get Started</h3>
+  <div>
+      <% if(documentation !== undefined && documentation !== null){ %>
+        <% documentation.forEach(function(doc){ %>
+          <% if(doc.category == 'tutorial'){ %>
             <%if(doc.url === '#'){%>
-                <a style="display: inline;padding-left: 10px;">[Not available]</a>
-              <% }else{ %>
-                <a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</a>
+                <a style="display: block;font-size: 13px;"><%=doc.dname%> [N/A]</a>
+            <% }else{ %>
+                <a href="<%=doc.url%>" target="_blank" style="display: block;font-size: 13px;"><%=doc.dname%></a>
             <% } %>
-            </h5>
-          </div>
-        </div>
-        <% } %>
-      <% }); %>
-    <% } %>
-  
-</div>
-<div class="col-md-10 category category-header"><a>Community</a></div>
-<div class="col-md-10">
-  
-    <% if(documentation !== undefined && documentation !== null){ %>
-      <% documentation.forEach(function(doc){ %>
-        <% if(doc.category == 'community'){ %>
-        <div class="row">
-          <div>
-            <h5 class="doc-item"><%=doc.dname%>
-              <%if(doc.url === '#'){%>
-                <a style="display: inline;padding-left: 10px;">[Not available]</a>
-              <% }else{ %>
-                <a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</a>
-              <% } %>
-            </h5>
-          </div>
-        </div>
-        <% } %>
-      <% }); %>
-    <% } %>
-  
-</div>
-<div class="col-md-10 category category-header"><a>FAQ</a></div>
-<div class="col-md-10">
-  
-    <% if(documentation !== undefined && documentation !== null){ %>
-      <% documentation.forEach(function(doc){ %>
-        <% if(doc.category == 'faq'){ %>
-        <div class="row">
-          <div>
-            <h5 class="doc-item"><%=doc.dname%>
-              <%if(doc.url === '#'){%>
-                <a style="display: inline;padding-left: 10px;">[Not available]</a>
-              <% }else{ %>
-                <a href="<%=doc.url%>" target="_blank" style="display: inline;padding-left: 10px;">[See Documentation]</a>
-              <% } %>
-            </h5>
-          </div>
-        </div>
-        <% } %>
-      <% }); %>
-    <% } %>
-  
+          <% } %>
+        <% }); %>
+      <% } %>
+  </div>
+  <h3 style="font-size: 17px;color:white;">Community</h3>
+  <div>
+      <% if(documentation !== undefined && documentation !== null){ %>
+        <% documentation.forEach(function(doc){ %>
+          <% if(doc.category == 'community'){ %>
+            <%if(doc.url === '#'){%>
+              <a style="display: block;font-size: 13px;"><%=doc.dname%> [N/A]</a>
+            <% }else{ %>
+              <a href="<%=doc.url%>" target="_blank" style="display: block;font-size: 13px;"><%=doc.dname%></a>
+            <% } %>
+          <% } %>
+        <% }); %>
+      <% } %>
+  </div>
+  <h3 style="font-size: 17px;color:white;">FAQ</h3>
+  <div>
+      <% if(documentation !== undefined && documentation !== null){ %>
+        <% documentation.forEach(function(doc){ %>
+          <% if(doc.category == 'faq'){ %>
+            <%if(doc.url === '#'){%>
+              <a style="display: block;font-size: 13px;"><%=doc.dname%> [N/A]</a>
+            <% }else{ %>
+              <a href="<%=doc.url%>" target="_blank" style="display: block;font-size: 13px;"><%=doc.dname%></a>
+            <% } %>
+          <% } %>
+        <% }); %>
+      <% } %>
+  </div>
 </div>

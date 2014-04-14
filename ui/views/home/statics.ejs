@@ -1,137 +1,68 @@
-<div style="border: 1px solid #CCC;padding: 10px; width: 567px;">
-  <div>
-    <div style="padding-bottom: 10px;">
-      <div style="width: 60px;height: 70px;border: 1px solid #CCC;float: left;margin-right: 10px; position:relative; cursor: pointer;">
-        <img src="../images/ssh.png" alt="SSH" title="SSH" style="position: absolute;top: 0;bottom: 0;right: 0;left: 0;margin: auto;" />
+<span class="og-close"></span>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <div class="row" style="padding-left: 10px;position: relative; z-index: 2;">
+      <h4 class="service-name"><%=service%> - Service Status</h4>
+    </div>
+    <div class="row" style="padding-left: 10px;">
+      <div class="col-md-6" style="padding-top: 10px;">
+        <div class="row" style="margin-bottom: 10px;">
+          <span class="error-icon" style="height: 34px;width: 34px;float: left;margin-right: 10px;"></span>
+          <h5><strong>Workload</strong> - CPU usage has reached 90%</h5>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <a href="#">Monitoring Page</a>
+        </div>
+        <div class="row">
+          <div style="display: inline-block;margin-right: 5px;">
+            <span style="display: block;">CPU</span>
+            <canvas id="service_cpu" data-current="90" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+          </div>
+          <div style="display: inline-block;margin-right: 5px;">
+            <span style="display: block;">Memory</span>
+            <canvas id="service_mem" data-current="65" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+          </div>
+          <div style="display: inline-block;margin-right: 5px;">
+            <span style="display: block;">Disk</span>
+            <canvas id="service_disk" data-current="45" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+          </div>
+        </div>
+        <div class="row">
+          <h5 class="service-details">Details</h5>
+          <div style="width: 230px;"><span>Registered users</span><span style="float: right;font-weight: bold;">34</span></div>
+          <div style="width: 230px;"><span>Commits in last 24hrs</span><span style="float: right;font-weight: bold;">11</span></div>
+          <div style="width: 230px;"><span>Gates passed</span><span style="float: right;font-weight: bold;">4</span></div>
+        </div>
       </div>
-      <div style="width: 60px;height: 70px;border: 1px solid #CCC;float: left; position:relative;  cursor: pointer;">
-        <img src="../images/log.png" alt="Logs" title="Logs" style="position: absolute;top: 0;bottom: 0;right: 0;left: 0;margin: auto;" />
+      <div class="col-md-6" style="padding-top: 10px;">
+        <div class="row" style="margin-bottom: 10px;">
+          <span class="error-icon" style="height: 34px;width: 34px;float: left;margin-right: 10px;"></span>
+          <h5><strong>Backup</strong> - Backup failed!</h5>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <div style="float:left;padding-right: 5px;"><a href="#">Backup Now</a></div>
+          <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#">Backup Sets</a></div>
+          <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#">Backup Restore</a></div>
+          <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#">Download Backup Log</a></div>
+        </div>
+        <div class="row">
+          <div>
+            <span style="padding-right: 10px;">Last Backup Run</span><span>2014/05/01 - 9:23 AM</span>
+          </div>
+          <div>
+            <span style="padding-right: 10px;">Log Message</span><span>Gerrit backup finished succesfully</span>
+          </div>
+        </div>
       </div>
-      <div style="clear:both;"></div>
     </div>
   </div>
-  <div>
-    <div style="line-height: 27px;"><div style="background-color: #E16138;float: left;width: 20px;height: 20px;border-radius: 5px 0px;margin-top: 7px;margin-right: 5px;"></div><span style="vertical-align: sub;">CPU ussage has reached 90%</span></div>
-    <div>
-      <div style="float:left; padding-top:5px;">
-        <span style="display: block;text-align: center;font-weight: bold;">CPU</span>
-        <canvas id="cpu" width="120" height="120" data-current="90">
-      </div>
-      <div style="float:left; padding-top:5px;">
-        <span style="display: block;text-align: center;font-weight: bold;">Memory</span>
-        <canvas id="mem" width="120" height="120" data-current="65">
-      </div>
-      <div style="float:left; padding-top:5px;">
-        <span style="display: block;text-align: center;font-weight: bold;">Disk</span>
-        <canvas id="disk" width="120" height="120" data-current="30">
-      </div>
-      <div style="clear:both;"></div>
-      <div style="padding-left: 255px;"><a>Monitoring Page</a></div>
-    </div>
-  </div>
-  <div>
-    <%if(has_backups){%>
-      <div>
-        <a href="#" style="padding: 5px 30px 5px 0px;" id="tool_backups">Tool Backup</a>
-        <a href="#" style="padding: 5px 30px 5px 30px;">Backup Logs</a>
-      </div>
-    <% } %>
-
-  </div>
-  <div id="table_container">
-  <table id="table_stats" class="table table-hover">
-    <thead>
-      <th id="table_stats_title">
-        Kit Stats
-      </th>
-      <th>
-        Values
-      </th>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Registered users</td>
-        <td>34</td>
-      </tr>
-      <tr>
-        <td>Commits in last 24hrs</td>
-        <td>11</td>
-      </tr>
-      <tr>
-        <td>Gates passed</td>
-        <td>4</td>
-      </tr>
-    </tbody>
-  </table>
-  <div id="no_back" style="text-align: center;font-weight: bold;padding-top: 20px;padding-bottom: 20px; display: none;"><span style="display:block">This service has no backups enabled.</span><a href="#" id="go_back">[Go back]</a></div>
+  <div class="col-md-2"></div>
 </div>
 <script>
   $(document).ready(function(){
-    progress('cpu', 90, 'new');
-    progress('mem', 65, 'new');
-    progress('disk', 30, 'new');
-    
-    <%if(has_backups){%>
-      loadTools();
-    <% } %>
+    progress('service_cpu', 90, 'new');
+    progress('service_mem', 65, 'new');
+    progress('service_disk', 45, 'new');
   });
-  <%if(has_backups){%>
-  function loadTools(){
-      $("#tool_backups").on('click', function(){
-        socket.get('/status/display',{
-          type: 'tools',
-          service: '<%=backup_service%>'
-        }, function (response) {
-          if(response.success){
-            if(response.has_backups){
-              var timestp = response.message.backup.time + '';
-              var year = timestp.substring(0,4);
-              var month = timestp.substring(4,6);
-              var day = timestp.substring(6,8);
-              var complete_date = year+'/'+month+'/'+day
-              var html_size = '<tr><td>Backup Size</td><td>'+response.message.backup.size+'</td></tr>'
-              var html_time = '<tr><td>Last Backup</td><td>'+complete_date+'</td></tr>'
-              var html_fs = '<tr><td>File System Usage</td><td>'+response.message['fs-usage']+'</td></tr>'
-              
-              $("#table_container").fadeOut(500,function(){
-                $("#table_stats_title").html('Backup Stats')
-                var old_html = $("#table_stats").children('tbody').html();
-                old_html = encodeURIComponent(old_html);
-                $("#table_stats").children('tbody').attr('data-old-html', old_html);
-                $("#table_stats").children('tbody').html(html_size+html_time+html_fs);
-                $('#tool_backups').text('Go Back');
-                $('#tool_backups').off();
-                $('#tool_backups').on('click', function(){
-                  $("#table_container").fadeOut(500,function(){
-                    var change_html = $("#table_stats").children('tbody').attr('data-old-html');
-                    change_html = decodeURIComponent(change_html);
-                    console.log(change_html);
-                    $("#table_stats").children('tbody').html(change_html);
-                    $('#tool_backups').text('Tool Backup');
-                    $("#table_stats_title").text('Kit Stats');
-                    $('#tool_backups').off();
-                    loadTools();
-                  }).fadeIn(1000);
-                });
-              }).fadeIn(1000);
-            }else{
-              console.log('do no backups');
-              $("#table_container").fadeOut(500,function(){
-                $("#table_stats").fadeOut();
-                $("#no_back").fadeIn();
-                $("#go_back").on('click', function(){
-                  $("#table_container").fadeOut(500,function(){
-                    $("#no_back").fadeOut();
-                    $("#table_stats").fadeIn();
-                  }).fadeIn(1000);
-                });
-              }).fadeIn(1000);
-            }
-          }else{
-            console.log('no success');
-          }
-        });
-    });
-  }
-  <% } %>
 </script>
