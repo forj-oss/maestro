@@ -1,0 +1,1 @@
+../../maestro/bootstrap/boothook.sh
