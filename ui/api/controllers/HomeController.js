@@ -31,7 +31,7 @@ module.exports = {
       console.log('Unable to get the instance_id of the kit: '+err.message);
       res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
     }, function(result){
-      if(res === undefined){
+      if(result === undefined){
         res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
       }else{
         
@@ -54,7 +54,7 @@ module.exports = {
                 blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
                   //Suppress the error and log the exception
                   console.log('Unable to retrieve the list of tools:'+err.message);
-                  callback();
+                  callback(err.message, null);
                 }, function(res_tools){
                   tools = JSON.parse(res_tools);
                   callback(null, tools);
