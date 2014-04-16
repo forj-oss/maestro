@@ -14,7 +14,7 @@
 
 # Implements a git clone capability requested by metadata variable 'repos'
 
-REPOS="$(GetJson $PREFIX/meta.js repos)"
+REPOS="$(GetJson /meta-boot.js repos)"
 
 if [ "$REPOS" != "" ]
 then

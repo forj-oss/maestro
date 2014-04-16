@@ -1,6 +1,6 @@
 # Identify branch to use for GIT clones
 
-GITBRANCH="$(GetJson $PREFIX/meta.js gitbranch)"
+GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
 if [ "$GITBRANCH" != "" ]
 then
     GITBRANCH_FLAG="-b $GITBRANCH"
@@ -14,7 +14,7 @@ chmod 2775 /opt/config/production/git
 _CWD=$(pwd)
 cd /opt/config/production/git
 
-MAESTRO_LINK="$(GetJson $PREFIX/meta.js maestrolink)"
+MAESTRO_LINK="$(GetJson /meta-boot.js maestrolink)"
 GitLinkCheck $MAESTRO_LINK
 if [ ! $? -eq 0 ] 
 then

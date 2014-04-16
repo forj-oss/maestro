@@ -61,7 +61,7 @@ fi
 
 
 . /etc/environment
-_PROXY="$(GetJson $PREFIX/meta.js webproxy)"
+_PROXY="$(GetJson /meta-boot.js webproxy)"
 
 apt-get purge -yq python-pip
 

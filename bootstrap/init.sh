@@ -21,7 +21,7 @@ then
    exit 1
 fi
 
-if [ ! -f "$1" ]
+if [ ! -d "$1" ]
 then
    echo "$0: bootstrap root dir '$1' doesn't exist. Box bootstrap cancelled."
    exit 1
@@ -29,6 +29,8 @@ fi
 
 BIN_PATH="$(cd $(dirname $0); pwd)"
 BOOTSTRAP_DIR="$1"
+
+source $BIN_PATH/functions
 
 # Load build.d files
 
@@ -40,6 +42,24 @@ do
   source $INC_FILE
   echo "Maestro boot init: $INC_FILE done."
 done
+
+BOOTSTRAP_REPOS="$(GetJson /meta-boot.js bootstrap)"
+
+# By default, it bootstraps from Maestro repository.
+BOOTSTRAP_PATH=$BOOTSTRAP_DIR/git/maestro/bootstrap/maestro
+
+if [ "$BOOTSTRAP_REPOS" != "" ]
+then
+
+   for REPO in $(echo "$BOOTSTRAP_REPOS" | sed 's/|/ /g')
+   do  
+      if [ -d $BOOTSTRAP_DIR/$REPO ]
+      then
+         echo "$0: Added '$BOOTSTRAP_DIR/$REPO' to the Box bootstrap list"
+         BOOTSTRAP_PATH="$BOOTSTRAP_PATH $BOOTSTRAP_DIR/$REPO"
+      fi  
+   done
+fi
 
 if [ "$BOOTSTRAP_PATH" != "" ]
 then

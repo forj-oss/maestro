@@ -44,9 +44,12 @@ fi
 #if metadata does not exist grab it form the Upstream provided data (${metadata-json} is replaced by upstream code)
 if [ ! -f $PREFIX/meta.js ] 
 then
-  echo '${metadata-json}' > $PREFIX/meta.js
+  echo '${metadata-json}' > /meta-boot.js
   echo "WARNING! /meta.js not found. Getting info from user_data"
+else
+  cp $PREFIX/meta.js /meta-boot.js
 fi
+chmod 644 /meta-boot.js
 
 #try to validate that the content is OK, as last fallback hardcode the data
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
