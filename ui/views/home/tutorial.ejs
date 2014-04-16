@@ -195,8 +195,8 @@ text-justify:inter-word;
     <a name="intro"></a>
     <div class="scrollblock block-8">
         <h2>introduction</h2>
-        <p>Throughout this tutorial, we'll walk you through the modification of a demo application Tutorial.</p>
-        <p>You will go hands on and modify the code before pushing it to GERRIT, see ZUUL and JENKINS pass your changes through an automated security scan leveraging HP FORTIFY, approve the changes for inclusion and eventually publish the updated version of the Tutorial to the HP CLOUD.</p>
+        <p>Throughout this tutorial, we'll walk you through the modification of a hello world Python tutorial.</p>
+        <p>You will go hands on and modify the code before pushing it to GERRIT, see ZUUL and JENKINS pass your changes through a Python lint checker and approve for inclusion.</p>
     </div>
     <!-- setup -->
     <a name="setup"></a>
@@ -212,7 +212,7 @@ text-justify:inter-word;
             <a href="http://git-scm.com/download/linux">Download git for Linux</a>
         </p>
         <p>
-              After downloading and installing git for you apropiate system open a git command line, this is where you'll mainly be working<br>
+              After downloading and installing git for your apropiate system open a git command line, this is where you'll mainly be working.<br>
               If you have difficulty installing git, for example on Ubuntu, make sure you have already added the repository:<br>
               ><code><p2>sudo add-apt-repository ppa:git-core/ppa</p2></code><br>
               ><code><p2>sudo apt-get update</p2></code><br>
@@ -227,10 +227,10 @@ text-justify:inter-word;
             On Windows, download <a href="http://users.ugent.be/~bpuype/cgi-bin/fetch.pl?dl=wget/wget-1.10.2.exe">wget.exe</a> to your "Downloads" folder. Make sure that you replace each 'wget' below by '~/Downloads/wget'.<br>Start GIT bash.<br>
             &gt;<code><p2>mkdir .ssh</p2></code><br>
             When connected directly to the internet:<br>
-        &gt;<code><p2>wget --no-check-certificate https://raw.github.com/miqui/tutorial/stackato/keys/demo_keys -O ~/.ssh/demo_keys</p2></code> <br>
+        &gt;<code><p2>wget --no-check-certificate https://github.com/forj/tutorials/tree/master/keys -O ~/.ssh/demo_keys</p2></code> <br>
       
       Or, behind a web proxy:<br>
-        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://raw.github.com/miqui/tutorial/stackato/keys/demo_keys  -O ~/.ssh/demo_keys</p2> </code><br>
+        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://github.com/forj/tutorials/tree/master/keys  -O ~/.ssh/demo_keys</p2> </code><br>
       You now have a "demo_keys" file in your home/.ssh directory ($HOME on Linux, %HOMEPATH% on Windows)<br>
       Let's modify the permissions of this file for linux systems:<br>
       ><code><p2>chmod 600 ~/.ssh/demo_keys</p2></code><br>
@@ -243,7 +243,7 @@ text-justify:inter-word;
             ><code><p2>notepad ~/.ssh/config</p2></code> for Windows systems and<br>
             add these lines to the "config" file (note that the file doesn't have an extension such as .txt)<br>
             <code><p2>Host <font color="33FF33">review</font></p2></code><br>
-            <code><p2>  Hostname my review server ip</code><br/>
+            <code><p2>  Hostname <%=gerrit_ip%></code><br/>
             <code><p2>  User demouser</p2></code><br>
             <code><p2>  Port 29418</p2></code><br>
             <code><p2>  identityfile ~/.ssh/demo_keys</p2></code><br>
@@ -255,7 +255,7 @@ text-justify:inter-word;
         <h2>checkout the Tutorial repository</h2>
         <p>
             create a working copy of the Tutorial repository by running the command<br>
-        &gt;<code><p2>git clone ssh://demouser@<font color="33FF33">review</font>:29418/tutorial.git</p2></code><br>
+        &gt;<code><p2>git clone ssh://demouser@<font color="33FF33">review</font>:29418/tutorials.git</p2></code><br>
         </p>
         <p>
             This will download the code locally on the folder you are in you command line so that you can edit it.
@@ -263,10 +263,11 @@ text-justify:inter-word;
         <p>
             You actually get all the history and metadata of the code: this is great to work completely disconnected from the remote repository. Check by yourself:<br>
             Code history:<br>
-            &gt;<code><p2>cd  tutorial</p2></code><br>
+            &gt;<code>
+            <p2>cd  tutorials</p2></code><br>
             &gt;<code><p2>git log</p2></code><br>
             Details of a specific change:<br>
-            &gt;<code><p2>git show 50c20eca5efa70f2e157a1a83527396c055dc07e</p2></code>
+            &gt;<code><p2>git show 6687e07c859e2d3ff6136a5745d8932fe441a60a</p2></code>
         </p>
     </div>
     <a name="gerrit"></a>
@@ -277,10 +278,10 @@ text-justify:inter-word;
             <a href="https://review.openstack.org/Documentation/intro-quick.html#_creating_the_review">magic branch</a>:<br>
             &gt;<code><p2>git config remote.origin.push refs/heads/*:refs/for/*</p2></code><br>
             Install the commit hook which automatically generates unique Change-Ids in commit messages for Gerrit<br>
-        &gt;<code><p2>wget --no-check-certificate https://<font color="33FF33">review</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg</p2></code><br>
-      If you are on a private network you have to specify a proxy so your command will be:<br>
+        &gt;<code><p2>wget --no-check-certificate https://<font color="33FF33"><%=gerrit_ip%></font>/tools/hooks/commit-msg -O .git/hooks/commit-msg</p2></code><br>
+      If you are behind a proxy your command will be:<br>
       
-        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://proxy.atlanta.hp.com:8080  https://<font color="33FF33">review</font>/tools/hooks/commit-msg -O .git/hooks/commit-msg </p2></code><br>
+        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://mywebproxy.com:8080  https://<font color="33FF33"><%=gerrit_ip%></font>/tools/hooks/commit-msg -O .git/hooks/commit-msg </p2></code><br>
 
       now run this command <br>
             &gt;<code><p2>chmod u+x .git/hooks/commit-msg</p2></code><br>
@@ -293,25 +294,26 @@ text-justify:inter-word;
         <h2>modify a file</h2>
         <p>
             modify the file at <br>
-            <code><p2>/path/to/repository/tutorial/src/main/webapp/WEB-INF/jsp/welcome.jsp</p2></code><br>
+            <code>
+            <p2>/path/to/repository/tutorials/openstack/helloworld.py</p2></code><br>
             and change any text you want.
         </p>
     </div>
     <a name="add"></a>
     <div class="scrollblock block-6">
         <h2>add &amp; commit</h2>
-        <p>
-            Navigate to the folder where you did the change:<br>
-            &gt;<code><p2> cd src/main/webapp/WEB-INF/jsp </p2></code><br>
-            now, commit the changes in your local repository:<br>
-            &gt;<code><p2>git add welcome.jsp</p2></code> or<br>
-            &gt;<code><p2>git add *</p2></code><br>
-            Go back to the main git tree folder:<br>
-            &gt;<code><p2> cd - </p2></code><br>
+        <p>List your changes with:<br>
+            &gt;<code>
+            <p2> git status</p2></code><br>
+            now, add the changes in your local repository:<br>
+            &gt;<code>
+            <p2>git add openstack/helloworld.py</p2></code> or<br>
+            &gt;<code><p2>git add *</p2></code><code><p2></p2></code><br>
             To actually commit, do:<br>
-            &gt;<code><p2>git commit -m "Changed text on welcome screen"</p2></code><br>
+            &gt;<code>
+            <p2>git commit -m "Changed text on helloworld.py"</p2></code><br>
             Now the file is committed to the <b>local</b> repository, but not in the <b>remote</b> repository yet.
-        </p>
+      </p>
     </div>
     <a name="push"></a>
     <div class="scrollblock block-7">
@@ -328,12 +330,12 @@ text-justify:inter-word;
         <p>
             The change goes through Zuul's <i>check</i> pipeline which verifies automatically any change. If the check fails, the change is rejected.<br>
             Open Zuul interface to see the pipelines and the change as it goes through Zuul:<br>
-            <a href="http://15.185.241.138/"><code><p2><font color="33FF33">http://15.185.241.138</font></p2></code></a>
+            <a href="http://<%=zuul_ip%>/"><code><p2><font color="33FF33">http://<%=zuul_ip%></font></p2></code></a>
             
         </p>
         <img src="../tutorial_images/zuul.1.jpg" alt="">
         <p>
-          As you can see, we have 2 verifications in the check pipeline: packaging and security scan using <a href="http://www.hp.com/go/fortify">Fortify</a>.
+          As you can see, we have a python lint check:  using <a href="https://flake8.readthedocs.org/en/2.0/">Flake8</a>.
         </p>
     </div>
     <a name="review"></a>
@@ -341,7 +343,7 @@ text-justify:inter-word;
         <h2>Review the change</h2>
         <p>
             Go to Gerrit to open your change:<br>
-        <a href="https://15.185.237.61//"><code><p2><font color="33FF33">https://15.185.237.61/</font></p2></code></a><br>
+        <a href="https://<%=gerrit_ip%>//"><code><p2><font color="33FF33">https://<%=gerrit_ip%>/</font></p2></code></a><br>
             
             The change needs to be "Verified", "Code-Review" and "Approved" (the "Need" lines).<br>
             Verifying is checking that the code actually compiles, unit tests pass etc. Verification is done by Jenkins jobs configured in the "check" Zuul pipeline.<br>

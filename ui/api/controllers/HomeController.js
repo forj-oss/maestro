@@ -146,7 +146,36 @@ module.exports = {
     res.view({ layout: null, backup_service: service, has_backups: has_backups });
   },
   tutorial: function(req, res){
-    res.view({ layout: null });
+	blueprint_utils.get_blueprint_id(
+	  function(err){
+        console.log('Unable to get the instance_id of the kit: '+err.message); 
+        res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });		
+      }, 
+	  function(result){ 	  	  
+	    result = JSON.parse(result);		  		  
+		blueprint_utils.get_blueprint_section(result.id, 'tools', 
+		  function(err){
+            console.log('Unable to retrieve the list of tools:'+err.message);
+			res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
+          },
+		  function(result){              			
+			result = JSON.parse(result);			  
+			var gerrit_ip = 'my_gerrit_ip'
+			var zuul_ip = 'my_zuul_ip';
+			for (i=0; i<result.length; i++){			  
+			  if (result[i].name == "gerrit"){				    			
+                // Only nums and point			  
+				gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');				
+			  }
+			  if (result[i].name == "zuul"){				
+				zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');				
+			  }
+			}	
+            res.view({ layout: null, 'gerrit_ip': gerrit_ip, 'zuul_ip': zuul_ip });
+          }
+        );        
+	  } 
+	);	    
   },
   projects: function(req, res){
     res.view({ layout: null });
