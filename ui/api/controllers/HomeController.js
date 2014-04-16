@@ -29,7 +29,7 @@ module.exports = {
   index: function(req, res){
     blueprint_utils.get_blueprint_id(function(err){
       console.log('Unable to get the instance_id of the kit: '+err.message);
-      res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+      res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
     }, function(result){
       if(result === undefined){
         res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
@@ -42,7 +42,7 @@ module.exports = {
         }
         
         if(result instanceof Error){
-          res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
         }else{
           var tools = [];
           var defect_tracker = [];
@@ -53,41 +53,57 @@ module.exports = {
               tools: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the list of tools:'+err.message);
+                  console.error('Unable to retrieve the list of tools:'+err.message);
                   callback(err.message, null);
                 }, function(res_tools){
                   tools = JSON.parse(res_tools);
-                  callback(null, tools);
+                  if(tools instanceof Array){
+                    callback(null, tools);
+                  }else{
+                    callback(null, []);
+                  }
                 })
               },
               defect_tracker: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'defect_tracker', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the list of defect_trackers:'+err.message);
-                  callback();
+                  console.error('Unable to retrieve the list of defect_trackers:'+err.message);
+                  callback(err.message, null);
                 }, function(res_dt){
                   defect_tracker = JSON.parse(res_dt);
-                  callback(null, defect_tracker);
+                  if(defect_tracker instanceof Array){
+                    callback(null, defect_tracker);
+                  }else{
+                    callback(null, []);
+                  }
                 })
               },
               projects: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'projects', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the value of projects:'+err.message);
-                  callback();
+                  console.error('Unable to retrieve the value of projects:'+err.message);
+                  callback(err.message, null);
                 }, function(res_pj){
                   projects = JSON.parse(res_pj);
-                  callback(null, projects);
+                  if(projects instanceof Array){
+                    callback(null, projects);
+                  }else{
+                    callback(null, []);
+                  }
                 })
               },
               users: function(callback){
                 blueprint_utils.get_blueprint_section(result.id, 'users', function(err){
                   //Suppress the error and log the exception
-                  console.log('Unable to retrieve the value of users:'+err.message);
-                  callback();
+                  console.error('Unable to retrieve the value of users:'+err.message);
+                  callback(err.message, null);
                 }, function(res_us){
                   users = JSON.parse(res_us);
-                  callback(null, res_us);
+                  if(users instanceof Array){
+                    callback(null, users);
+                  }else{
+                    callback(null, []);
+                  }
                 })
               },
               auth: function(callback){callback(null, null);},
@@ -107,8 +123,8 @@ module.exports = {
               }
           }, function(errasync, results) {
               if (errasync) {
-                console.log('Error getting the tools and defect tracker: '+errasync.message)
-                res.view('500', { errors: [ errasync.message ]});
+                console.error('Error getting the tools and defect tracker: '+errasync.message)
+                res.view('500', { layout: null, errors: [ errasync.message ]});
               }else{
                 res.view(results, 200);
               }

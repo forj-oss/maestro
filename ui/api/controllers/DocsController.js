@@ -25,7 +25,7 @@ module.exports = {
    index : function (req, res) {
     blueprint_utils.get_blueprint_id(function(err){
       console.log('Unable to get the instance_id of the kit: '+err.message);
-      res.view('500', { errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+      res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
     }, function(result){
       var id = JSON.parse(result).id;
       blueprint_utils.get_blueprint_section(id, 'documentation', function(err){
@@ -34,7 +34,11 @@ module.exports = {
         callback();
       }, function(res_docs){
         res_docs = JSON.parse(res_docs);
-        res.view({ layout: null, documentation: res_docs }, 200);
+        if(res_docs instanceof Array){
+          res.view({ layout: null, documentation: res_docs }, 200);
+        }else{
+          res.view({ layout: null, documentation: [] }, 200);
+        }
       })
     });
   },
