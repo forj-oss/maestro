@@ -28,13 +28,13 @@ then
 fi
 
 BIN_PATH="$(cd $(dirname $0); pwd)"
-BOOTSTRAP_DIR="$1"
+BOX_BOOT_DIR="$1"
 
 source $BIN_PATH/functions
 
 # Load build.d files
 
-mkdir -p $BOOTSTRAP_DIR/bootstrap
+mkdir -p $BOX_BOOT_DIR/bootstrap
 
 for INC_FILE in $BIN_PATH/init.d/*.sh
 do
@@ -46,17 +46,17 @@ done
 BOOTSTRAP_REPOS="$(GetJson /meta-boot.js bootstrap)"
 
 # By default, it bootstraps from Maestro repository.
-BOOTSTRAP_PATH=$BOOTSTRAP_DIR/git/maestro/bootstrap/maestro
+BOOTSTRAP_PATH=$BOX_BOOT_DIR/git/maestro/bootstrap/maestro
 
 if [ "$BOOTSTRAP_REPOS" != "" ]
 then
 
    for REPO in $(echo "$BOOTSTRAP_REPOS" | sed 's/|/ /g')
    do  
-      if [ -d $BOOTSTRAP_DIR/$REPO ]
+      if [ -d $BOX_BOOT_DIR/$REPO ]
       then
-         echo "$0: Added '$BOOTSTRAP_DIR/$REPO' to the Box bootstrap list"
-         BOOTSTRAP_PATH="$BOOTSTRAP_PATH $BOOTSTRAP_DIR/$REPO"
+         echo "$0: Added '$BOX_BOOT_DIR/$REPO' to the Box bootstrap list"
+         BOOTSTRAP_PATH="$BOOTSTRAP_PATH $BOX_BOOT_DIR/$REPO"
       fi  
    done
 fi
