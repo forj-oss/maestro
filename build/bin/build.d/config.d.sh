@@ -88,7 +88,10 @@ function HPC_Check()
        FORJ_HPC_BLOCK_STORAGE="$CDK_BUILD_ZONE"
     fi
  fi
+}
 
+function HPC_Verify()
+{
  typeset -i iCount=1
  
  # Check $FORJ_HPC data

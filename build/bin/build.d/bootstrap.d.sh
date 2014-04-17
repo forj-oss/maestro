@@ -24,6 +24,8 @@ cd $APP_NAME
 if [ ${#META[@]} -gt 0 ]
 then
    META_DATA="$(echo "${META[@]}" | sed 's/ /,/g')"
+   Info "Meta-data set:
+$META_DATA"
    META_JSON="{\"$(echo $META_DATA|sed 's/ *= */":"/g
                                         s/ *, */","/g')\"}"
 fi
@@ -41,6 +43,16 @@ fi
 BOOT_BOX=$BUILD_DIR/boot_${APP_NAME}.sh
 
 rm -f $BOOT_BOX
+
+if [ "$BOOTSTRAP_DIR" != "" ]
+then
+   if [ "$(find $BOOTSTRAP_DIR -maxdepth 1 -type f -name \*.sh -exec basename {} \; | wc -l)" -eq 0 ]
+   then
+      Warning "'$BOOTSTRAP_DIR' contains no bootstrap files. Please check it."
+   else
+      Info "Completing Maestro basic cloud-init with '$BOOTSTRAP_DIR'"
+   fi
+fi
 
 BOOT_FILES="$(find bootstrap $BOOTSTRAP_DIR -maxdepth 1 -type f -name \*.sh -exec basename {} \; | sort -u)"
 

@@ -1,0 +1,17 @@
+#cloud-config
+final_message: "maestro cloud-init boot finished, after $UPTIME seconds"
+preserve_hostname: true
+manage_etc_hosts: false
+locale: en_US.UTF-8
+packages:
+  - ruby1.8-dev
+  - language-pack-en
+  - dos2unix
+  - git
+  - python-all-dev
+  - curl
+  - corkscrew
+  - puppet
+  - make
+package_reboot_if_required: false
+output: {all: '| tee -a /var/log/cloud-init.log'}

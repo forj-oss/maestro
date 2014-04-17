@@ -46,10 +46,7 @@ if [ ! -f $PREFIX/meta.js ]
 then
   echo '${metadata-json}' > /meta-boot.js
   echo "WARNING! /meta.js not found. Getting info from user_data"
-else
-  cp $PREFIX/meta.js /meta-boot.js
 fi
-chmod 644 /meta-boot.js
 
 #try to validate that the content is OK, as last fallback hardcode the data
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
@@ -58,7 +55,9 @@ then
   echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "ssh://review/CDK-infra","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
   echo "WARNING! /config/meta.js not found. HARDCODING DATA"
 fi
-#cp /config/meta.js /meta.js
+
+cp $PREFIX/meta.js /meta-boot.js
+chmod 644 /meta-boot.js
 
 
 cat $PREFIX/meta.js

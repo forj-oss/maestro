@@ -235,7 +235,18 @@ fi
 source "$CONFIG"
 Info "$CONFIG loaded."
 
+# Checking hpcloud configuration
+# Check if $FORJ_HPC is already created.
+
 HPC_Check
+
+if [ "$(hpcloud account | grep -e "^$FORJ_HPC$" -e "^$FORJ_HPC <= default")" = "" ]
+then
+   hpcloud account:copy hp $FORJ_HPC || Exit 1
+   HPC_COPY=True
+fi
+
+HPC_Verify
 
 if [ ! -d "$APP_NAME" ]
 then
@@ -270,21 +281,17 @@ then
    Error 1 "hpcloud installation is not installed or not in your PATH. Please check."
 fi 
 
-# Checking hpcloud configuration
-# Check if $FORJ_HPC is already created.
-
-if [ "$(hpcloud account | grep -e "^$FORJ_HPC$" -e "^$FORJ_HPC <= default")" = "" ]
-then
-   hpcloud account:copy hp $FORJ_HPC || Exit 1
-   HPC_COPY=True
-fi
-
-
 hpcloud account:verify $FORJ_HPC
 
 if [ $? -ne 0 ]
 then
    Error 2 "account $FORJ_HPC is not correctly configured. Please fix it and retry."
+fi
+
+if [ "$(grep az ~/.hpcloud/accounts/$FORJ_HPC)" != "" ]
+then
+   Warning "HPCloud account '$FORJ_HPC' is using 12.12"
+   HPC_DETECTED=12.12
 fi
 
 printf "Checking servers"
@@ -303,7 +310,12 @@ $ hpcloud servers:remove $BUILD_ID -a $FORJ_HPC
 
    ERO_IP="$(hpcloud servers $BUILD_ID -d , -c ips -a $FORJ_HPC)"
    PRIVIP="$(echo $ERO_IP | awk -F, '{ print $1 }')"
-   PUBIP="$(hpcloud addresses -d , -c fixed_ip,floating_ip -a $FORJ_HPC | awk -F, '$1 ~ /^'"$PRIVIP"'$/ { print $2 }' )"
+   if [ "$HPC_DETECTED" = 12.12 ]
+   then
+      PUBIP="$(echo $ERO_IP | awk -F, '{ print $2 }')"
+   else
+      PUBIP="$(hpcloud addresses -d , -c fixed_ip,floating_ip -a $FORJ_HPC | awk -F, '$1 ~ /^'"$PRIVIP"'$/ { print $2 }' )"
+   fi
    if [ "$PUBIP" = "" ]
    then
       echo "There is no Public IP associated from '$PRIVIP'."
@@ -314,32 +326,39 @@ $ ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem"
    exit 3
 fi
 
-printf " networks"
-
-if [ "$(hpcloud networks $FORJ_HPC_NETID -a $FORJ_HPC | grep $FORJ_HPC_NETID)" = "" ]
+if [ "$HPC_DETECTED" != 12.12 ] && [ "$FORJ_HPC_NET" != "" ]
 then
-   Error 2 "The build script is trying to use a network ID ${FORJ_HPC_NETID}. But this one is not found. Please check with hpcloud tool."
+   printf " networks"
+ 
+   FORJ_HPC_NET_OUTP="$(hpcloud networks $FORJ_HPC_NET -a $FORJ_HPC -d , -c id,name)"
+   FORJ_HPC_NETID="$(echo "$FORJ_HPC_NET_OUTP" | awk -F, '{print $1}')"
+   if [ "$(echo "$FORJ_HPC_NET_OUTP" | grep -e ",$FORJ_HPC_NET *$" -e "^$FORJ_HPC_NET,")" = "" ]
+   then
+      echo
+      Error 2 "The build script is trying to use a network '${FORJ_HPC_NET}' (FORJ_HPC_NET). But this one is not found. Please check with hpcloud tool."
+   fi
 fi
 
 printf " flavors"
-if [ "$(hpcloud flavors $FORJ_FLAVOR -a $FORJ_HPC | grep $FORJ_FLAVOR)" = "" ]
+FORJ_FLAVOR_OUTP="$(hpcloud flavors $FORJ_FLAVOR -a $FORJ_HPC -d , -c id,name)"
+FORJ_FLAVOR_ID="$(echo "$FORJ_FLAVOR_OUTP" | awk -F, '{print $1}')"
+if [ "$(echo $FORJ_FLAVOR_OUTP | grep -e ",$FORJ_FLAVOR *$" -e "^$FORJ_FLAVOR,")" = "" ]
 then
-   Error 2 "The build script is trying to use a flavor ID $FORJ_FLAVOR, supposed to be xsmall. But this one is not found. Please check with hpcloud tool."
+   echo
+   Error 2 "The build script is trying to use a flavor '$FORJ_FLAVOR' (FORJ_FLAVOR), supposed to be xsmall. But this one is not found. Please check with hpcloud tool."
 fi
 
 printf " images"
 # Checking the base image to use. If deprecated, a WARNING have to be sent.
-if [ "$(hpcloud images $FORJ_BASE_IMG -a $FORJ_HPC | grep deprecated)" != "" ]
+BASE_IMG="$(echo "$FORJ_BASE_IMG" | sed 's/(/\\(/g
+                                         s/)/\\)/g')"
+FORJ_BASE_IMG_OUTP="$(hpcloud images "$BASE_IMG" -a $FORJ_HPC -d , -c id,name)"
+FORJ_BASE_IMG_ID="$(echo "$FORJ_BASE_IMG_OUTP" | awk -F, '{print $1}')"
+if [ "$(echo "$FORJ_BASE_IMG_OUTP" | grep -e ",$FORJ_BASE_IMG *$" -e "^$FORJ_BASE_IMG,")" = "" ]
 then
    echo
-   Warning "The Image ID $FORJ_BASE_IMG is marked as 'deprecated'. Think to update the base Image to a supported one."
+   Error 2 "The build script is trying to use an image ID '$FORJ_BASE_IMG' (FORJ_BASE_IMG), supposed to be ubuntu 12.04 LTS. But this one is not found. Please check with hpcloud tool."
 fi
-if [ $? -ne 0 ]
-then
-   echo
-   Error 2 "The build script is trying to use an image ID $FORJ_BASE_IMG, supposed to be ubuntu 12.04 LTS. But this one is not found. Please check with hpcloud tool."
-fi
-FORJ_BASE_IMG_ID="$(hpcloud images $FORJ_BASE_IMG -a $FORJ_HPC -c id -d ,)"
 
 printf " keypairs"
 # Checking the nova key existence.
@@ -359,7 +378,7 @@ $ hpcloud keypairs:import nova \"\$(cat nova-USWest-AZ3.pub )\" -a $FORJ_HPC"
 fi
 
 # Required by cloudinit.conf file.
-BUILD_DIR=~/.build/$APPPATH
+BUILD_DIR=~/.build/$APPPATH/$$
 mkdir -p $BUILD_DIR
 
 printf "\n"
@@ -385,7 +404,12 @@ fi
 Info "Starting '$BUILD_ID' build."
 trap "Error 1 'Ctrl-C keystroke by user. Build killed.'" SIGINT
 # Creating the instance. Use metadata/userdata from ../../bootstrap/eroPlus
-hpcloud servers:add $BUILD_ID 101 -i $FORJ_BASE_IMG_ID -k nova -n $FORJ_HPC_NETID -a $FORJ_HPC $HPCLOUD_PAR
+if [ "$HPC_DETECTED" != 12.12 ] && [ $FORJ_HPC_NETID != "" ]
+then
+   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k nova -n $FORJ_HPC_NETID -a $FORJ_HPC $HPCLOUD_PAR
+else
+   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k nova -a $FORJ_HPC $HPCLOUD_PAR
+fi
 
 if [ $? -ne 0 ]
 then
@@ -420,8 +444,8 @@ do
      INSTANT_STATUS="${INSTANT_STATUS}$CUR_STATE"
      typeset -i INSTANT_STATUS_CNT=$(echo "$INSTANT_STATUS" | wc -c)
      if [ "$TERM" != "" ]
-     then
-        COLS=$(tput cols)
+     then # reduce size by prefix string size. ie ACTIVE (cloud_init)
+        let "COLS=$(tput cols)-22"
      fi
      if [ $INSTANT_STATUS_CNT -gt $COLS ]
      then
@@ -439,19 +463,31 @@ do
      if [ "$PUBIP" = "" ] || [ "$PRIVIP" = "" ]
      then
         ERO_IP="$(hpcloud servers $BUILD_ID -d , -c ips -a $FORJ_HPC)"
-        #PUBIP="$( echo $ERO_IP | awk -F, '{ print $2 }')" # This feature is not working well - IPs data sync is not done on time by openstack.
         PRIVIP="$(echo $ERO_IP | awk -F, '{ print $1 }')"
-        if [ "$PUBIP" = "" ] && [ "$NEW_PUBIP" = "" ]
+        if [ "$HPC_DETECTED" != 12.12 ] && [ $FORJ_HPC_NETID != "" ]
         then
-           printf "\r"
-           Info "Selecting a public IP to associate to your server."
-           NEW_PUBIP="$(hpcloud addresses -d , -c fixed_ip,floating_ip -a $FORJ_HPC| grep "^," | awk -F, '{ if (FNR == 1 ) print $2 }')"
-           if [ "$NEW_PUBIP" = "" ] && [ "$NEW_PUBIP_WARN" != True ]
+           if [ "$PUBIP" = "" ] && [ "$NEW_PUBIP" = "" ]
            then
-              NEW_PUBIP_WARN=True
-              Warning "Unable to identify an IP to assign from the pool. You need to extend or free up some IPs, to get a free one.
+              printf "\r"
+              Info "Selecting a public IP to associate to your server."
+              NEW_PUBIP="$(hpcloud addresses -d , -c fixed_ip,floating_ip -a $FORJ_HPC| grep "^," | awk -F, '{ if (FNR == 1 ) print $2 }')"
+              if [ "$NEW_PUBIP" = "" ] && [ "$NEW_PUBIP_WARN" != True ]
+              then
+                 NEW_PUBIP_WARN=True
+                 Warning "Unable to identify an IP to assign from the pool. You need to extend or free up some IPs, to get a free one.
 NOTE: The build process will continuously query to get a new IP. So, if you can free up an IP in parallel, do it now."
+              fi
            fi
+        else
+           PUBIP="$( echo $ERO_IP | awk -F, '{ print $2 }')" # This feature is not working well - IPs data sync is not done on time by openstack.
+           NEW_PUBIP_ASSIGNED=True
+           printf "\r"
+           echo "Now, as soon as the server respond to the ssh port, you will be able to get a tail of the build with:
+while [ 1 = 1 ]
+do
+  ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem tail -f /var/log/cloud-init.log
+  sleep 5
+done"
         fi
      fi
 

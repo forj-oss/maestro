@@ -22,6 +22,10 @@ DFL_COLOR="[0m"
 
 function Exit
 {
+ if [ "$BUILD_DIR" != "" ] && [ -d $BUILD_DIR ]
+ then
+    rm -fr "$BUILD_DIR"
+ fi
  exit $1
 }
 
