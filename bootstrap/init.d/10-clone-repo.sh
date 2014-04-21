@@ -16,36 +16,48 @@
 
 REPOS="$(GetJson /meta-boot.js repos)"
 
+function clone-repo
+{
+ if [ ! -d /opt/config/production/git ]
+ then
+    echo "$0: init.d/10-clone-repo.sh : /opt/config/production/git is missing. Script aborted."
+    return
+ fi
+ echo "$0: init.d/10-clone-repo.sh : Found setting repos : $REPOS"
+
+ mkdir -p /opt/config/production/git
+ chmod 2775 /opt/config/production/git
+
+ if [ "$GITBRANCH" != "" ]
+ then
+   GITBRANCH_FLAG="-b $GITBRANCH"
+ fi
+
+ for REPO in $(echo "$REPOS" | sed 's/|/ /g')
+ do
+    # REPO string is composed by link->name
+    REPO_LINK="$(echo "$REPO" | awk -F"->" '{print $1}')"
+    REPO_DIRNAME="$(basename $(echo "$REPO" | awk -F'->' '{print $2}'))"
+    GitLinkCheck $REPO_LINK
+    if [ $? -ne 0 ]
+    then
+       continue
+    fi
+    cd /opt/config/production/git
+    git clone $GITBRANCH_FLAG $REPO_LINK $REPO_DIRNAME
+    if [ ! -d $REPO_DIRNAME ]
+    then
+       echo "ERROR! 20-clone-repo.sh: $REPO_LINK was not cloned to $REPO_DIRNAME"
+       continue
+    fi
+    cd $REPO_DIRNAME
+    git config core.autocrlf false
+ done
+}
+
 if [ "$REPOS" != "" ]
 then
-
-   mkdir -p /opt/config/production/git
-   chmod 2775 /opt/config/production/git
    _CWD=$(pwd)
-
-   if [ "$GITBRANCH" != "" ]
-   then
-       GITBRANCH_FLAG="-b $GITBRANCH"
-   fi
-
-   for REPO in $(echo "$REPOS" | sed 's/|/ /g')
-   do
-      # REPO string is composed by link->name
-      REPO_LINK="$(echo "$REPO" | awk -F"->" '{print $1}')"
-      REPO_DIRNAME="$(basename $(echo "$REPO" | awk -F'->' '{print $2}'))"
-      GitLinkCheck $REPO_LINK
-      if [ $? -ne 0 ]
-      then
-         continue
-      fi
-      git clone $GITBRANCH_FLAG $REPO_LINK $REPO_DIRNAME
-      if [ ! -d $REPO_DIRNAME ]
-      then
-         echo "ERROR! 20-clone-repo.sh: $REPO_LINK was not cloned to $REPO_DIRNAME"
-         continue
-      fi
-      cd $REPO_DIRNAME
-      git config core.autocrlf false
-      cd $_CWD
-   done
+   clone-repo
+   cd $_CWDdd
 fi

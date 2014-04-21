@@ -16,9 +16,14 @@
 
 # This bootscript configure Maestro Box to become puppet Orchestrator.
 
-BIN_PATH="$(cd $(dirname $0); pwd)"
+if [ -f "$INIT_FUNCTIONS" ]
+then
+   source $INIT_FUNCTIONS
+else
+   echo "Unable to load 'INIT_FUNCTIONS' ($INIT_FUNCTIONS). Script aborted."
+   exit 1
+fi
 
-source $BIN_PATH/../functions
 
 #
 # puppetlabs broke, and we needed to grab a newer version of this script without forwarding config repo

@@ -35,6 +35,7 @@ then
 fi
 
 BIN_PATH="$(cd $(dirname $0); pwd)"
+export INIT_FUNCTIONS=$BIN_PATH/functions
 BOX_BOOT_DIR="$1"
 
 source $BIN_PATH/functions
@@ -62,13 +63,15 @@ BOOTSTRAP_PATH=$BOX_BOOT_DIR/git/maestro/bootstrap/maestro
 
 if [ "$BOOTSTRAP_REPOS" != "" ]
 then
-
+   echo "$0: Found additional bootstrap setting: $BOOTSTRAP_REPOS"
    for REPO in $(echo "$BOOTSTRAP_REPOS" | sed 's/|/ /g')
    do  
       if [ -d $BOX_BOOT_DIR/$REPO ]
       then
          echo "$0: Added '$BOX_BOOT_DIR/$REPO' to the Box bootstrap list"
          BOOTSTRAP_PATH="$BOOTSTRAP_PATH $BOX_BOOT_DIR/$REPO"
+      else
+         echo "$0: WARNING! '$BOX_BOOT_DIR/$REPO' is not found. Bootstrap path ignored."
       fi  
    done
 else
@@ -82,20 +85,24 @@ then
    echo "Read boot script: "
    for BOOT_FILE in $BOOT_FILES
    do
+      echo "$BOOT_FILE ..."
       for DIR in $BOOTSTRAP_PATH
       do  
-         if [ -x $DIR/$BOOT_FILE ]
+         if [ -f $DIR/$BOOT_FILE ]
          then
-            echo "Maestro boot init repo: $DIR/$BOOT_FILE Starting..."
-            if [ "$EMULATE" = True ]
+            if [ -x $DIR/$BOOT_FILE ]
             then
-               echo "Maestro boot init repo: should start ${BOOT_FILE}..."
+               echo "Maestro boot init repo: $DIR/$BOOT_FILE Starting..."
+               if [ "$EMULATE" = True ]
+               then
+                  echo "Maestro boot init repo: should start ${BOOT_FILE}..."
+               else
+                  bash -x $DIR/$BOOT_FILE
+               fi
+               echo "Maestro boot init repo: $DIR/$BOOT_FILE executed."
             else
-               bash -x $DIR/$BOOT_FILE
+               echo "Maestro boot init repo: Error! $DIR/$BOOT_FILE was not executed. Check rights."
             fi
-            echo "Maestro boot init repo: $DIR/$BOOT_FILE executed."
-         else
-            echo "Maestro boot init repo: Error! $DIR/$BOOT_FILE was not executed. Check rights."
          fi  
       done
    done

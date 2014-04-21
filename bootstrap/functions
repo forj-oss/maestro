@@ -60,18 +60,6 @@ function GitLinkCheck
 # TODO: find if we can source meta.js values from facter since we
 #  have all meta.js in facters now.
 
-if [ -f /config/meta.js ]
-then
-   PREFIX=/config
-fi
-
-if [ ! -f $PREFIX/meta.js ]
-then
-   echo "Warning! Missing meta-data file meta.js"
-   exit 1
-fi
-
-
 . /etc/environment
 
 
