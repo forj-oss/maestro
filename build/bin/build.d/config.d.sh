@@ -107,9 +107,11 @@ function HPC_Verify()
       then
          hpcloud account:edit $FORJ_HPC "$REF=$VALUE"
       fi
+   REFS="$REFS '$REF'"
    fi
    let iCount++
  done
+ Info "Found definitions :$REFS"
  if [ "$HPC_COPY" != "True" ] && [ -r ~/.hpcloud/accounts/.cache/$FORJ_HPC ]
  then
     echo "Cleaning '$FORJ_HPC' hpcloud cache."

@@ -67,7 +67,7 @@ fi
 
 if [ ! -f $PREFIX/meta.js ]
 then
-   echo "Boot image invalid. Cannot go on!"
+   echo "Warning! Missing meta-data file meta.js"
    exit 1
 fi
 

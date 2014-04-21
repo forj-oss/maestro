@@ -162,11 +162,11 @@ while true ; do
             DEBUG=True;
             shift;;
         --build_ID) 
-            BUILD_ID=$BUILD_PREFIX$2$BUILD_SUFFIX
+            BUILD_ID="$(echo "$2" | awk '{ print $1}')"
             Info "Preparing to make $BUILD_ID"
             shift;shift;;
         --gitBranch)
-            BRANCH=$2
+            BRANCH="$(echo "$2" | awk '{ print $1}')"
             GITBRANCH="$(git branch --list $BRANCH)"
             if [ "$GITBRANCH" = "" ]
             then
@@ -176,7 +176,6 @@ while true ; do
             then
                Warning "Branch '$BRANCH' is not the default one"
             fi
-            BUILD_CONFIG=$2
             shift;shift;; 
         --gitBranchCur)
             GITBRANCH="$(git branch | grep -e '^\*')"
@@ -184,28 +183,30 @@ while true ; do
             then
                Error 1 "Branch '$BRANCH' does not exist. Use 'git branch' to find the appropriate branch name."
             fi
-            BUILD_CONFIG=$GITBRANCH
             shift;;
         --build-conf-dir)
-            CONFIG_PATH="$2"
+            CONFIG_PATH="$(echo "$2" | awk '{ print $1}')"
             if [ ! -d "$CONFIG_PATH" ]
             then
                Error 1 "'$CONFIG_PATH' is not a valid path for option '--build-conf-dir'. Please check."
             fi
             shift;shift;; 
         --box-name)
-            APP_NAME="$2"
+            APP_NAME="$(echo "$2" | awk '{ print $1}')"
             shift;shift;; 
         --build-config)
-            BUILD_CONFIG=$2
+            BUILD_CONFIG="$(echo "$2" | awk '{ print $1}')"
             shift;shift;; 
         --gitRepo|--gitLink)
-            GIT_REPO=$2
+            GIT_REPO="$(echo "$2" | awk '{ print $1}')"
             Warning "Your git repository '$2' currently can not be tested by this script. Hope you checked it before building the box."
             shift;shift;; 
         --meta)
-            META["$(echo $2 | awk -F= '{print $1}')"]="$2"
-            echo "Meta set : $2"
+            META_NAME="$(echo "$2" | awk -F= '{print $1}') | awk '{ print $1}')"
+            META_VAL="$( echo "$2" | awk -F= '{print $2}') | awk '{ print $1}')"
+            META[$META_NAME]="$META_NAME=$META_VAL"
+            echo "Meta set : $META_NAME"
+            unset META_NAME META_VAL
             shift;shift;; 
         --) 
             shift; break;;
@@ -226,12 +227,20 @@ if [ "$BUILD_CONFIG" = "" ]
 then
    Error 1 "build configuration set not correctly set."
 fi
-CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.env"
+if [ "$GITBRANCH" = "" ]
+then
+   CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.env"
+else
+   CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}.env"
+fi
 if [ ! -r "$CONFIG" ]
 then
-   Error 1 "Unable to load '$BUILD_CONFIG' build configuration file. Please check it. (File $CONFIG not found)"
+   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)
+'$BUILD_CONFIG' is built from:
+{option --build-conf-dir}/{--box-name}.{--build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
 fi
 
+# TODO: Add validation of HPC variables set.
 source "$CONFIG"
 Info "$CONFIG loaded."
 

@@ -12,24 +12,24 @@ how we create a predefined box?
 
 Several spaces are used to build a box:
 
-> * bin/build.sh<br>
+> * `bin/build.sh`<br>
 >   This is the main script tool. You have to be here to build a box, as it requires to have access to the box subdirectory like maestro, proto2b or node.
-> * conf/*.env<BR>
+> * `conf/*.env`<BR>
 >   This directory contains a collection of build configuration used to build your box.
-> * bin/build/built-tools/boothook.sh<br>
+> * `bin/build/built-tools/boothook.sh`<br>
 >   This is a the first common cloud-init script
-> * <BoxName>/cloudconfig.yaml<br>
+> * `<BoxName>/cloudconfig.yaml`<br>
 >   This is the first specific box init definition sent to cloud-init.
-> * <BoxName>/bootstrap<br>
+> * `<BoxName>/bootstrap`<br>
 >   Collection of files to build the last cloud-init boot step.
 
 build.sh will first build the cloud-init based on: 
 
-> * boothook.sh (build/bin/build-tools/boothook.sh)<br>
+> * boothook.sh (`build/bin/build-tools/boothook.sh`)<br>
 >   Used to mainly set hostname, debug mode, log redirection, proxy management, extra updates.
-> * cloudconfig.yaml (build/{BoxName}/cloudconfig.yaml<br>
+> * cloudconfig.yaml (`build/{BoxName}/cloudconfig.yaml`)<br>
 >   Used to keep hostname set by boothook, and extra packages updates.
-> * boot-maestro.sh (build/{BoxName}/bootstrap/*.sh)<br>
+> * boot-maestro.sh (`build/{BoxName}/bootstrap/*.sh`)<br>
   Used to git clone repos, and start your defined bootstrap
 
 Start building a box
