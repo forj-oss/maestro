@@ -1,1 +1,1 @@
-../../maestro/bootstrap/boothook.sh
+../../bin/build-tools/boothook.sh
