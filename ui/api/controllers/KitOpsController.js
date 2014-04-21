@@ -27,12 +27,13 @@ module.exports = {
    */
   _config: {},
   register: function(req, res){
+    console.log(req.session.email);
     if(req.session.email === undefined){
       res.redirect('/auth/sign_in', 301);
     }else{
       register_module.is_registered(function(err){
-        console.log(err);
-        res.view({ layout: null, registered: 0, error_message: err });
+        console.error(err.message);
+        res.view({ layout: null, registered: 0, error_message: err.message });
       }, function(result){
         res.view({ layout: null, registered: result.result, error_message: null });
       })
@@ -45,14 +46,14 @@ module.exports = {
       if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
         name = validator.toString(name);
         register_module.do_register(name, email, function(err){
-          console.log("Kit Registration Failed: "+err);
+          console.error("Kit Registration Failed: "+err.message);
           res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
         }, function(result){
-          console.log("Kit Registration: "+result.state+", Stacktrace:"+result.stacktrace);
+          console.info("Kit Registration: "+result.state+", Stacktrace: "+result.stacktrace);
           res.json({ success: result.state, message: result.stacktrace }, 200);
         })
       }else{
-        res.json('Invalid name or email address.', 409);
+        res.json({ success: 'failed', message: 'Invalid name or email address.' }, 409);
       }
     }else{
       res.redirect('/auth/sign_in', 301);
