@@ -36,8 +36,8 @@ module.exports.policies = {
 	}
 	*/
 	HomeController: {
-    '*':true,
-    tutorial: 'isAuthenticated'
+    '*':true
+    //tutorial: 'isAuthenticated'
 	}
 };
 
