@@ -17,7 +17,7 @@
 # 
 # ChL: Added Build configuration load.
 
-BUILD_CONFIG=master
+BUILD_CONFIG=bld
 CONFIG_PATH=. # By default search for configuration files on the current directory
 
 # Those data have to be configured in a build configuration file
@@ -114,7 +114,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l box-name:,build-conf-dir:,gitBranch:,gitBranchCur,build-config:,gitLink:,debug,meta: -- "$@" )
+OPTS=$(getopt -o h -l box-name:,build-conf-dir:,gitBranch:,gitBranchCur,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -166,6 +166,9 @@ while true ; do
             META["$(echo $2 | awk -F= '{print $1}')"]="$2"
             echo "Meta set : $2"
             shift;shift;; 
+        --meta-data)
+            load-meta "$2"
+            shift;shift;; 
         --) 
             shift; break;;
     esac
@@ -185,10 +188,17 @@ if [ "$BUILD_CONFIG" = "" ]
 then
    Error 1 "build configuration set not correctly set."
 fi
-CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.env"
+if [ "$GITBRANCH" = "" ]
+then
+   CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.env"
+else
+   CONFIG="$CONFIG_PATH/${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}.env"
+fi
 if [ ! -r "$CONFIG" ]
 then
-   Error 1 "Unable to load '$BUILD_CONFIG' build configuration file. Please check it. (File $CONFIG not found)"
+   echo "List of valid configuration : {--box-name}.{'bld' or --build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
+   ls -l $CONFIG_PATH/*.env
+   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)"
 fi
 
 source "$CONFIG"

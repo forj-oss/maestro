@@ -32,7 +32,7 @@
 #
 # ChL: Added Build configuration load.
 
-BUILD_CONFIG=master
+BUILD_CONFIG=bld
 CONFIG_PATH=. # By default search for configuration files on the current directory
 
 # Those data have to be configured in a build configuration file
@@ -142,7 +142,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta: -- "$@" )
+OPTS=$(getopt -o h -l box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -208,6 +208,9 @@ while true ; do
             echo "Meta set : $META_NAME"
             unset META_NAME META_VAL
             shift;shift;; 
+        --meta-data)
+            load-meta "$2"
+            shift;shift;;
         --) 
             shift; break;;
     esac
@@ -235,9 +238,9 @@ else
 fi
 if [ ! -r "$CONFIG" ]
 then
-   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)
-'$BUILD_CONFIG' is built from:
-{option --build-conf-dir}/{--box-name}.{--build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
+   echo "List of valid configuration : {--box-name}.{'bld' or --build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
+   ls -l $CONFIG_PATH/*.env
+   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)"
 fi
 
 # TODO: Add validation of HPC variables set.
@@ -245,9 +248,31 @@ source "$CONFIG"
 Info "$CONFIG loaded."
 
 # Checking hpcloud configuration
+HPC_Check
+
+# Check if FORJ_HPC is defined. If not, then the user HAVE to review the configuration file and update it as needed.
+
+if [ "$FORJ_HPC" = "" ]
+then
+   Error 1 "The configuration file '$CONFIG' needs to be reviewed and updated.
+Please, open '$CONFIG', read comments and update accordingly.
+
+At least you need to set FORJ_HPC variable to the dedicated HPCloud account to use for your build. 
+If this account doesn't exist, it will be created from 'hp' account. 
+Then, you may need to redefine some HPCloud setting as listed in your configuration file as FORJ_HPC_*.
+
+Example: If you do not have 'dev' (FORJ_HPC setting) and your 'hp' is set with a tenantID like 'ABCD1234'. But you want to use a different one for your build.
+         So, set FORJ_HPC_TENANTID=GFJK5969 in your configuration will:
+1. create 'dev' from 'hp' as 'dev' was inexistant.
+2. update 'dev' to change tenantID from 'ABCD1234' to 'GFJK5969'
+3. Then build your image with this 'dev' account setting.
+
+
+Build aborted."
+fi
+
 # Check if $FORJ_HPC is already created.
 
-HPC_Check
 
 if [ "$(hpcloud account | grep -e "^$FORJ_HPC$" -e "^$FORJ_HPC <= default")" = "" ]
 then

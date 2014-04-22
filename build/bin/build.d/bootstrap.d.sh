@@ -15,6 +15,20 @@
 # This script contains process for building the user-data bootstrap.
 # 
 
+function load-meta
+{
+ IFS=',' read -a META_ARRAY <<< "$1"
+ for META_STR in "${META_ARRAY[@]}"
+ do
+   META_NAME="$(echo "$META_STR" | awk -F= '{print $1}')"
+   META_VAL="$( echo "$META_STR" | awk -F= '{print $2}')"
+   META[$META_NAME]="$META_NAME=$META_VAL"
+   printf "Meta set : %15s = '%s'\n" $META_NAME $META_VAL
+   shift
+ done
+ unset META_NAME META_VAL META_STR
+}
+
 function bootstrap_build
 {
 Info "Preparing cloudinit mime."
@@ -46,7 +60,7 @@ rm -f $BOOT_BOX
 
 if [ "$BOOTSTRAP_DIR" != "" ]
 then
-   if [ "$(find $BOOTSTRAP_DIR -maxdepth 1 -type f -name \*.sh -exec basename {} \; | wc -l)" -eq 0 ]
+   if [ "$(find $BOOTSTRAP_DIR -maxdepth 1 \( -type f -o -type l \) -name \*.sh -exec basename {} \; | wc -l)" -eq 0 ]
    then
       Warning "'$BOOTSTRAP_DIR' contains no bootstrap files. Please check it."
    else
@@ -54,7 +68,7 @@ then
    fi
 fi
 
-BOOT_FILES="$(find bootstrap $BOOTSTRAP_DIR -maxdepth 1 -type f -name \*.sh -exec basename {} \; | sort -u)"
+BOOT_FILES="$(find bootstrap $BOOTSTRAP_DIR -maxdepth 1 \( -type f -o -type l \) -name \*.sh -exec basename {} \; | sort -u)"
 
 echo "Read boot script: "
 for BOOT_FILE in $BOOT_FILES
