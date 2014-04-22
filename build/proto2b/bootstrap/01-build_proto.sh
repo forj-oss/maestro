@@ -1,28 +1,3 @@
-#!/bin/bash -x
-
-function GetJson
-{
- python -c "exec(\"import json\\njson_d=open('$1').read()\\ndata=json.loads(json_d)\\nprint(data['$2'])\")"
-}
-
-echo "################# BOOT-Ero Start step 1 #################"
-
-set -x
-
-locale-gen en_US
-
-if [ -f /config/meta.js ]
-then
-   PREFIX=/config
-fi
-
-if [ ! -f $PREFIX/meta.js ]
-then
-   echo "Boot image invalid. Cannot go on!"
-   exit 1
-fi
-
-
 _PUPPET_MASTER="$(GetJson $PREFIX/meta.js erosite)"
 _PUPPET_MASTER_FQDN="${_PUPPET_MASTER}.$(GetJson $PREFIX/meta.js erodomain)"
 
@@ -55,14 +30,3 @@ echo 'node default {
 }' > build_proto.pp
 
 puppet apply --modulepath=/etc/puppet/modules/:. build_proto.pp
-
-# cleanup
-
-#rm -rf ./config
-
-mv /var/log/cloud-init.log /var/log/cloud-init.proto.log
-rm -fr /var/lib/puppet/ssl
-rm -f /meta.js
-umount /config
-rm -fr /config
-exit 0
