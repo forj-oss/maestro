@@ -20,7 +20,6 @@ $mysql_password = 'changeme'
 $mysql_root_password = 'changeme'
 
 
-node /.*(review|precise32).*/  {
 
 #
 # all nodes should meet these requirements.
@@ -132,4 +131,3 @@ node /.*(review|precise32).*/  {
     override_vhost                  => $override_vhost,
     demo_enabled                    => true,
     }
-}

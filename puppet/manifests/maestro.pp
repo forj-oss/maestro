@@ -18,15 +18,7 @@
 #
 # Setup host so that we can deal with vagrant configs and ip based configs
 # this section still requires some work
-# TODO: need to figure out if this should be global of not.
 
-if str2bool($::vagrant_guest) == true {
-  $node_server = 'localhost'
-} else {
-  $node_server = inline_template('<% if defined?(@ec2_public_ipv4) %><%= @ec2_public_ipv4 %><% elsif defined?(@ipaddress_eth0)%><%= @ipaddress_eth0 %><% else %><%= @fqdn %><% end %>')
-}
-
-$node_vhost = $node_server
 $sysadmins = []
 
 # implements hiera_data installations

@@ -30,7 +30,7 @@ node /.*(maestro|precise32).*/ {
   }
 
   include gardener
-  require cdk_project::pip
+  include cdk_project::pip
   notice("openstack puppetmaster blueprint working for ${::fqdn}")
 
   class { 'hiera':
