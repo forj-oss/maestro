@@ -24,11 +24,11 @@
 
 node default {
   # we need to set it to what our vagrant hostname for fqdn will be
-  $instance_name = "maestro"
+  $instance_name = 'maestro'
   $instance_id = '42'
   $instance_dom = 'localhost'
   maestro::orchestrator::gencerts {$instance_name :
-      domain => $instance_dom,
+      domain      => $instance_dom,
       instance_id => $instance_id,
       serial_init => '01',
   }
@@ -62,16 +62,15 @@ node default {
   #    ssl_cert_file_contents  => hiera('wiki_ssl_cert_file_contents'),
   #    ssl_key_file_contents   => hiera('wiki_ssl_key_file_contents'),
   #    ssl_chain_file_contents => hiera('wiki_ssl_chain_file_contents'),
-      
-      mysql_root_password     => "changeme",
+
+      mysql_root_password     => 'changeme',
       sysadmins               => [],
       ssl_cert_file_contents  => $ssl_cert_file_data,
       ssl_key_file_contents   => $ssl_key_file_data,
       ssl_chain_file_contents => $ssl_chain_file_data,
-      require => Maestro::Orchestrator::Gencerts[$instance_name],
+      require                 => Maestro::Orchestrator::Gencerts[$instance_name],
     }
   }
-  
 }
 
 
