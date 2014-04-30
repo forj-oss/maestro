@@ -1,5 +1,5 @@
 /**
- * CommandController
+ * ProjectController
  *
  * @module      :: Controller
  * @description	:: A set of functions called `actions`.
@@ -15,40 +15,42 @@
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
 
-var maestroexec = require('maestro-exec');
-
+/**
+ *
+ * @type {{create: create, _config: {}}}
+ */
 module.exports = {
     
+  
   /**
    * Action blueprints:
-   *    `/command/exec`
+   *    `/project/create`
    */
-   /* if you want to capture command output in data
-    maestro.execCmd('/bin/ls',' -la /home/miqui/tmp', null, function(data, error) {
-        if(error) {
-          console.log('my error:' + error);
-    } else {
-         console.log('my data:' + data);
-    }
-    });
+   create: function (req, res) {
 
-    or
-    like this: to only capture/test data:true/false
-    maestro.execCmd('/bin/ls',' -la /home/miqui/tmp', {status_only: true}, function(data) {
-       console.log('my data:' + data);
-    })
+   // hack!! salt.controllers.<controller-name>.function()
+   // calls another controller's action....
+   // example below: works, not sure this cool...
+   // sails.controllers.command.exec(req, res);
+
+   // using a service from api/service
+   /** example:
+   CommandSvc.CommandExec('/bin/ls', '/home/miqui',{status_only: true}, function(data) {
+          return res.json({exec: data})
+   })
    */
-   exec: function (req, res) {
 
-    // Send a JSON response
-    return res.json({
-      hello: 'world'
-    });
   },
+
+
+
+
 
   /**
    * Overrides for the settings in `config/controllers.js`
-   * (specific to CommandController)
+   * (specific to ProjectController)
    */
   _config: {}
+
+  
 };
