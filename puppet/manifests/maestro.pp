@@ -48,5 +48,5 @@ node /^maestro.*/ inherits default {
       iptables_public_tcp_ports => [4505, 4506, 8139, 8140, 80, 443, 3000, 8080],
       sysadmins                 => $sysadmins,
   } ->
-  ::sysadmin_config::swap { '512':}
+  ::sysadmin_config::swap { '1G':}
 }
