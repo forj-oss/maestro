@@ -25,20 +25,17 @@ node /^review.*/ inherits default {
 # we need a utilities server until we fix puppet master bug that prevents server restart, so we can consolidate
 node /^util.*/ inherits default {
 
+  #TODO: we need to fix the iptables class because currently the class is only executed once, and it will never overwrite again the rules even if they changed.
   $zuul_url = read_json('zuul','tool_url',$::json_config_location,false)
   if $zuul_url != '' and $zuul_url != '#'
   {
     $statsd_hosts = [$zuul_url]
     $rules = regsubst ($statsd_hosts, '^(.*)$', '-m udp -p udp -s \1 --dport 8125 -j ACCEPT')
-  }
-  else
-  {
-    $rules = ''
-  }
-  ::sysadmin_config::setup { 'setup util node ports':
+    ::sysadmin_config::setup { 'setup util node ports':
     iptables_public_tcp_ports => [22, 80, 443, 8080, 8081, 8125, 2003, 8080],
     iptables_rules4           => $rules,
     sysadmins                 => $sysadmins,
+    }
   }
 }
 
