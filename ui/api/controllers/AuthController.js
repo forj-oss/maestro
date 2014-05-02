@@ -201,7 +201,6 @@ function getRelyingParty(callback){
             console.log('Failed to parse the get_blueprint_section result into the maestro_url');
             callback(maestro_url.message, null);
           }else{
-            req.session.maestro_url = maestro_url;
             var relyingParty = new openid.RelyingParty(
               maestro_url+'/auth/verify', // Verification URL (yours)
               null, // Realm (optional, specifies realm for OpenID authentication)
