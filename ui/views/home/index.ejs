@@ -4,24 +4,46 @@
       <% if(tools !== undefined && (tools instanceof Array)){ %>
         <% tools.forEach(function(tool){ %>
           <li>
-          	<div class="tool-ops" style="width: 80px;float: right;">
-          	  <%if(tool.tool_url !== '#'){%>
-                <div class="ops-home"><a href="<%=tool.tool_url%>" target="_blank">Home</a></div>
-              <% }else{ %>
-                <div class="ops-home"><a href="<%=tool.tool_url%>">Home</a></div>
-              <% } %>
-              <div class="ops-workload ops-ok">Workload</div>
-              <div class="ops-backup ops-warning">Backup</div>
-            </div>
-            <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
+            <% if(tool.status == 'online') { %>
+            	<div class="tool-ops" style="width: 80px;float: right;">
+            	  <%if(tool.tool_url !== '#'){%>
+                  <div class="ops-home"><a href="<%=tool.tool_url%>" target="_blank">Home</a></div>
+                <% }else{ %>
+                  <div class="ops-home"><a href="<%=tool.tool_url%>">Home</a></div>
+                <% } %>
+                <div class="ops-workload ops-ok">Workload</div>
+                <div class="ops-backup ops-warning">Backup</div>
+              </div>
+              <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
 						  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
-					  </a>
-	          <%if(tool.settings_url !== '#'){%>
-	            <a class="tool-desc-name" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
-	          <% }else{ %>
-	            <a class="tool-desc-name" href="<%=tool.settings_url%>" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
-	          <% } %>
-					  <span style="clear:both;"></span>
+  					  </a>
+  	          <%if(tool.settings_url !== '#'){%>
+  	            <a class="tool-desc-name" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+  	          <% }else{ %>
+  	            <a class="tool-desc-name" href="<%=tool.settings_url%>" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+  	          <% } %>
+  					  <span style="clear:both;"></span>
+            <% } %>
+            <% if(tool.status == 'offline') { %>
+              <div class="tool-ops" style="width: 80px;float: right;">
+            	  <%if(tool.tool_url !== '#'){%>
+                  <div class="ops-home ops-offline"><a href="<%=tool.tool_url%>" target="_blank">Home</a></div>
+                <% }else{ %>
+                  <div class="ops-home ops-offline"><a href="<%=tool.tool_url%>">Home</a></div>
+                <% } %>
+                <div class="ops-workload ops-offline">Workload</div>
+                <div class="ops-backup ops-offline">Backup</div>
+              </div>
+              <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
+						  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+  					  </a>
+  	          <%if(tool.settings_url !== '#'){%>
+  	            <a class="tool-desc-name ops-offline" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+  	          <% }else{ %>
+  	            <a class="tool-desc-name ops-offline" href="<%=tool.settings_url%>" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
+  	          <% } %>
+  					  <span style="clear:both;"></span>
+            <% } %>
           </li>
         <% }); %>
       <% } %>

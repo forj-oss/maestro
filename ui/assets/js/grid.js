@@ -274,7 +274,7 @@ var Grid = (function() {
 		$items.on( 'click', 'span.og-close', function() {
 			hidePreview();
 			return false;
-		} ).children( 'a.tool-view' ).on( 'click', function(e) {
+		} ).children( 'a.tool-view:not(.ops-offline)' ).on( 'click', function(e) {
       //$(".og-expander-inner").load('../home/statics?service=Gerrit');
 			var $item = $( this ).parent();
 			// check if item already opened

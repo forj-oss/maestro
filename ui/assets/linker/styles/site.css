@@ -229,9 +229,11 @@ background-color: #739C5A;
 .ops-backup{
   
 }
+.ops-offline{
+  background-color: #797979 !important;
+}
 .ops-ok{
   background-color: #47CC3A;
-  /*background-color: #8BBB6E;*/
 }
 .ops-warning{
   background-color: #F09101;
