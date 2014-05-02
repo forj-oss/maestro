@@ -43,7 +43,6 @@
         </div>
         <div class="header-options">
           <ul class="options">
-            <li><div class="notifications"></div></li>
             <li><div class="help">?</div></li>
             <span style="clear:both;"></span>
           </ul>
@@ -63,8 +62,12 @@
         <div id="navcontainer">
           <ul id="navlist">
             <li class="active"><a href="#" id="current">Home</a></li>
+            <% if(req.session.projects){ %>
             <li><a href="#">Projects</a></li>
+            <% } %>
+            <% if(req.session.users){ %>
             <li><a href="#">Users</a></li>
+            <% } %>
           </ul>
         </div>
         

@@ -57,88 +57,88 @@
       </div>
     </div>
     <% if(req.session.is_admin){ %>
-    
       <div class="row" style="margin: 0;margin-top: 10px;">
         <div class="row" style="margin: 0;padding-top: 10px;">
-          <h5 class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>System Backup</h5>
+          <% if(req.session.kit_registered.registered){ %>
+            <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring check-icon"></span>Registration</h5>
+          <% } %>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error == null){ %>
+            <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>Registration</h5>
+          <% } %>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error !== null){ %>
+            <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring check-icon"></span>Registration</h5>
+          <% } %>
         </div>
         <div class="row monitoring-contents" style="display:none;">
-          <div class="col-md-12">
-            <p>Backup Placeholder</p>
-          </div>
-        </div>
-      </div>
-      <div>
-    
-      <div class="row" style="margin: 0;margin-top: 10px;">
-        <div class="row" style="margin: 0;padding-top: 10px;">
-          <h5 class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>Registration</h5>
-        </div>
-        <div class="row monitoring-contents" style="display:none;">
-          <div class="col-md-12">
-            <div class="row" style="padding-left: 25px;padding-top: 15px;">
-              <input type="text" id="name" placeholder="Name" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
-              <div id="register-btn" style="padding: 7px;background-color: #0096d6;font-size: 13px;display: inline-block; cursor:pointer;color: #FFFFFF; text-decoration: none;vertical-align: top;">
-                <span>Register</span>
-              </div>
-            </div>
-            <div class="row" style="padding-top: 15px;text-align: center;">
-              <span id="validator-label" style="color: #797979; display: none;">This should take a few seconds..</span>
-              <div class="register-bar" style="display:none;">
-                <div class="bar" style="width: 0%;">
+          <% if(req.session.kit_registered.registered ){ %>
+            <p style="color: #797979;padding-left: 17px;">Your forge is already registered</p>
+          <% } %>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error == null){ %>
+            <div class="col-md-12">
+              <div class="row" style="padding-left: 25px;padding-top: 15px;">
+                <input type="text" id="name" placeholder="Name" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
+                <div id="register-btn" style="padding: 7px;background-color: #0096d6;font-size: 13px;display: inline-block; cursor:pointer;color: #FFFFFF; text-decoration: none;vertical-align: top;">
+                  <span>Register</span>
                 </div>
               </div>
-              <span id="status-label" style="color: #797979; display:none;">Registering...</span>
+              <div class="row" style="padding-top: 15px;text-align: center;">
+                <span id="validator-label" style="color: #797979; display: none;">This should take a few seconds..</span>
+                <div class="register-bar" style="display:none;">
+                  <div class="bar" style="width: 0%;">
+                  </div>
+                </div>
+                <span id="status-label" style="color: #797979; display:none;">Registering...</span>
+              </div>
+              <script>
+                $(document).ready(function(){
+                  $('#register-btn').click(function(){
+                    var name = $("#name").val();
+                    if(name.length === 0){
+                      $("#validator-label").fadeOut(500, function(){
+                        $(this).text('Please provide your name.');
+                      }).fadeIn(500);
+                    }else{
+                      $('#validator-label').fadeOut(500, function(){
+                        $(this).text('This should take a few seconds..');
+                      }).fadeIn(500);
+                      $('.register-bar').fadeIn(500);
+                      $('.status-label').fadeIn(500, function(){
+                        $('.bar').css('width', '50%');
+                      });
+                      socket.get('/kitops/do_register', {
+                        name: name
+                      }, function(response) {
+                          if(response.success == 'failed'){
+                            $("#validator-label").fadeOut(500, function(){
+                              $(this).css({'color':'#E16138'});
+                              $('.bar').css('color', '#E16138');
+                              $(this).text('Kit Registration Failed');
+                            }).fadeIn(500);
+                          }
+                          if(response.success == 'success'){
+                            $('#status-label').fadeOut(500, function(){
+                              $('.bar').css('width', '100%');
+                              $(this).text('Done!');
+                              $('#h5-registration').removeClass('error-icon');
+                              $('#h5-registration').addClass('check-icon');
+                              $('#name').remove();
+                              $('#register-btn').remove();
+                            }).fadeIn(500);
+                          }
+                      });
+                    }
+                  })
+                });
+              </script>
             </div>
-            <script>
-              $(document).ready(function(){
-                $('#register-btn').click(function(){
-                  var name = $("#name").val();
-                  if(name.length === 0){
-                    $("#validator-label").fadeOut(500, function(){
-                      $(this).text('Please provide your name.');
-                    }).fadeIn(500);
-                  }else{
-                    $('#validator-label').fadeOut(500, function(){
-                      $(this).text('This should take a few seconds..');
-                    }).fadeIn(500);
-                    $('.register-bar').fadeIn(500);
-                    $('.status-label').fadeIn(500, function(){
-                      $('.bar').css('width', '50%');
-                    });
-                    socket.get('/kitops/do_register', {
-                      name: name
-                    }, function(response) {
-                        if(response.success == 'failed'){
-                          $("#validator-label").fadeOut(500, function(){
-                            $(this).css({'color':'#E16138'});
-                            $('.bar').css('color', '#E16138');
-                            $(this).text('Kit Registration Failed');
-                          }).fadeIn(500);
-                        }
-                        if(response.success == 'success'){
-                          $('#status-label').fadeOut(500, function(){
-                            $('.bar').css('width', '100%');
-                            $(this).text('Done!');
-                          }).fadeIn(500);
-                        }
-                    });
-                  }
-                })
-              });
-            </script>
-          </div>
+          <% } %>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error !== null){ %>
+            <p style="color: #797979;padding-left: 17px;">We were unable to check if your forge is registered.</p>
+          <% } %>
         </div>
       </div>
       <div>
     <% } %>
-    <div class="row" style="margin: 0;margin-top: 10px;">
-      <div class="col-md-12" style="background-color: #f2e1c7;min-height: 55px;">
-        <span class="trial-icon"></span>
-        <h5 class="trial">Trial expires in 12 Days!</h5>
-        <span class="rellocate-span">Rellocate yout FORJ - <a href="#">Click Here</a></span>
-      </div>
-    </div>
     </div>
   </div>
   

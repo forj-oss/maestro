@@ -36,7 +36,7 @@ module.exports.policies = {
 	*/
 	HomeController: {
     '*':true,
-    index: 'isBlueprintNameSet',
+    index: ['isBlueprintNameSet', 'hasProjects', 'hasUsers', 'isKitRegistered'],
 	}
 };
 
