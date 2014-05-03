@@ -141,8 +141,8 @@
                             $('#status-label').fadeOut(500, function(){
                               $('.bar').css('width', '100%');
                               $(this).text('Done!');
-                              $('#h5-registration').removeClass('error-icon');
-                              $('#h5-registration').addClass('check-icon');
+                              $('#h5-registration span').removeClass('error-icon');
+                              $('#h5-registration span').addClass('check-icon');
                               $('#name').remove();
                               $('#register-btn').remove();
                             }).fadeIn(500);

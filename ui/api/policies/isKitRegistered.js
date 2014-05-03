@@ -5,7 +5,7 @@ module.exports = function(req, res, next){
     req.session.kit_registered = { registered: false , error: err.message };
     return next();
   }, function(result){
-    req.session.kit_registered = { registered: result.result!==0?false:true, error: null };
+    req.session.kit_registered = { registered: result.result!==0?true:false, error: null };
     return next();
   })
 };

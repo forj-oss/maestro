@@ -27,8 +27,6 @@ module.exports = {
    */
   _config: {},
   index: function(req, res){
-    req.session.is_admin = true;
-    req.session.email = 'vrodrigo.montano@gmail.com';
     blueprint_utils.get_blueprint_id(function(err){
         console.log('Unable to get the instance_id of the kit: '+err.message);
         res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
