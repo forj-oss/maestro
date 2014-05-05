@@ -83,7 +83,7 @@ fi
 
 if [ "$BOOTSTRAP_PATH" != "" ]
 then
-   BOOT_FILES="$(find $BOOTSTRAP_PATH -maxdepth 1 \( -type f -name -o -type l \) \*.sh -exec basename {} \; | sort -u)"
+   BOOT_FILES="$(find $BOOTSTRAP_PATH -maxdepth 1 \( -type f -o -type l \) -name \*.sh -exec basename {} \; | sort -u)"
 
    echo "--- Read boot script: "
    for BOOT_FILE in $BOOT_FILES
