@@ -50,14 +50,17 @@ export environment=production
 export PUPPET_MODULES=/opt/config/$environment/puppet/modules:/opt/config/$environment/git/CDK-infra/blueprints/openstack/puppet/modules:/opt/config/$environment/git/config/modules:/etc/puppet/modules
 _FQDN=$(facter fqdn)
 puppet cert generate $_FQDN
-puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-apply1.log
-puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-apply2.log
-puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-apply3.log
+puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap1.log
+puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap2.log
+puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite1.log
+puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysote2.log
 # Added due to npm install sometimes throwing undefined install errors... clears up after subsequent runs.
 # TODO: find how we can delay maestro ui install till after base orchestration is running.... consideration for future release.
-puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-apply4.log
+puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite3.log
 service puppet-dashboard-workers restart
 }
 run1
 
 puppet agent --debug --verbose --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test3.log
+
+
