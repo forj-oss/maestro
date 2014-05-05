@@ -1,4 +1,8 @@
+<% if(req.session.is_admin){ %>
 <div id="container-tools" class="col-lg-10">
+<% }else{ %>
+<div id="container-tools" class="col-lg-12">
+<% } %>
   <div class="row">
     <ul id="og-grid" class="og-grid">
       <% if(tools !== undefined && (tools instanceof Array)){ %>
@@ -11,11 +15,15 @@
                 <% }else{ %>
                   <div class="ops-home"><a href="<%=tool.tool_url%>">Home</a></div>
                 <% } %>
-                <div class="ops-workload ops-ok">Workload</div>
-                <div class="ops-backup ops-warning">Backup</div>
+                <div class="ops-workload ops-ok" style="cursor:pointer;">Workload</div>
+                <div class="ops-backup ops-warning" style="cursor:pointer;">Backup</div>
               </div>
-              <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
-						  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+              <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
+						    <% if(tool.icon!=='true'?false:true){ %>
+                  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+                <% }else{ %>
+                  <img src="/tools_images/tool_no_icon.png" alt="<%=tool.name%>"/>
+                <% } %>
   					  </a>
   	          <%if(tool.settings_url !== '#'){%>
   	            <a class="tool-desc-name" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
@@ -31,11 +39,15 @@
                 <% }else{ %>
                   <div class="ops-home ops-offline"><a href="<%=tool.tool_url%>">Home</a></div>
                 <% } %>
-                <div class="ops-workload ops-offline">Workload</div>
-                <div class="ops-backup ops-offline">Backup</div>
+                <div class="ops-workload ops-offline" style="cursor:pointer;">Workload</div>
+                <div class="ops-backup ops-offline" style="cursor:pointer;">Backup</div>
               </div>
-              <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
-						  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+              <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
+                <% if(tool.icon!=='true'?false:true){ %>
+                  <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
+                <% }else{ %>
+                  <img src="/tools_images/tool_no_icon.png" alt="<%=tool.name%>"/>
+                <% } %>
   					  </a>
   	          <%if(tool.settings_url !== '#'){%>
   	            <a class="tool-desc-name ops-offline" href="<%=tool.settings_url%>" target="_blank" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%=tool.dname%></a>
@@ -50,35 +62,9 @@
 		</ul>
   </div>
 </div>
-<div class="col-lg-2 right-menu">
-  <h4>Console</h4>
-  <div class="row">
-    <div class="row" style="margin: 0;margin-top: 10px;">
-      <div class="row" style="margin: 0;">
-        <h5 class="monitoring-option arrow-up"><span class="status-monitoring check-icon"></span>System Workload</h5>
-      </div>
-      <div class="row monitoring-contents">
-        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
-          <div class="col-md-12">
-            <canvas id="cpu" width="75" height="75" data-current="90" style="float: left;"></canvas>
-            <span class="stats-text">CPU Usage</span>
-          </div>
-        </div>
-        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
-          <div class="col-md-12">
-            <canvas id="mem" width="75" height="75" data-current="65" style="float: left;"></canvas>
-            <span class="stats-text">Memory Usage</span>
-          </div>
-        </div>
-        <div class="row" style="margin: 0; margin-bottom: 10px; position: relative;">
-          <div class="col-md-12">
-            <canvas id="disk" width="75" height="75" data-current="30" style="float: left;"></canvas>
-            <span class="stats-text">Disk Usage</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <% if(req.session.is_admin){ %>
+<% if(req.session.is_admin){ %>
+  <div class="col-lg-2 right-menu">
+    <h4>Console</h4>
       <div class="row" style="margin: 0;margin-top: 10px;">
         <div class="row" style="margin: 0;padding-top: 10px;">
           <% if(req.session.kit_registered.registered){ %>
@@ -160,21 +146,38 @@
         </div>
       </div>
       <div>
-    <% } %>
+    
     </div>
   </div>
-  
+<% } %>
 </div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+        <div class="modal-header" style="padding: 10px !important;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title" id="mySmallModalLabel">Information</h4>
+        </div>
+        <div class="modal-body">
+          Implementation in progress
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+  </div>
+</div>
+
 <script src="../js/grid.js"></script>
 <script>
   $(document).ready(function(){
-    
-    Grid.init();
-    
-    progress('cpu', 90, 'new');
-    progress('mem', 65, 'new');
-    progress('disk', 30, 'new');
-    
+    $('.ops-workload').click(function(){
+      $('.modal').modal('show');
+    });
+    $('.ops-backup').click(function(){
+      $('.modal').modal('show');
+    });
     $('.monitoring-option').click(function () {
       $option = $(this);
       $content = $option.parent().next();
@@ -187,6 +190,6 @@
       }
       $content.slideToggle(500);
 
-  });
+    });
   });
 </script>
