@@ -19,9 +19,7 @@
  *
  * @type {{create: create, _config: {}}}
  */
-module.exports = {
-    
-  
+module.exports = {  
   /**
    * Action blueprints:
    *    `/project/create`
@@ -42,9 +40,35 @@ module.exports = {
 
   },
 
+  'run': function(req,res){
+    //redirect('/shell/show/'+pname);
+    exec("./shell.sh", puts);
+    res.view({
+    pname: req.query.user
+    });
+  },
 
+  'show': function(req,res){
+  try{
+    console.log("entro al try");
+      var doc = yaml.safeLoad(fs.readFileSync('/opt/config/production/git/CDK-infra/blueprints/openstack/puppet/modules/runtime_project/files/jenkins_job_builder/config/projects.yaml', 'utf8'));
+      var projectsa = [];
+      var projects = doc["project"];
+      for (var i=0;i<doc.length;i++)
+      {
+        projectsa[i] = doc[i]["project"]["name"];
+      } 
+      res.view(
+      {
+        list: projectsa
+      });
+    }catch(e)
+    {
+      res.view({
+      });
+    }
 
-
+  },
 
   /**
    * Overrides for the settings in `config/controllers.js`

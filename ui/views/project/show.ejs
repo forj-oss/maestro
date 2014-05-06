@@ -1,0 +1,37 @@
+<form name="input" action="/shell/run" method="get">
+Username: <input type="text" name="user">
+<input type="submit" value="Submit">
+</form>
+<%= prueba %>
+<br>
+<%= list %>
+<br>
+<%= list.length %>
+<br>
+<% for (var i=0;i<list.length;i++ )  %>
+<% {  %>
+<%= list[m] %> <br>
+<br>
+<% }  %>
+<%   %>
+
+<!--
+<script>
+    $("#submit-register").click(function(){
+        var pname = $("#pname").val();
+        if (username && password) {
+            $.post(
+                '/shell/run',
+                {pname: pname},
+                function () {
+                    window.location = "/shell/run";
+                }
+            ).fail(function(res){
+                alert("Error: " + res.getResponseHeader("error"));
+            });
+        } else {
+            alert("A username and password is required");
+        }
+    });
+</script>
+-->
