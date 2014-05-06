@@ -227,10 +227,10 @@ text-justify:inter-word;
             On Windows, download <a href="http://users.ugent.be/~bpuype/cgi-bin/fetch.pl?dl=wget/wget-1.10.2.exe">wget.exe</a> to your "Downloads" folder. Make sure that you replace each 'wget' below by '~/Downloads/wget'.<br>Start GIT bash.<br>
             &gt;<code><p2>mkdir .ssh</p2></code><br>
             When connected directly to the internet:<br>
-        &gt;<code><p2>wget --no-check-certificate https://github.com/forj/tutorials/tree/master/keys -O ~/.ssh/demo_keys</p2></code> <br>
+        &gt;<code><p2>wget --no-check-certificate https://raw.githubusercontent.com/forj/tutorials/master/keys/demo_keys -O ~/.ssh/demo_keys</p2></code> <br>
       
       Or, behind a web proxy:<br>
-        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://github.com/forj/tutorials/tree/master/keys  -O ~/.ssh/demo_keys</p2> </code><br>
+        &gt;<code><p2>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://&lt;web-proxy&gt;:8080 https://raw.githubusercontent.com/forj/tutorials/master/keys/demo_keys -O ~/.ssh/demo_keys</p2> </code><br>
       You now have a "demo_keys" file in your home/.ssh directory ($HOME on Linux, %HOMEPATH% on Windows)<br>
       Let's modify the permissions of this file for linux systems:<br>
       ><code><p2>chmod 600 ~/.ssh/demo_keys</p2></code><br>
