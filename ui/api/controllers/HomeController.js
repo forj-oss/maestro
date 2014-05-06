@@ -101,9 +101,15 @@ module.exports = {
 			  if (result[i].name == "gerrit"){
                 // Only nums and point
 				gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
+				if (gerrit_ip == ''){
+				  gerrit_ip = 'my_gerrit_ip'
+				}
 			  }
 			  if (result[i].name == "zuul"){
 				zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
+				if (zuul_ip == ''){
+				  zuul_ip = 'my_zuul_ip'
+				}
 			  }
 			}
             res.view({ layout: null, 'gerrit_ip': gerrit_ip, 'zuul_ip': zuul_ip });
