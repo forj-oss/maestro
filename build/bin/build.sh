@@ -202,8 +202,8 @@ while true ; do
             Warning "Your git repository '$2' currently can not be tested by this script. Hope you checked it before building the box."
             shift;shift;; 
         --meta)
-            META_NAME="$(echo "$2" | awk -F= '{print $1}') | awk '{ print $1}')"
-            META_VAL="$( echo "$2" | awk -F= '{print $2}') | awk '{ print $1}')"
+            META_NAME="$(echo "$2" | awk -F= '{print $1}' | awk '{ print $1}')"
+            META_VAL="$( echo "$2" | awk -F= '{print $2}' | awk '{ print $1}')"
             META[$META_NAME]="$META_NAME=$META_VAL"
             echo "Meta set : $META_NAME"
             unset META_NAME META_VAL
