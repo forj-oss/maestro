@@ -19,57 +19,23 @@
  *
  * @type {{create: create, _config: {}}}
  */
-module.exports = {  
+ var maestro_exec = require('maestro-exec/maestro-exec');
+module.exports = {
   /**
    * Action blueprints:
    *    `/project/create`
    */
-   create: function (req, res) {
-
-   // hack!! salt.controllers.<controller-name>.function()
-   // calls another controller's action....
-   // example below: works, not sure this cool...
-   // sails.controllers.command.exec(req, res);
-
-   // using a service from api/service
-   /** example:
-   CommandSvc.CommandExec('/bin/ls', '/home/miqui',{status_only: true}, function(data) {
-          return res.json({exec: data})
-   })
-   */
-
-  },
-
-  'run': function(req,res){
-    //redirect('/shell/show/'+pname);
-    exec("./shell.sh", puts);
-    res.view({
-    pname: req.query.user
+  create: function (req, res) {
+    maestro_exec.execCmd('/config/newproject.sh', req.body.project_name, { status_only: true }, function(data){
+     res.json(data);
     });
   },
-
-  'show': function(req,res){
-  try{
-    console.log("entro al try");
-      var doc = yaml.safeLoad(fs.readFileSync('/opt/config/production/git/CDK-infra/blueprints/openstack/puppet/modules/runtime_project/files/jenkins_job_builder/config/projects.yaml', 'utf8'));
-      var projectsa = [];
-      var projects = doc["project"];
-      for (var i=0;i<doc.length;i++)
-      {
-        projectsa[i] = doc[i]["project"]["name"];
-      } 
-      res.view(
-      {
-        list: projectsa
-      });
-    }catch(e)
-    {
-      res.view({
-      });
-    }
-
+  index: function(req, res){
+    res.view({ layout: null });
   },
-
+  new: function(req, res){
+    res.view({ layout: null });
+  },
   /**
    * Overrides for the settings in `config/controllers.js`
    * (specific to ProjectController)

@@ -83,7 +83,10 @@
           <% } %>
           <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error == null){ %>
             <div class="col-md-12">
-              <div class="row" style="padding-left: 25px;padding-top: 15px;">
+              <div class="row" style="text-align: center; color: #797979;font-size: 13px; font-family: 'Open Sans Regular', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !important;">
+                <span>Register your forge to extend the trial period to X days. Use '<%=req.session.email%>' email and this as my name to register:”</span>
+              </div>
+              <div class="row" style="padding-left: 20px;padding-top: 15px;">
                 <input type="text" id="name" placeholder="Name" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
                 <div id="register-btn" style="padding: 7px;background-color: #0096d6;font-size: 13px;display: inline-block; cursor:pointer;color: #FFFFFF; text-decoration: none;vertical-align: top;">
                   <span>Register</span>

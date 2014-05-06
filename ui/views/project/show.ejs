@@ -13,24 +13,3 @@ Username: <input type="text" name="user">
 <br>
 <% }  %>
 <%   %>
-
-<!--
-<script>
-    $("#submit-register").click(function(){
-        var pname = $("#pname").val();
-        if (username && password) {
-            $.post(
-                '/shell/run',
-                {pname: pname},
-                function () {
-                    window.location = "/shell/run";
-                }
-            ).fail(function(res){
-                alert("Error: " + res.getResponseHeader("error"));
-            });
-        } else {
-            alert("A username and password is required");
-        }
-    });
-</script>
--->
