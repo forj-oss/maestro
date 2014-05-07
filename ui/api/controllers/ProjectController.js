@@ -20,6 +20,7 @@
  * @type {{create: create, _config: {}}}
  */
  var maestro_exec = require('maestro-exec/maestro-exec');
+  var blueprint_utils = require('blueprint/blueprint');
 module.exports = {
   /**
    * Action blueprints:
@@ -34,7 +35,37 @@ module.exports = {
     res.view({ layout: null });
   },
   new: function(req, res){
-    res.view({ layout: null });
+    blueprint_utils.get_blueprint_id(function(err){
+      console.log('Unable to get the instance_id of the kit: '+err.message);
+      res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+    }, function(result){
+        if(result === undefined){
+          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+        }else{
+          
+          try{
+            result = JSON.parse(result);
+          }catch(e){
+            result = new Error('Unable to parse malformed JSON');
+          }
+          
+          if(result instanceof Error){
+            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+          }else{
+            blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
+              console.error('Unable to retrieve the list of tools:'+err.message);
+              callback(err, tools);
+            }, function(res_tools){
+              tools = JSON.parse(res_tools);
+              tools.forEach(function(tool) {
+                if(tool.name=='gerrit'){
+                  res.view({ layout: null, gerrit_url: tool.tool_url });
+                }
+              });
+            })
+          }
+        }
+    });
   },
   /**
    * Overrides for the settings in `config/controllers.js`
