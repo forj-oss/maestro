@@ -15,8 +15,8 @@
                 <% }else{ %>
                   <div class="ops-home"><a href="<%=tool.tool_url%>">Home</a></div>
                 <% } %>
-                <div class="ops-workload ops-ok" style="cursor:pointer;">Workload</div>
-                <div class="ops-backup ops-warning" style="cursor:pointer;">Backup</div>
+                <div class="ops-workload ops-offline" style="cursor:pointer;">Workload</div>
+                <div class="ops-backup ops-offline" style="cursor:pointer;">Backup</div>
               </div>
               <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
 						    <% if(tool.icon!=='true'?false:true){ %>
