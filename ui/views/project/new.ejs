@@ -15,9 +15,15 @@
 </div>
 <script>
   $(document).ready(function(){
-    $('#create_project').click(function(){
+    $('#create_project').on('click', doPost());
+  });
+  function doPost(){
+    $('#create_project').on('click',function(){
       $('#div_result').fadeIn(200);
+      $('#create_project').off();
+      $('#create_project').css('background-color', '#797979');
       $.ajax({
+        asyc: true,
         type: "POST",
         url: "/project/create",
         data: { project_name: $('#project_name').val() }
@@ -27,14 +33,18 @@
             $('#project_result').css('color', '#47CC3A');
             $('#project_result').text('Project created, please wait 10 min. and visit Gerrit.');
           }).fadeIn(500);
+          $('#create_project').on(doPost);
+          $('#create_project').css('background-color', '#1d4e70');
         }else{
           $('#div_result').fadeIn(500,function(){
             $('#project_result').css('color', '#D6332C');
             $('#project_result').text('Project creation failed.');
           }).fadeIn(500);
+          $('#create_project').on(doPost);
+          $('#create_project').css('background-color', '#1d4e70');
         }
       });
     });
-  });
+  }
 </script>
 <% } %>

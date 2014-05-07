@@ -26,7 +26,7 @@ module.exports = {
    *    `/project/create`
    */
   create: function (req, res) {
-    maestro_exec.execCmd('sudo ./config/newproject.sh', req.body.project_name, { status_only: true }, function(data){
+    maestro_exec.createProject(req.body.project_name, function(data){
      res.json(data);
     });
   },
