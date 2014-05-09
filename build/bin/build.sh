@@ -238,9 +238,16 @@ else
 fi
 if [ ! -r "$CONFIG" ]
 then
-   echo "List of valid configuration : {--box-name}.{'bld' or --build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
-   ls -l $CONFIG_PATH/*.env
-   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)"
+   printf "Unable to load build configuration file.\nHere are the list of valid configuration from '$CONFIG_PATH':\n"
+   printf "%-10s | %-20s | %-10s\n--------------------------------------------\n" "BoxName" "ConfigName" "BranchName"
+   ls -1 $CONFIG_PATH/*.env | sed 's|'"$CONFIG_PATH"'/\(.*\)\.env$|\1|g' | awk -F. '{ 
+                                                                                     MID=$0;
+                                                                                     gsub(sprintf("^%s.",$1), "",MID);
+                                                                                     gsub(sprintf(".%s$",$NF),"",MID);
+                                                                                     printf "%-10s | %-20s | %-10s\n",$1,MID,$NF
+                                                                                    }'
+   echo "--------------------------------------------"
+   Error 1 "No file matching BoxName:${APP_NAME} ConfigName:${BUILD_CONFIG} BranchName:${GITBRANCH}. (${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}.env) Please check it."
 fi
 
 # TODO: Add validation of HPC variables set.
