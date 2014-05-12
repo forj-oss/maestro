@@ -51,7 +51,7 @@ module.exports = {
   },
   new: function(req, res){
     blueprint_utils.get_blueprint_id(function(err){
-      console.log('Unable to get the instance_id of the kit: '+err.message);
+      console.error('Unable to get the instance_id of the kit: '+err.message);
       res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
     }, function(result){
         if(result === undefined){

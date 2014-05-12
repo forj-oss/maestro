@@ -42,7 +42,6 @@ module.exports = {
    */
   _config: {},
   register: function(req, res){
-    console.log(req.session.email);
     if(req.session.email === undefined){
       res.redirect('/auth/sign_in', 301);
     }else{
