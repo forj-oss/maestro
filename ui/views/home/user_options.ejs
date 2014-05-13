@@ -8,7 +8,13 @@
       <a href="../auth/sign_in" style="color: #FFFFFF; text-decoration: none;">Sign In</a>
     </div>
   <% }else{ %>
-    <h3 class="user-options-title" style="margin-bottom: 7px;">Welcome</h3><span><%=req.session.email%></span>
+    <h3 class="user-options-title" style="margin-bottom: 7px;">Welcome
+      <%if(req.session.is_admin){ %>
+        Administrator
+      <% }else{ %>
+        User
+      <% } %>
+    </h3><span><%=req.session.email%></span>
     <div style="padding: 10px;background-color: #1d4e70;font-size: 13px;display: inline-block; position: absolute; bottom: 25px;left: 22px;">
       <a href="../auth/sign_out" style="color: #FFFFFF; text-decoration: none;">Sign Out</a>
     </div>
