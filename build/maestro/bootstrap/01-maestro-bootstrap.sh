@@ -14,7 +14,12 @@
 #
 # Identify branch to use for GIT clones
 
+# Reading meta-data
 GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
+MAESTRO_LINK="$(GetJson /meta-boot.js maestrolink)"
+
+# Show instructions runs
+set -x 
 if [ "$GITBRANCH" != "" ]
 then
     GITBRANCH_FLAG="-b $GITBRANCH"
@@ -28,7 +33,6 @@ chmod 2775 /opt/config/production/git
 _CWD=$(pwd)
 cd /opt/config/production/git
 
-MAESTRO_LINK="$(GetJson /meta-boot.js maestrolink)"
 GitLinkCheck $MAESTRO_LINK
 if [ ! $? -eq 0 ] 
 then
@@ -41,3 +45,4 @@ cd maestro
 git config core.autocrlf false
 
 ln -s /opt/config/production/git/maestro/puppet /opt/config/production
+set +x

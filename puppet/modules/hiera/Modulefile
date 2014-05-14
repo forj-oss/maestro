@@ -1,0 +1,9 @@
+name 'forj-hiera'
+version '0.1.0'
+author '(c) Copyright 2014 Hewlett-Packard Development Company, L.P.'
+license 'http://www.apache.org/licenses/LICENSE-2.0'
+source 'https://review.forj.io'
+project_page 'https://forj.io'
+summary 'Sets up our hiera data, works in conjuction with runtime_project\\files\\hier puppet.'
+description 'Hiera makes Puppet better by keeping site-specific data out of your manifests. 
+Puppet classes can request whatever data they need, and your Hiera data will act like a site-wide config file. '

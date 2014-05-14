@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+    ServerAdmin puppet
+    ServerName localhost
+    ServerAlias localhost
+ 
+    ProxyRequests off
+ 
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+ 
+    <Location />
+        ProxyPass http://localhost:1337/
+        ProxyPassReverse http://localhost:1337/
+    </Location>
+</VirtualHost>

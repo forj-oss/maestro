@@ -1,4 +1,4 @@
-#!/bin/bash
+# == status_url_config
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-## "pupkillinst.sh" script will handle to delete the instances created by
-## the kit from eroplus instance, using on choice a puppet manifest.
-## xx-util, xx-ci, xx-review (will the instance to clear
 
-function getnst {
-     export PUPPET_MODULES=/etc/puppet/modules:/opt/config/production/modules:/opt/config/production/git/maestro/puppet/modules:/opt/config/production/git/CDK-infra/blueprints/openstack/puppet/modules
-     puppet apply --debug --verbose --modulepath=$PUPPET_MODULES /opt/config/production/git/maestro/puppet/manifests/maestro-unprovision.pp
-} 
-
-getnst
+Facter.add("status_url_config") do
+ confine :kernel => "Linux"
+ setcode do
+   if File.exist? "/srv/static/status/index.html"
+     Facter::Util::Resolution.exec("echo #")
+   else
+     Facter::Util::Resolution.exec("echo")
+   end
+ end
+end

@@ -1,0 +1,8 @@
+name 'forj-packages'
+version '0.1.0'
+author '(c) Copyright 2014 Hewlett-Packard Development Company, L.P.'
+license 'http://www.apache.org/licenses/LICENSE-2.0'
+source 'https://review.forj.io'
+project_page 'https://forj.io'
+summary 'Allows us to manage package installations from hiera, supports many all features of package specification.'
+description 'Allows us to manage package installations from hiera, supports many all features of package specification.'

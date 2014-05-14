@@ -5,6 +5,7 @@
 	<projects>
 		<project>config</project>
 		<project>puppet</project>
+		<project>redstone</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

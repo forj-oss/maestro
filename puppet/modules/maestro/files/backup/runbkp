@@ -1,0 +1,433 @@
+#!/bin/bash
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+#---runbkp V 1.0 --- based on mybkp_rsync.sh 
+#    - test: on dev instances wiki, jenkins, gerrit
+#    - centralize in a standard refactorized script
+#    - test: perfomance of configurations by a external file
+# General Description:
+#  This script will prepare the backups for instances, 
+#   I )  check for Database existance (now mysql service)
+#   II)  run mysql backup based on innobackupex tool with an script that
+#        runs the full backup. -- 
+#   III) completes a backup of a packed FS with bup and rsync tools
+#   note: for log lines format "Clasificacion: evtime <operation message>"
+#         evtime = date +%d/%m-%k:%M
+#---------------------------------------------------------------------------------------------
+
+# =-==-=-==-=-==-=- Set variables -=-==-=-==-=-==-=
+
+## mode flag ---- 
+sc_mode="P"                                       #--- perform the different modes of how this script runs
+params=$1
+## system variables 
+mydate=$(date +'%Y-%W')                          #--- sets standard date for destiny folders
+hname="$HOSTNAME"                                #--- Host name
+evtime=$(date +%d/%m-%k:%M:%S)                   #--- set for log events
+
+##---=  backup setup variables =---##
+rhnick=""                                        #--- to be set as part of configurations provided and confirmation 
+
+appname=""                                       #--- application name (used as part of bkp folder base ): jenkins, gerrit, wiki, Nexus ...
+srcfolder=""                                     #--- Path to source folder where is located all files to be backup
+bkfoldbase="backups"/"$hname"/"$appname"	 #--- base folder for backup history: "forj-bck"/"$hname"/"$appname" 
+bkfoldcont="$mydate"    	                 #--- name of the initialized folder for current week bkp: $mydate
+bkpbsname=""                                     #--- base name for the bup save function: $appname"_bkp"
+locals=""                       # mnt/"$appname"
+logfile=$appname".log"	                         #--- "$srcfolder/bkphist " will be the container for this log file, name: $bkpbsname".log"
+logpath="$srcfolder/bkphist"                     #--- folder for log file & DB backups: "$srcfolder/bkphist"
+
+
+####################################################################################################################################################################
+############################################          Database section           ###################################################################################
+####################################################################################################################################################################
+TAROPTS="-czvf"
+timestamp=$( date +%Y%m%d )
+clrday="1"  # day of the week when to perform a cleanup of "DB history backups"
+
+#dbhost=""                                       # ---- eg: "localhost"  
+dbuser=""                                        # ---- (e.g.: dbuser=wikiuser)
+dbpw=""                                          # ---- "$dbpw"   # (e.g.: dbuser password)
+DBNAME=""                                        # ---- "reviewdb"
+BACKUPDIR="$logpath"                             # ---- "where backup folder will be placed"
+bkpdbname=$appname_$timestamp
+DBbkf="DB"$appname"bkp"
+confpath="/etc/mysql/my.cnf"
+tmpfold="/mnt/innbckpf"                            # ---- Temporal stream folder for innobackupex
+tmpfile="/mnt/tmpfile"                           # ---- innobackupex operational temporal logs
+fullibx="/usr/bin/innobackupex-1.5.1"            # ---- path to innobackupex binary
+
+
+
+function aptrep { #---- set the apt repository for percona and perfoms percona-xtrabackup Installation
+  apt-key adv --keyserver keys.gnupg.net --recv-keys 1C4CBDCDCD2EFD2A # this keys are a command that shoud mandatory be run
+  vers=$(cat /etc/lsb-release | sed -n '3p' | cut -d "=" -f2)  
+  echo "deb http://mirrors.kernel.org/ubuntu <http://mirrors.kernel.org/ubuntu>  $vers main" >> /etc/apt/sources.list
+  echo "deb http://repo.percona.com/apt $vers main" >> /etc/apt/sources.list
+  echo "deb-src http://repo.percona.com/apt $vers main" >> /etc/apt/sources.list
+  apt-get update
+  #verify the installation
+  apt-cache search percona-xtrabackup
+   if [[ $? -eq 0 ]]; then
+          echo "- Running: $evtime : Performing percona-xtrabackup Installation " >> $logfile 
+          apt-get install -y percona-xtrabackup
+          if [[ $? -eq 0 ]]; then
+               echo "- Success: $evtime : percona-xtrabackup Installed OK " >> $logfile
+          fi
+   else
+          echo "- Error : $evtime : Setting up percona repository unsuccessful" >> $logfile
+          exit 1
+   fi
+             
+}
+
+function bkhclean { #---- clean the history of innobackups from the folder and left just two days bkp history locally
+  find $BACKUPDIR/$DBbkf/ -name "*.tar.gz" -mtime +$clrday -exec rm -rf {} \;
+}
+
+function chkbkdir { #---- checks the DB backup destiny folder existance
+  if [ !  -d $BACKUPDIR/$DBbkf  ] ;then
+    mkdir -p $BACKUPDIR/$DBbkf
+  else
+    if [ $clrday == $(date +%u) ] ; then  # sets the rotation for the DB backup tar.gz files
+        bkhclean
+    fi
+  fi
+}
+
+function tardump { ## not used but available
+  TAR $TAROPTS $bkpdbname-$timestamp.tgz $BACKUPFILE
+  if [[ $? -eq 0 ]] ; then
+   rm $bkpdbname
+  else
+   exit 1
+  fi
+}
+
+function setmysqldump { ## not used but available
+   mysqldump --all-databases --user=$DBUSER --password  > $bkpdbname
+   if [[ $? -eq 0 ]] ; then
+     tardump
+   else
+     exit 1
+   fi
+}
+
+function dbrewv {
+   BACKUPDIR=$logpath
+   bkpdbname=$appname_$timestamp
+   DBbkf="DB"$appname"bkp"
+}
+
+function setXtrabackup { 
+   dbrewv 
+   userconfs=" --user=$dbuser --password=$dbpw"
+   /usr/sbin/service mysql status | grep 'mysql start/running'
+   if [ $? -ne 0 ] ; then
+           echo "- Warning: $evtime: Mysql service does not appear to be running." >>$logfile
+           exit 1
+   elif [ ! -x $fullibx  ]; then
+               echo "- Warning: $evtime: innobackupex package is not available." >>$logfile
+               aptrep
+               if [[ $? -eq 0 ]]; then
+                       setXtrabackup
+               fi  
+   else        
+               if [ ! $(echo "exit" | /usr/bin/mysql -s --user=$dbuser --password=$dbpw) ]; then 
+                      if [ ! -d $tmpfold ]; then
+                                $fullibx --defaults-file=$confpath  $userconfs  $tmpfold --no-timestamp > $tmpfile 2>&1
+                                if [ -n $(tail -n1 $tmpfile  |awk ' /completed OK/ { print $5}') ]; then
+                                        wherefrom=$(cat $tmpfile | awk ' BEGIN { FS=":" } /Backup created/ {print $2} ' |cut -d "'" -f2)
+                                        tail -n1 $tmpfile >> $logfile
+                                        echo "- Success: $evtime : Database backuped to $wherefrom " >> $logfile
+                                        rm -f $tmpfile 
+                                        echo "- Running: $evtime : Applying logs to backuped Database" >> $logfile
+                                        $fullibx --apply-log --defaults-file=$confpath $userconfs  $tmpfold  > $tmpfile 2>&1
+                                        if [ -z "$( tail -1 $tmpfile | grep 'completed OK' )" ] ; then
+                                                echo "- Error: $evtime : Error output, Applying log to Databases" >>$logfile
+                                                cat $tmpfile | grep "ERROR" >>$logfile
+                                                rm -rf $tmpfile
+                                                exit 1
+                                        else
+                                                chkbkdir
+                                                bkpdbname=$logpath"/"$DBbkf"/"$bkpdbname".tar.gz"
+                                                echo "- Success: $evtime : Logs applied to backuped Databases" >>$logfile
+                                                echo "- Running: $evtime : Compressing backup files" >>$logfile
+                                                tar -zcf $bkpdbname $tmpfold
+                                                echo "- Success: $evtime : backup files compressed, OK" >>$logfile
+                                                echo "- Running: $evtime : cleanup temp files and folders" >> $logfile
+                                                rm -rf $tmpfold
+                                                echo "- Success: $evtime : All Database backup operations finish successfully." >>$logfile
+                                       fi 
+                                fi
+                      else      
+                                echo "- Warning: $evtime : some operations where not concluded " >> $logfile
+                                echo "- Warning: $evtime : This means the backup not concluded fine last time " >> $logfile
+                                echo "- Info   : $evtime : In this case to retry the backup please delete or remove: $tmpfold" >> $logfile 
+                                echo "- Read: $evtime : please review log file for operation failures" >>$logfile
+                                exit 1
+                      fi
+               else 
+                      echo "- Error: $evtime : Supplied mysql username or password appears to be incorrect" >>$logfile
+                      exit 1
+               fi
+   fi
+}
+
+function dbsetschk {
+  dbuser=$(cat $params | cut -d "#" -f1 | awk ' BEGIN { FS=":" } /^dbuser/ {print $2}' | cut -d " " -f1 )   # ---- (e.g.: dbuser=wikiuser)
+    if [ -n $dbuser ]; then   
+             dbpw=$(cat $params | cut -d "#" -f1 | awk ' BEGIN { FS=":" } /^dbspwd/ {print $2}' | cut -d " " -f1 )     # ---- "$dbpw"   # (e.g.: dbuser password)
+            if [ -n $dbpw ]; then            
+                     DBNAME=$(cat $params | cut -d "#" -f1 | awk ' BEGIN { FS=":" } /^dbname/ {print $2}' | cut -d " " -f1 )   # ---- "reviewdb" 
+                     if [ -n $DBNAME ]; then
+                              setXtrabackup
+                     else
+                              echo "- Error: $evtime : Database specification not provided" >>$logfile
+                              exit 1
+                     fi
+            else
+                     echo "- Error: $evtime : Database password not provided" >>$logfile
+                     exit 1
+            fi
+    else
+             echo "- Error: $evtime : Database user not provided" >>$logfile
+             exit 1
+    fi
+}
+
+#   chkbkdir
+#   setXtrabackup
+
+####################################################################################################################################################################
+####################################################################################################################################################################
+####################################################################################################################################################################
+
+function sshconfig {      #--- verify the config file to retrieve the usefull info to connect to remote user
+  if [ -n  $( grep -w "$rhnick" ~/.ssh/config | awk '{ print  $2 }' ) ]; then
+     "- Success: $evtime : SSH configuration OK  " >>$logfile
+  else
+     "- Error: $evtime : SSH configuration not provided " >>$logfile
+     exit      
+  fi
+}
+#---=--=--=--=--=-- functions block --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
+
+#- log related functions -==-==-==-==-
+
+function bupinitig { # --- perform the bup init and validates
+   echo "- Running: $evtime : Initializing bup repository " >>$logfile
+   bup -d $locals init
+   if [[ $? -ne 0 ]]; then
+           echo "- Error: $evtime : bup repo initializing not successful " >>$logfile
+           exit 1
+   else
+           echo "- Success: $evtime : bup repo created at $locals" >>$logfile
+   fi
+}
+
+
+function mk_log { #creates log directory and log file
+   if [ ! -d $logpath ]; then
+            mkdir -p $logpath 
+            bupinitig
+   fi
+    touch $logpath/$logfile
+    logfile="$logpath/$logfile"
+    echo "- Success: $evtime :  log created: OK" >> $logfile
+}
+
+function chk_log {  # Validates the log file; if exists Checks OK, else creates the file
+  if [ -a $logpath/$logfile ] ;  then 
+        logfile="$logpath/$logfile"
+        echo "-Success: $evtime : log availability check OK" >>$logfile
+        if [ "$(date +%u)" = "1" ]; then  #----
+             echo "- Success: $evtime : log rotation, Start Backup for week" >>$logfile
+        fi
+  else
+        mk_log
+  fi
+}
+
+function sshmkdestfol {  # --- create at first time to initialize the remote backup folder (destiny folder)
+ echo "- Running: $evtime : Creating remote Folder $bkfoldcont " >> $logfile
+ ssh $rhnick " mkdir -p $bkfoldbase/$bkfoldcont " >> $logfile
+ ssh $rhnick " chmod 755 -R $bkfoldbase/$bkfoldcont " >> $logfile
+ if [ $? -eq 0 ] ; then
+   echo "- Success: $evtime : folder $bkfoldcont created OK" >> $logfile
+ else
+   echo "- Error: $evtime : Some error happened at folder inicialization" >> $logfile
+   exit 1
+ fi
+}
+
+function verify_init { # --- verifies the initialization of remote folders
+  ssh $rhnick ls -l $bkfoldbase
+  if [[ $? -eq 0  ]] ; then     #check bsfold: "forj-bck"/"$hname"/"$appname"
+      echo "- Success: $evtime : Verified Availability of remote base folder  OK" >>$logfile            
+     if [[ -d $( ssh $rhnick ls -l $bkfoldbase/$bkfoldcont ) ]] ; then
+         echo "- Success: $evtime : remote Backup folder availability OK" >>$logfile
+     else
+         sshmkdestfol
+     fi
+  else
+     ssh $rhnick " mkdir -p $bkfoldbase " >> $logfile
+     ssh $rhnick " chmod 755 -R $bkfoldbase " >> $logfile
+     if [ $? -eq 0 ] ; then
+        verify_init
+     else
+        exit 1
+     fi
+  fi
+}
+
+#    --=--=--=--=--=--=--=---
+
+#$RSYNC $RSYNCOPTS $SSH $srcfolder $REMOTEUSER@$REMOTEHOST:$REMOTEDIR
+function printvals { # --- print values resultant of backup operations
+      echo "Running: $evtime : Last values to be save \" log \" " >> $logfile
+      echo "Folder Source  : $srcfolder" >> $logfile
+      echo "Backup Name    : $bkpbsname" >> $logfile
+      echo "Destiny Folder : $bkfoldcont" >> $logfile
+      if [ "yes" = "$dbavail"  ]; then
+                 echo "DB backup file : $bkpdbname">> $logfile
+      fi
+}
+
+function rsyncbup { # --- generates the sincronization from local and remote folder  
+  printvals
+  verify_init
+  rsync -avz -e ssh $locals $rhnick:$bkfoldbase/$bkfoldcont
+  if [[ $? -eq 0 ]] ; then
+     echo "- Success: $evtime : Backup process finish Complete " >> $logfile
+     rsync -avz -e ssh $locals $rhnick:$bkfoldbase/$bkfoldcont  # --- will send the last line of the log :)
+  fi
+}
+
+function bupindex { # --- performs the bup indexation and validates
+   echo "- Running: $evtime :  start bup index" >>$logfile
+   bup -d $locals index -u $srcfolder 
+   if [[ $? -eq 0 ]]; then
+             echo "- Success: $evtime : bup index concluded OK" >>$logfile
+   elif [[ $? -eq 15 ]]; then
+             bupinitig
+   else
+     echo "- Error: $evtime : bup index failed" >>$logfile
+     exit 1
+   fi  
+}
+
+function chklocals { #---verify local destiny for bup and backup synchroinzation
+   if [ ! -d "$locals" ]; then 
+            echo "- Running: $evtime : Creating local backup container" >>$logfile     ## de las funciones para hacer la validación
+            mkdir -p $locals
+            bupinitig       
+               #if [[ $? -eq 0 ]] ; then
+               #        echo "- Running: $evtime : Initializing bup repository " >>$logfile
+               #        bupindex
+              #fi
+     #else
+              #bupindex
+     #          if [[ $? -ne 0 ]] ; then
+     #                  bupinitig
+     #                  chklocals
+     #          fi    
+     #          echo "- Success: $evtime : Bup repo checked OK" >>$logfile
+  fi
+}
+
+function bupsave {
+   echo " start bup save process at $(date +%m-%d-%y:%H:%m:%S) --" >>$logfile
+   
+   tar -cf - $srcfolder |  bup -d $locals split --name=$bkpbsname
+   if [[ $? -eq 0 ]] ; then
+           echo "- Success: $evtime : bup save finish OK" >>$logfile
+   else
+           echo "- Error: happened in Backup save process" >>$logfile
+           exit 1
+   fi
+}
+
+function rewval {
+   locals=/mnt/$appname
+   #------  bkfoldbase="forj-bck"/"$hname"/"$appname"        #--- base folder for backup history: "forj-bck"/"$hname"/"$appname" -------# 
+   bkfoldbase="backups"/"$hname"/"$appname"                  #"$hname"/"$appname"  base folder for backup history: "forj-bck"/"$hname"/"$appname" 
+   logfile=$appname".log"                                    #--- "$srcfolder/bkphist " will be the container for this log file, name: $bkpbsname".log"
+   logpath="$locals/bkphist"   
+   chk_log
+}
+
+
+function CreateRBack {  #Central function of backup functions
+   rewval
+   dbavail="$(cat $params | cut -d '#' -f1 | awk ' BEGIN { FS=":" } /^DBsvr/ {print $2}' | cut -d " " -f1 )"
+   if [ "yes" = "$dbavail"  ]; then
+            dbsetschk 
+            echo "- Running: $evtime : Start backup Filesystem operations" >>$logfile
+   fi
+   chklocals
+   bupsave   
+   rsyncbup
+}
+
+function chkconff {    # --= check availability of config file
+##--- cat bkpconfig |cut -d "#" -f1 | awk ' BEGIN { FS=":" } /^[config_ap]/ {print $2} ' 
+ appname=$(cat $params | cut -d "#" -f1 | awk ' BEGIN { FS=":" } /^config_ap/ {print $2}' | cut -d " " -f1 )
+   if [ -n $appname  ]; then 
+             rhnick=$(cat $params | cut -d "#" -f1  | awk ' BEGIN { FS=":" } /^sshcnfnam/ {print $2}' | cut -d " " -f1 )                    
+            if [ -n $rhnick ]; then
+                    srcfolder=$(cat $params | cut -d "#" -f1  | awk ' BEGIN { FS=":" } /^srcfolder/ {print $2}' | cut -d " " -f1 )
+                    if [ -n $srcfolder ]; then
+                            bkpbsname=$(cat $params | cut -d "#" -f1  | awk ' BEGIN { FS=":" } /^bkpbsname/ {print $2}'| cut -d " " -f1 )
+                             if [ -n $bkpbsname ]; then
+                                    CreateRBack 
+                             else
+                                     echo "- Error: $evtime : backup name not specified"  >>$logfile
+                             fi
+                    else
+                           echo "- Error: $evtime : source folder not specified"  >>$logfile
+                    fi
+            else
+                   echo "- Error: $evtime : ssh conf name not specified" >>$logfile
+            fi
+   else
+        echo "- Error: $evtime : app config header not specified" >>$logfile
+   fi
+}
+
+
+
+#--=--=--=--=--=--=---
+case $sc_mode in
+[M,m])
+       #validins  ## retrieve values from the user; not in use now
+       printvals ## print values
+;;
+[A,a])
+   echo "Beggining backup running at : $mydate " >> $logfile
+   chk_log
+   
+#--   sshconfig --> function removed
+   verify_init
+   CreateRBack         ## call the main function to perform the backup 
+;;
+p|P)
+   if [ -f "$params" ]; then
+       chkconff
+   else
+       echo "- Error: $evtime Checking config file: Error"
+   fi    
+;;
+esac

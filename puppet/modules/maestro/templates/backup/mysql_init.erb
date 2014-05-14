@@ -1,0 +1,5 @@
+<%# This script creates the user for backups in mysql db %>
+select count(*) as 'exists' from mysql.user where user = '<%= @db_user %>';
+create user '<%= @db_user %>' IDENTIFIED BY '<%= @db_password %>';
+GRANT RELOAD, SHOW DATABASES, SELECT, LOCK TABLES, REPLICATION CLIENT ON *.* TO '<%= @db_user %>';
+FLUSH PRIVILEGES;

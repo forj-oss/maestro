@@ -1,0 +1,46 @@
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+# Openstack layout - Version 0.01
+#
+
+# This file has been created to be focused for the first generator script to manage openstack as a Blueprint implementation.
+#
+# On Maestro, this file will need to be located under /usr/lib/maestro/layouts.
+# By convention, the layout will be named as <bluePrintName>-layout.yaml to make the distinction against the master one.
+
+# Variables:
+# There is at least 3 kind of variables. All of these variables are defined from the blueprint. 
+# In the deploy file, we will implement 2 kind of files:
+# - hiera variables. We will have a file per servers.
+#   blueprints/openstack/puppet/modules/runtime_project/files/hiera/hieradata/Debian/nodetype/*.yaml
+# - site.pp
+#   site.pp will need to be replaced by a collection of files. See http://docs.puppetlabs.com/puppet/latest/reference/dirs_manifest.html
+#   Currently, I have updated site.pp to reflect a simplified util section. But this should be stored under a <server>.pp
+
+blueprint-deploy:
+   blueprint : openstack-1.0 # This refer to another file which describes the blueprint itself. 
+                             # In this case, I named this file blueprint/openstack-1.0.yaml.
+                             # Most of default modules variables are kept in the blueprint file, like vhost_name for 'graphite' or even 'status'.
+   servers:
+     - util: # This define the server which will have a list of application installed.
+       name: util
+       applications:
+        - graphite: # Any class references are stored on the blueprint file. We are listing only top elements and data required set up during layout.
+          hiera:
+            class_params: # Those options has been fixed during the setup of the layout. Default values not updated are kept referenced from the blueprint.
+              - graphite_admin_user: ''
+              - graphite_admin_email: ''
+              - graphite_admin_password: ''
+        - paste:
+

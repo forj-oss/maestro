@@ -2,7 +2,7 @@
 .bin/
 fixtures/
 *.pyc
-CDK-infra/blueprints/openstack/puppet/modules/eroplus_ui/files/ui/Gemfile.lock
+Gemfile.lock
 .vagrant
 vagrant/orchestrator/bundles
 vagrant/CDK-gerrit/CDK_Deploy/vagrant.pem

@@ -1,4 +1,3 @@
-
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +12,29 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
+
+# This file is shared between user_data build sequence and box bootstrap sequence.
+
 function GetJson
 {
- python -c "exec(\"import json\\njson_d=open('$1').read()\\ndata=json.loads(json_d)\\nprint(data['$2'])\")"
+ python -c "
+import json
+import os.path
+import sys
+ 
+if os.path.isfile('$1'):
+   json_d=open('$1').read()
+   data=json.loads(json_d)
+   if '$2' in data.keys():
+      print(data['$2'])
+      print >> sys.stderr, '$1 - Found: $2 = \"'+data['$2']+'\"'
+   else:
+      print '$3'
+      print >> sys.stderr, 'Key \"$2\" not found. Default value to \"$3\"'
+else:
+   print '$3'
+   print >> sys.stderr, 'Warning! File \"$1\" was not found. Default value to \"$3\"'
+"
 }
 
 # make sure that the passed in gitlink is a valid git repository url
@@ -56,34 +75,13 @@ function GitLinkCheck
    fi
 }
 
-exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
-                 print POUT;
-                 print POUT >> "/var/log/cloud-init.log";
-                 fflush("");
-               }') 2>&1
-
-echo "################# BOOT-Ero Start step 1 #################"
-
-set -x
-
-locale-gen en_US
 # TODO: find if we can source meta.js values from facter since we
 #  have all meta.js in facters now.
-if [ -f /config/meta.js ]
-then
-   PREFIX=/config
-fi
 
-if [ ! -f $PREFIX/meta.js ]
+if [ -f /etc/environment ]
 then
-   echo "Boot image invalid. Cannot go on!"
-   exit 1
+   . /etc/environment
 fi
 
 
-. /etc/environment
-_PROXY="$(GetJson /meta-boot.js webproxy)"
-
-apt-get purge -yq python-pip
-
-export HOME=/root
+# vim:syntax=sh

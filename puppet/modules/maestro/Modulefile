@@ -1,0 +1,8 @@
+name    'forj-maestro'
+version '0.1.0'
+source 'https://review.forj.io'
+author 'Copyright 2012 Hewlett-Packard Development Company, L.P'
+license 'http://www.apache.org/licenses/LICENSE-2.0'
+summary 'Rendering engine for forj blueprints. '
+description 'Implements orhestration integration, forj administrative gui, landing page and forj api interfaces.'
+project_page 'https://forj.io'

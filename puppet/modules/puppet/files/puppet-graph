@@ -1,0 +1,16 @@
+#!/bin/bash
+FACTERLIB="/var/lib/puppet/lib/facter"
+PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"
+GRAPHS="/var/lib/puppet/state/graphs"
+GRAPHLIST="expanded_relationships relationships resources"
+OUTPUT="/tmp/graphs"
+
+rm -rf $OUTPUT
+mkdir -p $OUTPUT
+
+/usr/bin/timeout 800 /usr/bin/puppet agent  --test --graph --logdest /var/log/puppet/puppetd.log &> /dev/null
+
+for i in $GRAPHLIST; do
+  dot -Tpng -o $OUTPUT/$i.png $GRAPHS/$i.dot
+done
+

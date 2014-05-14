@@ -1,0 +1,13 @@
+/proc/*
+/sys/*
+/dev/*
+/tmp/*
+/floppy/*
+/cdrom/*
+/var/spool/squid/*
+/var/spool/exim/*
+/media/*
+/mnt/*
+/var/agentx/*
+/run/*
+/root/backup-restore-*

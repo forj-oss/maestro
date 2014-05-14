@@ -13,10 +13,28 @@
 #   limitations under the License.
 #
 
+# This file is shared between user_data build sequence and box bootstrap sequence.
 
 function GetJson
 {
- python -c "exec(\"import json\\njson_d=open('$1').read()\\ndata=json.loads(json_d)\\nprint(data['$2'])\")"
+ python -c "
+import json
+import os.path
+import sys
+ 
+if os.path.isfile('$1'):
+   json_d=open('$1').read()
+   data=json.loads(json_d)
+   if '$2' in data.keys():
+      print(data['$2'])
+      print >> sys.stderr, '$1 - Found: $2 = \"'+data['$2']+'\"'
+   else:
+      print '$3'
+      print >> sys.stderr, 'Key \"$2\" not found. Default value to \"$3\"'
+else:
+   print '$3'
+   print >> sys.stderr, 'Warning! File \"$1\" was not found. Default value to \"$3\"'
+"
 }
 
 # make sure that the passed in gitlink is a valid git repository url
@@ -60,7 +78,10 @@ function GitLinkCheck
 # TODO: find if we can source meta.js values from facter since we
 #  have all meta.js in facters now.
 
-. /etc/environment
+if [ -f /etc/environment ]
+then
+   . /etc/environment
+fi
 
 
 # vim:syntax=sh

@@ -16,7 +16,24 @@
 
 function GetJson
 {
- python -c "exec(\"import json\\njson_d=open('$1').read()\\ndata=json.loads(json_d)\\nprint(data['$2'])\")"
+ python -c "
+import json
+import os.path
+import sys
+ 
+if os.path.isfile('$1'):
+   json_d=open('$1').read()
+   data=json.loads(json_d)
+   if '$2' in data.keys():
+      print(data['$2'])
+      print >> sys.stderr, '$1 - Found: $2 = \"'+data['$2']+'\"'
+   else:
+      print '$3'
+      print >> sys.stderr, 'Key \"$2\" not found. Default value to \"$3\"'
+else:
+   print '$3'
+   print >> sys.stderr, 'Warning! File \"$1\" was not found. Default value to \"$3\"'
+"
 }
 
 # Install log requirement.
@@ -28,7 +45,7 @@ exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
                  fflush("");
                 }') 2>&1
 
-echo "################# BOOTHOOK Start ########################"
+echo "################# 1st sequence : user_data BOOTHOOK Start #################"
 
 PREFIX=/
 
@@ -44,7 +61,7 @@ then
     then
       PREFIX=/config
     else
-    mount /dev/sr0 /config
+      mount /dev/sr0 /config
       if [ -f  /config/openstack/latest/meta_data.json ]
       then
         _meta_data="$(GetJson /config/openstack/latest/meta_data.json meta)"
@@ -60,7 +77,7 @@ then
   fi
 fi
 
-#if metadata does not exist grab it form the Upstream provided data (${metadata-json} is replaced by upstream code)
+#if metadata does not exist grab it form the Upstream provided data ({metadata-json} is replaced by upstream code (build.sh))
 if [ ! -f $PREFIX/meta.js ] 
 then
   echo '${metadata-json}' > /meta-boot.js
@@ -71,13 +88,12 @@ fi
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
 if [ "$_test_data" == "" ]
 then
-  echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "ssh://review/CDK-infra","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
+  echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "ssh://review/forj-oss/maestro","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
   echo "WARNING! /config/meta.js not found. HARDCODING DATA"
 fi
 
 cp $PREFIX/meta.js /meta-boot.js
 chmod 644 /meta-boot.js
-
 
 cat $PREFIX/meta.js
 
@@ -86,12 +102,12 @@ then
    echo "Boot image invalid. Cannot go on!"
    exit 1
 fi
-set -xv
 
 # Proxy management
 _PROXY="$(GetJson $PREFIX/meta.js webproxy)"
 if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
 then
+    set -x
     echo "export HTTP_PROXY=$_PROXY
 export http_proxy=$_PROXY
 export HTTPS_PROXY=$_PROXY
@@ -102,11 +118,19 @@ export no_proxy=localhost,127.0.0.1,10.0.0.1,169.254.169.254" >> /etc/environmen
     echo "Acquire::http::proxy \"$_PROXY\";
 Acquire::https::proxy \"$_PROXY\";
 Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
+    set +x
 fi	
 # hostname, and domain settings have to be fixed to make puppet master/agent running together.
 
+# Loading Metadata (before debug mode to limit unwanted output...)
 _SITE="$(GetJson $PREFIX/meta.js cdksite)"
 _DOMAIN="$(GetJson $PREFIX/meta.js cdkdomain)"
+_PUPPET_MASTER_IP="$(GetJson $PREFIX/meta.js eroip)"
+_PUPPET_MASTER="$(GetJson $PREFIX/meta.js erosite)"
+_PUPPET_DOMAIN="$(GetJson $PREFIX/meta.js erodomain)"
+#APT_MIRROR="$(GetJson $PREFIX/meta.js apt-mirror | sed 's/\//\\\//g') "
+
+set -x
 _FQDN=$_SITE.$_DOMAIN
 _HOSTNAME=$(echo $_FQDN | awk -F'.' '{print $1}')
 
@@ -122,9 +146,6 @@ hostname -b -F /etc/hostname
 
 # maestro 	to /etc/hosts
 
-_PUPPET_MASTER_IP="$(GetJson $PREFIX/meta.js eroip)"
-_PUPPET_MASTER="$(GetJson $PREFIX/meta.js erosite)"
-_PUPPET_DOMAIN="$(GetJson $PREFIX/meta.js erodomain)"
 _PUPPET_MASTER_FQDN=$_PUPPET_MASTER.$_PUPPET_DOMAIN
 _PUPPET_MASTER_HOSTNAME=$(echo $_PUPPET_MASTER | awk -F'.' '{print $1}')
 
@@ -136,7 +157,6 @@ fi
 cp /etc/dhcp/dhclient.conf /etc/dhcp/dhclient.conf.bak
 sed -e "s/domain-name, domain-name-servers, domain-search, host-name,/domain-name-servers,/" /etc/dhcp/dhclient.conf --in-place
 
-#APT_MIRROR="$(GetJson $PREFIX/meta.js apt-mirror | sed 's/\//\\\//g') "
 
 #if [ -n "$APT_MIRROR" ]
 #then
@@ -153,6 +173,5 @@ sed -e "s/domain-name, domain-name-servers, domain-search, host-name,/domain-nam
 apt-get -qy update
 apt-get -qy upgrade
 set +x
-echo "################# BOOTHOOK End ##########################"
+echo "################# 1st sequence : user_data BOOTHOOK ended  #################"
 exec 1>&6 2>&1
-echo "*************************** NO MORE OUTPUT to log file"

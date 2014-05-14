@@ -1,0 +1,28 @@
+#cloud-config
+hostname: <%= @full_q_hostname %>
+fqdn: <%= @full_q_hostname %>
+manage_etc_hosts: false
+final_message: "AGENT SYSTEM booted your system, after $UPTIME seconds"
+locale: en_US.UTF-8
+packages:
+  - language-pack-en
+  - dos2unix
+  - git
+  - python-all-dev
+  - curl
+  - corkscrew
+  - make
+package_reboot_if_required: false
+puppet:
+ conf:
+   main:
+     server: <%= @fqdn %>
+     certname: "<%= @full_q_hostname %>"
+     pluginsync: "true"
+   agent:
+     report: "true"
+     splay: "true"
+     listen: "true"
+     runinterval: "600"
+
+output: {all: '| tee -a /var/log/cloud-init.log'}

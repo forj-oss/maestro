@@ -1,0 +1,20 @@
+require 'rake'
+require 'rspec/core/rake_task'
+
+require 'rubygems'
+require 'puppetlabs_spec_helper/rake_tasks'
+require 'puppet-lint/tasks/puppet-lint'
+
+RAKE_ROOT = File.dirname(__FILE__)
+
+PuppetLint.configuration.fail_on_warnings = true
+PuppetLint.configuration.send('disable_80chars')
+
+# Disable check due to upstream bug: https://github.com/rodjek/puppet-lint/issues/170
+PuppetLint.configuration.send('disable_class_parameter_defaults')
+
+require 'puppetlabs_spec_helper/rake_tasks'
+
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = 'spec/*/*_spec.rb'
+end

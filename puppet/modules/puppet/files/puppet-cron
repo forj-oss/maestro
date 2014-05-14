@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Wiki page: https://kixeye.atlassian.net/wiki/display/UT/puppet-cron
+
+COMMAND=$1
+
+if [ $COMMAND != "disable" ] && [ $COMMAND != "enable" ]; then
+
+  echo puppet-cron disable  or
+  echo puppet-cron enable
+
+fi
+
+if [ -d /etc/cron.disabled ]; then
+
+  mkdir /etc/cron.disabled
+
+fi
+
+if [ -d /etc/cron.disabled/cron.d ]; then
+
+  mkdir /etc/cron.disabled/cron.d
+
+fi
+
+if [ $COMMAND == "disable" ]; then
+
+  if [ -f /etc/cron.d/puppet-agent ]; then
+
+    echo "Warning: This does not manage currently running puppet agents."
+    echo "         Be sure to check before making emergency changes." 
+    mv /etc/cron.d/puppet-agent /etc/cron.disabled/cron.d
+
+  else
+
+    echo "puppet agent cron disabled already or file missing"
+
+  fi
+
+fi
+
+if [ $COMMAND == "enable" ]; then
+
+  if [ -f /etc/cron.disabled/cron.d/puppet-agent ]; then
+
+    mv /etc/cron.disabled/cron.d/puppet-agent /etc/cron.d
+
+  else
+
+    echo "puppet agent cron enabled already or file missing"
+
+  fi
+
+fi

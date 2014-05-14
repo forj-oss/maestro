@@ -15,9 +15,11 @@
 #
 # Starting Maestro bootstrap from forj/maestro repository.
 
+echo "################# 2nd sequence : Maestro bootstrap start #################"
 if [ -x /opt/config/production/git/maestro/bootstrap/init.sh ]
 then
    # Initialize bootstrap for Maestro
    /opt/config/production/git/maestro/bootstrap/init.sh /opt/config/production
 fi
 
+echo "################# 2nd sequence : Maestro bootstrap ended #################"

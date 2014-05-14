@@ -35,13 +35,15 @@ fi
 # puppetlabs broke, and we needed to grab a newer version of this script without forwarding config repo
 # TODO: need to get to latest version of config repo so we can un-fork install_puppet.sh
 
-bash /opt/config/production/git/CDK-infra/blueprints/openstack/puppet/install_puppet.sh
+bash /opt/config/production/git/maestro/puppet/install_puppet.sh
 bash /opt/config/production/git/config/install_modules.sh
-bash /opt/config/production/git/CDK-infra/blueprints/openstack/puppet/install_modules.sh
-bash /opt/config/production/git/CDK-infra/blueprints/openstack/hiera/hiera.sh
+bash /opt/config/production/git/maestro/puppet/install_modules.sh
+#TODO: check with chrissss, how does this get abstracted out of maestro project?  Seems this whole file should be abstracted.
+bash /opt/config/production/git/redstone/puppet/install_modules.sh
+bash /opt/config/production/git/maestro/hiera/hiera.sh
 
 find /opt/config/production -type d -exec chmod 755 {} \;
-find /opt/config/production \( -path \*/bootstrap -o -path \*/build -o -path \*/.git \) -prune -o -type f -exec chmod 644 {} \;
+find /opt/config/production \( -path \*/tools/bin -o -path \*/bootstrap -o -path \*/build -o -path \*/.git \) -prune -o -type f -exec chmod 644 {} \;
 find /opt/config/production -exec chown puppet:puppet {} \;
 
 if [ "$http_proxy" != "" ] && [ -r /etc/default/puppet ] && [ "$(grep http_proxy /etc/default/puppet)" = "" ]
@@ -53,7 +55,12 @@ fi
 function run1
 {
 export environment=production
-export PUPPET_MODULES=/opt/config/$environment/puppet/modules:/opt/config/$environment/git/CDK-infra/blueprints/openstack/puppet/modules:/opt/config/$environment/git/config/modules:/etc/puppet/modules
+export PUPPET_MODULES=/opt/config/$environment/puppet/modules
+export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/redstone/puppet/modules
+export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/maestro/puppet/modules
+export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/config/modules
+export PUPPET_MODULES=$PUPPET_MODULES:/etc/puppet/modules
+
 _FQDN=$(facter fqdn)
 puppet cert generate $_FQDN
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap1.log

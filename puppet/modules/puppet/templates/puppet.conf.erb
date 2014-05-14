@@ -1,0 +1,38 @@
+[main]
+    vardir = /var/lib/puppet
+    logdir = /var/log/puppet
+    ssldir = /var/lib/puppet/ssl
+    rundir = /var/run/puppet
+    factpath = $vardir/lib/facter
+    templatedir = $confdir/templates
+    # enable with : puppet resource package etckeeper ensure=present
+    <% if @prerun_command != '' -%>prerun_command = <%= @prerun_command %><%else%>prerun_command = /etc/puppet/etckeeper-commit-pre<%end%>
+    <% if @postrun_command != '' -%>postrun_command = <%= @postrun_command %><%else%>postrun_command = /etc/puppet/etckeeper-commit-post<%end%>
+    <% if @pluginsync -%>pluginsync = <%= @pluginsync %><%end%>
+    <% if @certname -%>certname = <%= @certname %><%end%>
+
+<% if scope.lookupvar('::subnodetype') == 'puppetmaster' -%>
+[master]
+    ssl_client_header = SSL_CLIENT_S_DN
+    ssl_client_verify_header = SSL_CLIENT_VERIFY
+    autosign = $confdir/autosign.conf
+    <% if @manifestdir -%>manifestdir = <%= @manifestdir %><%end%>
+    <% if @manifest -%>manifest = <%= @manifest %><%end%>
+    <% if @modulepath -%>modulepath = <%= @modulepath %><%end%>
+    <% if scope.lookupvar('::puppet::reports::graphite::status') == 'enabled' %>
+    <% if @reports -%>reports = <%= @reports %>, graphite<% end -%><% else %><% if @reports -%>reports = <%= @reports %><%end%><% end %>
+    <% if @reporturl -%>reporturl = <%= @reporturl %><%end%>
+    <% if @reports == 'puppetdb' -%>storeconfigs_backend = puppetdb<%end%>
+    <% if @storeconfigs -%>storeconfigs = <%= @storeconfigs %><%end%>
+<% end -%>
+[agent]
+    classfile = $vardir/classes.txt
+    localconfig = $vardir/localconfig
+    <% if @splay -%>splay = <%= @splay %><%end%>
+    <% if @splaylimit -%>splaylimit = <%= @splaylimit %><%end%>
+    <% if @runinterval -%>runinterval = <%= @runinterval %><%else%>runinterval = 600<%end%>
+    <% if @listen -%>listen = <%= @listen %><%else%>listen = true<%end%>
+    <% if @puppetmaster -%>server = <%= @puppetmaster %><%end%>
+    <% if @reports -%>reports = true<%end%>
+
+

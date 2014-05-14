@@ -1,0 +1,11 @@
+name 'forj-cacerts'
+version '0.1.0'
+author '(c) Copyright 2014 Hewlett-Packard Development Company, L.P.'
+license 'http://www.apache.org/licenses/LICENSE-2.0'
+source 'https://review.forj.io'
+project_page 'https://forj.io'
+summary 'Manage ssl certificates and private key data (ssh, key pair exchanges)'
+description 'The cacerts is a collection of trusted certificate authority (CA) certificates.
+Sun Microsystems includes a cacerts file with its SSL support in the Java Secure Socket Extension (JSSE) tool kit and JDK 1.4.x.
+ It contains certificate references for well-known Certificate authorities, such as VeriSign. Its format is the "keystore" format defined by Sun. An administrator can edit the cacerts file with a command line tool (also provided by Sun) called keytool. For more information about keytool, see the Sun Web site. 
+'

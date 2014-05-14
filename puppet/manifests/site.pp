@@ -17,5 +17,6 @@
 
 import 'maestro.pp'
 
-import 'forj/*.pp'
+# Todo, this will be executed from different repos like forj-oss/openstack.pp
+# import 'forj/*.pp'
 

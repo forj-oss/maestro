@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+echo "################# BOOT-Node Start step #################"
+
+set -vx
+
+service puppet status
+service puppet stop
+
+locale-gen en_US
+
+_PUPPET_MASTER_IP=<% if defined?(@helion_public_ipv4) %><%= @helion_public_ipv4 %><% elsif defined?(@ec2_public_ipv4)%><%= @ec2_public_ipv4 %><% else %><%= @ipaddress %><% end %>
+_PUPPET_MASTER=<%= @hostname %>
+_PUPPET_MASTER_FQDN=<%= @fqdn %>
+
+
+export HOME=/root
+
+# keep this for DEBUGGING
+echo $_PUPPET_MASTER_FQDN |tee  /tmp/info
+echo `facter fqdn` | tee -a /tmp/info
+cat /etc/puppet/puppet.conf | tee -a /tmp/info
+
+. /etc/environment
+
+# puppet cert list
+
+# workaround for pip issues
+[[ ! -f /var/lib/ez_setup.py ]] && wget --no-check-certificate https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O /var/lib/ez_setup.py
+[[ ! -f /var/lib/get-pip.py ]] && wget --no-check-certificate https://raw.github.com/pypa/pip/master/contrib/get-pip.py -O /var/lib/get-pip.py
+python /var/lib/ez_setup.py
+python /var/lib/get-pip.py
+
+# fix bug with crud failing
+apt-get -q -y install rubygems1.8
+apt-get -q -y install ruby1.8-dev
+/usr/bin/gem1.8 install json --no-rdoc -no-ri
+
+# we perform multiple agent runs so we can allow other configs to execute and update maestro console faster
+# TODO (wenlock): improve this when we implement an event triggering option.
+rm -fr /var/lib/puppet/ssl
+
+if [ "$http_proxy" != "" ] && [ -r /etc/default/puppet ] && [ "$(grep http_proxy /etc/default/puppet)" = "" ]
+then
+   grep http_proxy /etc/environment >> /etc/default/puppet
+fi
+
+puppet agent --debug --verbose --waitforcert 600 --test 2>&1 | tee -a /tmp/puppet-agent-test1.log
+
+# Still need this update to let puppet do the report to maestro about the status.
+puppet agent --debug --verbose --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test2.log
+puppet agent --debug --verbose --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test3.log
+puppet agent --debug --verbose --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
+
+if [ -x /tmp/post-configure.sh ]
+then
+   /tmp/post-configure.sh
+fi
+
+# write /etc/puppet/auth.conf file:
+echo "# Allow puppet kick access
+path    /run
+method  save
+auth    any
+allow   <%= @fqdn %>" > /etc/puppet/auth.conf
+chown root:root /etc/puppet/auth.conf
+chmod 0644 /etc/puppet/auth.conf
+    
+service puppet start
+tail /etc/default/puppet
+cat /proc/$(pgrep puppet)/environ
+
+# service puppet restart
+
+set +ex
+echo "################# BOOT-Node End ###################"

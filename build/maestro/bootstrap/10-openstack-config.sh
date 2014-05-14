@@ -14,7 +14,7 @@
 #   limitations under the License.
 #
 # Configure Openstack config from a freezed version maintained by FORJ team.
-
+set -x
 echo "host jenkins.cdkdev.org
      StrictHostKeyChecking=no" >> ~/.ssh/config
 
@@ -25,3 +25,20 @@ cd /opt/config/production/git
 git clone $GITBRANCH_FLAG http://jenkins.cdkdev.org:82/ubuntu/config.git
 cd config
 git config core.autocrlf false
+
+
+# TODO: check with chrissss how do we specify all the git repos?
+GitLinkCheck $MAESTRO_LINK
+if [ ! $? -eq 0 ] 
+then
+   echo "INFO: using default MAESTRO git url"
+   MAESTRO_LINK="https://review.forj.io/p/forj-oss/redstone"
+fi
+
+git clone $GITBRANCH_FLAG $MAESTRO_LINK redstone
+cd redstone
+git config core.autocrlf false
+
+set +x
+
+
