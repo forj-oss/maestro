@@ -63,7 +63,7 @@ $mysql_root_password = 'changeme'
     sysadmins                 => [],
   } ->
 
-  ::sysadmin_config::swap { '512M': } ->
+  ::sysadmin_config::swap { '1024': } ->
 
   notify{ "Openstack gerrit blueprint working for ${gerrit_server}": } ->
 

@@ -18,7 +18,7 @@ node /^review.*/ inherits default {
       iptables_public_tcp_ports  => [80, 443, 8139, 8140, 29418, 8080],
       sysadmins                  => $sysadmins,
   } ->
-  ::sysadmin_config::swap { '512M':}
+  ::sysadmin_config::swap { '512':}
 }
 
 #
