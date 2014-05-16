@@ -23,7 +23,6 @@
                 <% } %>
                 <div class="ops-workload ops-offline ops">Workload</div>
                 <div class="ops-backup ops-offline ops">Backup</div>
-
               </div>
               <%if(tool.tool_url !== '#'){%>
                 <a class="tool-view" href="<%=tool.tool_url%>" target="_blank" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
@@ -41,20 +40,13 @@
             <% } %>
             <% if(tool.status == 'offline') { %>
               <div class="tool-ops" style="width: 80px;float: right;">
-            	  <%if(tool.tool_url !== '#'){%>
-                  <div class="ops-home ops-offline"><a href="<%=tool.tool_url%>" target="_blank">Home</a></div>
-                <% }else{ %>
-                  <div class="ops-home ops-offline"><a href="<%=tool.tool_url%>">Home</a></div>
+                <% if(req.session.is_admin){ %>
+                    <div class="ops-admin ops-offline">
+                      <a href="#">Admin</a>
+                    </div>
                 <% } %>
                 <div class="ops-workload ops-offline ops">Workload</div>
                 <div class="ops-backup ops-offline ops">Backup</div>
-                <% if(req.session.is_admin){ %>
-                  <%if(tool.settings_url !== '#'){%>
-                    <div class="ops-admin">
-                      <a href="<%=tool.settings_url%>" target="_blank">Admin</a>
-                    </div>
-                  <% } %>
-                <% } %>
               </div>
               <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
                 <% if(tool.icon!=='true'?false:true){ %>
