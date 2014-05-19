@@ -27,7 +27,7 @@ module.exports = function(req, res, next) {
     }, function(result){
       try{
         result = JSON.parse(result);
-        blueprint_utils.get_blueprint_section(result.id, 'blueprint_name', function(err){
+        blueprint_utils.get_blueprint_section(result.id, 'shortname', function(err){
           console.error('Unable to get the blueprint name (policies)(get blueprint section): '+err.message);
           return next();
         }, function(bp_name){

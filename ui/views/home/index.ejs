@@ -7,6 +7,7 @@
     <ul id="og-grid" class="og-grid">
       <% if(tools !== undefined && (tools instanceof Array)){ %>
         <% tools.forEach(function(tool){ %>
+          <%if(tool.visible!=='true'?false:true){ %>
           <li>
             <% if(tool.status == 'online') { %>
             	<div class="tool-ops" style="width: 80px;float: right;">
@@ -59,6 +60,7 @@
   					  <span style="clear:both;"></span>
             <% } %>
           </li>
+          <% } %>
         <% }); %>
       <% } %>
 		</ul>
@@ -155,7 +157,6 @@
     </div>
   </div>
 <% } %>
-</div>
 
 <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm">

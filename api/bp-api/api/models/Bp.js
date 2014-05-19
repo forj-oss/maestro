@@ -24,6 +24,9 @@
 module.exports = {
 
   attributes: {
+    shortname: {
+      type: 'text'
+    },
     id: {
       type: 'string',
       maxLength: 5,
