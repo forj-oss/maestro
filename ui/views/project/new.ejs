@@ -29,7 +29,7 @@
           $('#div_result').fadeOut(500,function(){
             $('#project_result').css('color', '#47CC3A');
             $('#project_result').text('Project request created, please review the change request on zuul status page, and approve the project creation on gerrit (Gerrit/All/Open)');
-            $('#project_result').append('<a href="<%=gerrit_url%>" target="_blank">here.</a>');
+            $('#project_result').append('<a href="<%=gerrit_url%>/#/q/status:open,n,z" target="_blank">here.</a>');
           }).fadeIn(500);
           $('#create_project').on(doPost);
           $('#create_project').css('background-color', '#1d4e70');
