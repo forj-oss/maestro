@@ -142,7 +142,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
+OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -172,11 +172,15 @@ while true ; do
             then
                Error 1 "Branch '$BRANCH' does not exist. Use 'git branch' to find the appropriate branch name."
             fi
-            if [ "$(echo $GITBRANCH | cut -d 1)" != "*" ]
+            if [ "$(echo $GITBRANCH | cut -c 1)" != "*" ]
             then
                Warning "Branch '$BRANCH' is not the default one"
             fi
+            GITBRANCH="$BRANCH"
             shift;shift;; 
+        --setBranch)
+            GITBRANCH="$(echo "$2" | awk '{ print $1}')"
+            shift; shift ;;
         --gitBranchCur)
             GITBRANCH="$(git branch | grep -e '^\*')"
             if [ "$GITBRANCH" = "" ]
@@ -238,7 +242,8 @@ else
 fi
 if [ ! -r "$CONFIG" ]
 then
-   printf "Unable to load build configuration file.\nHere are the list of valid configuration from '$CONFIG_PATH':\n"
+   Info "Unable to load build configuration file."
+   echo "Here are the list of valid configuration from '$CONFIG_PATH':"
    printf "%-10s | %-20s | %-10s\n--------------------------------------------\n" "BoxName" "ConfigName" "BranchName"
    ls -1 $CONFIG_PATH/*.env | sed 's|'"$CONFIG_PATH"'/\(.*\)\.env$|\1|g' | awk -F. '{ 
                                                                                      MID=$0;
@@ -246,7 +251,10 @@ then
                                                                                      gsub(sprintf(".%s$",$NF),"",MID);
                                                                                      printf "%-10s | %-20s | %-10s\n",$1,MID,$NF
                                                                                     }'
-   echo "--------------------------------------------"
+   echo "--------------------------------------------
+Set BoxName    with --box-name. Option required.
+    ConfigName with --build-config. By default, ConfigName is 'bld'
+    BranchName with --gitBranch or --gitBranchCur. By default, BranchName is 'master'"
    Error 1 "No file matching BoxName:${APP_NAME} ConfigName:${BUILD_CONFIG} BranchName:${GITBRANCH}. (${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}.env) Please check it."
 fi
 
