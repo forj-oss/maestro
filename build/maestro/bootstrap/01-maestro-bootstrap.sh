@@ -19,7 +19,7 @@ GitLinkCheck $MAESTRO_LINK
 if [ ! $? -eq 0 ] 
 then
    echo "INFO: using default MAESTRO git url"
-   MAESTRO_LINK="https://15.185.237.61/p/forj-oss/maestro"
+   MAESTRO_LINK="https://review.forj.io/p/forj-oss/maestro"
 fi
 
 git clone $GITBRANCH_FLAG $MAESTRO_LINK maestro
