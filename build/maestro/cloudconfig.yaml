@@ -14,4 +14,4 @@ packages:
   - puppet
   - make
 package_reboot_if_required: false
-output: {all: '| tee -a /var/log/cloud-init.log'}
+output: {all: "| tee -a /var/log/cloud-init.log"}

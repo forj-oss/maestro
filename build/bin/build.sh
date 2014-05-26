@@ -492,7 +492,7 @@ do
      # Build status summary display resize to the terminal cols
      INSTANT_STATUS="${INSTANT_STATUS}$CUR_STATE"
      typeset -i INSTANT_STATUS_CNT=$(echo "$INSTANT_STATUS" | wc -c)
-     if [ "$TERM" != "" ]
+     if [ "$TERM" != "" ] && [ "$TERM" != "dumb" ]
      then # reduce size by prefix string size. ie ACTIVE (cloud_init)
         let "COLS=$(tput cols)-22"
      fi

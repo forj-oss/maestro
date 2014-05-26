@@ -19,8 +19,15 @@ function GetJson
  python -c "exec(\"import json\\njson_d=open('$1').read()\\ndata=json.loads(json_d)\\nprint(data['$2'])\")"
 }
 
+# Install log requirement.
+apt-get install gawk -y
+
 exec 6>&1 # Save stdout
-exec > >(tee -a /var/log/cloud-init.log)
+exec > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
+                 print POUT;
+                 print POUT >> "/var/log/cloud-init.log"
+                 fflush();
+                }')
 exec 2>&1
 
 echo "################# BOOTHOOK Start ########################"
