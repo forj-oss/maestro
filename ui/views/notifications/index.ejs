@@ -1,0 +1,42 @@
+<div style="text-align: left;">
+  <h4 class="help-title">Welcome to FORJ</h4>
+  <h3 style="font-size: 17px;color:white;">Before using FORJ, please complete the following steps</h3>
+     
+     <div>
+     
+         <% if(notification !== undefined && notification !== null){ %>
+          <% notification.forEach(function(doc){ %>
+            <%if(doc.url === '#'){%>
+                <a style="display: block;font-size: 13px;"><%=doc.name%> [N/A]</a>
+            <% }else{ %>
+                <a href="<%=doc.url%>" target="_blank" style="display: block;font-size: 13px;"><%=doc.message%></a>
+            <% } %>
+          <% }); %>
+        <% } %>
+
+       <br><br>
+
+       <input type="checkbox" id="showWelcomeMessage" value="DoNotShow">Do not show this message again</input>
+     
+     </div>
+
+ <script>
+    $(document).ready(function(){ 
+      $('#showWelcomeMessage').click(function(){
+        var isChecked = $(this).is(':checked');
+        var value = (isChecked == true) ? false : true;
+
+        $.ajax({
+          type: 'GET',
+          url: '/home/notifications_enabled',
+          data: { enabled: value },
+          success: function (data, textStatus, jqXHR){
+            if(data.result == 'true' || data.result == true){
+             
+            }
+          },
+          dataType: 'json'
+          });
+      }); 
+    });
+  </script>

@@ -31,6 +31,8 @@
  */
  var async = require('async');
  var blueprint_utils = require('blueprint/blueprint');
+ var kit_ops = require('kit-ops/kit-ops');
+
 module.exports = {
     
   
@@ -143,5 +145,31 @@ module.exports = {
     }else{
       res.view({ layout: null, guest: true })
     }
+  },
+  notifications_enabled: function(req, res){
+
+    kit_ops.get_opt('show_welcome_notification', function(open_err, identifier){
+      if(open_err){
+        res.view('500', { layout: null, errors: [ open_err.message ]});
+      }else{
+        var notificationID = identifier.option_id;
+        var notificationValue = identifier.option_value;
+
+        if(notificationID === undefined){
+          res.view('500', { layout: null, errors: [ 'We could not retrieve the notificationID' ]});
+        }else{
+          
+          var enabled = req.param('enabled');
+          kit_ops.enable_notifications(enabled, notificationID, function(error, success){
+            if(error){
+               res.json({ result: success  }, 500);
+            }else{
+              req.session.show_welcome_message = enabled;
+              res.json({ result: success  }, 200);
+            }
+          });
+        }
+      }
+    });
   }
 };

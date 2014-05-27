@@ -51,6 +51,9 @@ module.exports = {
     documentation: {
       type: 'json'
     },
+    notification: {
+      type: 'json'
+    },
     maestro_url: {
       type: 'text'
     },

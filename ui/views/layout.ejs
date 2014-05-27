@@ -43,6 +43,9 @@
         </div>
         <div class="header-options">
           <ul class="options">
+            <% if (req.session.show_welcome_message == true || req.session.show_welcome_message == 'true'){ %>
+               <li><div class="notifications"><div>1</div></div></li>
+            <% } %>
             <li><div class="help">?</div></li>
             <span style="clear:both;"></span>
           </ul>
@@ -133,6 +136,16 @@
           });
         }
       });
-    });
+
+      $('.notifications').click(function(){
+        if( $(this).parent().children('div.notifications-show').length === 0 ){
+          $('.preview').remove();
+          $(this).parent().append("<div  class='notifications-show preview'><div id='viewport'></div></div>");
+          $('div.notifications-show').children('#viewport').load('../notifications/index').delay(500);
+        }else{
+          $(this).parent().children('div.notifications-show').remove();
+        }
+      });
+   });
   </script>
 </html>
