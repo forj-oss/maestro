@@ -20,7 +20,7 @@ module.exports.env = {
     kit: {
         registration: {
             protocol: "http",
-            ip: '15.185.92.168',
+            ip: 'reg-dev.forj.io',
             port: '3131',
             resource_uri: '/devkit/'
         },
