@@ -59,7 +59,7 @@ Because:
 Updating cloud or default meta data
 -----------------------------------
 
-If you want to create your own box based on one of our default image, you can copy the desired conf/*.env.
+If you want to create your own box based on one of our default image, you can copy the desired conf/\*.env.
 As an example, let's say you copy maestro.master.env to **~/src/MyRepo/maestro**.
 
 You can ensure any of cloud specification to be forcelly used by your configuration.
