@@ -6,7 +6,7 @@ build/bin     : Contains scripts to build Maestro or node images or any distribu
 build/maestro : Contains bootstrap to build a basic maestro image
 build/maestro : Contains bootstrap to build a basic maestro image
 build/node    : Contains bootstrap to build a basic node image.
-puppet-libs   : Contains puppet modules to build maestro or node images.
+puppet        : Contains puppet modules to build maestro or node images.
 api           : Internal Maestro api
 ui            : Maestro ui
 

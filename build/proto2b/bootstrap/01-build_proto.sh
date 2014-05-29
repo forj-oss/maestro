@@ -31,3 +31,7 @@ echo 'node default {
 }' > build_proto.pp
 
 puppet apply --modulepath=/etc/puppet/modules/:. build_proto.pp
+
+#TODO: Defect #166: when implemented this code should be removed
+[ ! -d /var/lib/python-install ] && mkdir -p /var/lib/python-install
+ $(cd /var/lib/python-install; wget https://raw.github.com/pypa/pip/8575e0c16424bcc9866baa0f9f779f1b524fbc20/contrib/get-pip.py; chmod +x ./get-pip.py)

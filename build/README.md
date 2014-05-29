@@ -10,12 +10,12 @@ There is 2 different images:
 how we create a predefined box?
 ===============================
 
-Several spaces are used to build a box:
+Several folders are used to build a box:
 
 > * `bin/build.sh`<br>
 >   This is the main script tool. You have to be here to build a box, as it requires to have access to the box subdirectory like maestro, proto2b or node.
 > * `conf/*.env`<BR>
->   This directory contains a collection of build configuration used to build your box.
+>   This directory contains a collection of build configuration used to build a box.
 > * `bin/build/built-tools/boothook.sh`<br>
 >   This is a the first common cloud-init script
 > * `<BoxName>/cloudconfig.yaml`<br>
