@@ -523,8 +523,15 @@ do
               if [ "$NEW_PUBIP" = "" ] && [ "$NEW_PUBIP_WARN" != True ]
               then
                  NEW_PUBIP_WARN=True
-                 Warning "Unable to identify an IP to assign from the pool. You need to extend or free up some IPs, to get a free one.
+                 # attempt to add a new public ip address and allow for 30 seconds, otherwise, let the warning display
+                 hpcloud addresses:add -a $FORJ_HPC
+                 sleep 30
+                 NEW_PUBIP="$(hpcloud addresses -d , -c fixed_ip,floating_ip -a $FORJ_HPC| grep "^," | awk -F, '{ if (FNR == 1 ) print $2 }')"
+                 if [ "$NEW_PUBIP" = "" ]
+                 then
+                    Warning "Unable to identify an IP to assign from the pool. You need to extend or free up some IPs, to get a free one.
 NOTE: The build process will continuously query to get a new IP. So, if you can free up an IP in parallel, do it now."
+                 fi
               fi
            fi
         else
