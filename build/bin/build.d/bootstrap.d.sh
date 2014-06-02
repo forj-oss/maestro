@@ -44,7 +44,8 @@ $META_DATA"
                                         s/ *, */","/g')\"}"
 fi
 # Maestro BootHook - Set hostname and workaround missing meta.js
-sed 's!${metadata-json}!'"$META_JSON"'!g' $BIN_PATH/build-tools/boothook.sh > $BUILD_DIR/boothook.sh
+Info "Boothook used: $BOOTHOOK"
+sed 's!${metadata-json}!'"$META_JSON"'!g' $BOOTHOOK > $BUILD_DIR/boothook.sh
 TOMIME="$BUILD_DIR/boothook.sh:text/cloud-boothook" 
 
 # Add cloudconfig.yaml - Inform cloud-init to no update hostname & install basic packages.

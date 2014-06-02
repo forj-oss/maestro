@@ -48,7 +48,11 @@ GITBRANCH=master
 APPPATH="."
 BIN_PATH=$(cd $(dirname $0); pwd)
 BUILD_SCRIPT=$BIN_PATH/$(basename $0)
+
+BOOTHOOK=$BIN_PATH/build-tools/boothook.sh
+
 MIME_SCRIPT=$BIN_PATH/build-tools/write-mime-multipart.py
+
 
 declare -A META
 
@@ -87,7 +91,7 @@ Box bootstrap:
 
 build.sh will create a user_data to boot your box as wanted.
 To build it, build.sh will search for :
-1. include 'boothook.sh' - Used to configure your hostname and workaround meta.js missing file.
+1. include 'boothook.sh' - Used to configure your hostname and workaround meta.js missing file. (default to build/bin/build-tools/boothook.sh)
 2. check if <BoxName>/cloudconfig.yaml exist and add it.
 3. build a boot-maestro.sh from <BoxName/bootstrap/{#}-*.sh. <BOOTSTRAP_DIR> will be merged with the default bootstrap dir. The merged files list are sorted by there name. if build found the same file name from all bootstrap directories, build.sh will include <BoxName>/bootstrap, then your BOOTSTRAP_DIR list.
 
@@ -110,6 +114,8 @@ Options details:
 --meta <meta>              : Add a metadata. have to be Var=Value. You can use --meta several times in the command line. 
                              On the configuration file, use META[<var>]='Var=Value' to force it.
 -h                         : This help
+
+--boothook <boothookFile>  : Optionnal. By default, boothook file used is build/bin/build-tools/boothook.sh. Use this option to set another one.
 
 By default, the config name is 'master'. But <Config> can be set to the name of the branch thanks to --gitBranch, --gitBranchCur or from --build-config
 
@@ -142,7 +148,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
+OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data:,boothook: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -214,6 +220,13 @@ while true ; do
             shift;shift;; 
         --meta-data)
             load-meta "$2"
+            shift;shift;;
+        --boothook)
+            if [ ! -f "$2" ]
+            then
+               Error 1 "'$2' is not a valid boothook file."
+            fi   
+            BOOTHOOK="$(pwd)/$2"
             shift;shift;;
         --) 
             shift; break;;
