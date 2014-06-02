@@ -22,8 +22,15 @@
                     </div>
                   <% } %>
                 <% } %>
-                <div class="ops-workload ops-offline ops">Workload</div>
-                <div class="ops-backup ops-offline ops">Backup</div>
+                <!-- app.settings.env is the ENV variable, it should only show the buttons if it's not production  -->
+               <% if(sails.config.environment=="development"){%>
+              <div class="ops-workload ops-offline ops">Workload</div>
+              <div class="ops-backup ops-offline ops">Backup</div>
+              <% }else{ %>
+              <!--  <div class="ops-workload ops-offline ops">Workload</div> -->
+              <!--  <div class="ops-backup ops-offline ops">Backup</div> -->
+              <% } %>
+
               </div>
               <%if(tool.tool_url !== '#'){%>
                 <a class="tool-view" href="<%=tool.tool_url%>" target="_blank" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
@@ -46,8 +53,15 @@
                       <a href="#">Admin</a>
                     </div>
                 <% } %>
-                <div class="ops-workload ops-offline ops">Workload</div>
-                <div class="ops-backup ops-offline ops">Backup</div>
+                <!-- app.settings.env is the ENV variable, it should only show the buttons if it's not production  -->
+               <% if(sails.config.environment=="development"){%>
+              <div class="ops-workload ops-offline ops">Workload</div>
+              <div class="ops-backup ops-offline ops">Backup</div>
+              <% }else{ %>
+              <!--  <div class="ops-workload ops-offline ops">Workload</div> -->
+              <!--  <div class="ops-backup ops-offline ops">Backup</div> -->
+              <% } %>
+
               </div>
               <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
                 <% if(tool.icon!=='true'?false:true){ %>
@@ -153,7 +167,6 @@
         </div>
       </div>
       <div>
-    
     </div>
   </div>
 <% } %>
