@@ -77,8 +77,8 @@
           <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error == null){ %>
             <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>Registration</h5>
           <% } %>
-          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error !== null){ %>
-            <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring check-icon"></span>Registration</h5>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error != null){ %>
+            <h5 id="h5-registration" class="monitoring-option arrow-down"><span class="status-monitoring error-icon"></span>Registration</h5>
           <% } %>
         </div>
         <div class="row monitoring-contents" style="display:none;">
@@ -147,7 +147,7 @@
               </script>
             </div>
           <% } %>
-          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error !== null){ %>
+          <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error != null){ %>
             <p style="color: #797979;padding-left: 17px;">We were unable to check if your forge is registered.</p>
           <% } %>
         </div>
