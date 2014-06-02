@@ -156,5 +156,5 @@ apt-get -qy update
 apt-get -qy upgrade
 set +x
 echo "################# BOOTHOOK End ##########################"
-exec 1>&6 6>&-
+exec 1>&6 2>&1
 echo "*************************** NO MORE OUTPUT to log file"
