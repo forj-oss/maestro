@@ -1,3 +1,19 @@
+<!-- 
+ (c) Copyright 2014 Hewlett-Packard Development Company, L.P.#
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ -->
+
 <% if(req.session.is_admin){ %>
 <div class="row">
   <div class="row" style="margin-left: 15px;margin-top: 10px;background-color: #1D4E6F;display: inline-block;color: #FFFFFF;">
@@ -5,7 +21,7 @@
     <ul style="font-family: 'Open Sans Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !important;font-size: 13px;padding-right: 10px;">
       <li>Gerrit has to be <b style="color: #47CC3A">online</b></li>
       <li>Gerrit has to have at least <b>1 registered administrator</b> (the first user who logs in to Gerrit becomes an administrator)</li>
-      <li>The person reviewing and approving the project creation must be part of the 'forj-core' Gerrit group (<a href="<%=gerrit_url%>/#/admin/groups/" target="_blank">Gerrit/Admin/Groups/forj-core</a>)</li>
+      <li>The person reviewing and approving the project creation must be part of the 'forj-core' Gerrit group; Please go to Gerrit >Admin > Groups > forj-core and add your user to the forj-core group</li>
     </ul>
   </div>
   <ul id="og-grid" class="og-grid">
