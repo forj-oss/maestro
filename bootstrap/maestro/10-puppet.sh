@@ -35,7 +35,7 @@ bash /opt/config/production/git/CDK-infra/blueprints/openstack/puppet/install_mo
 bash /opt/config/production/git/CDK-infra/blueprints/openstack/hiera/hiera.sh
 
 find /opt/config/production -type d -exec chmod 755 {} \;
-find /opt/config/production -type f -exec chmod 644 {} \;
+find /opt/config/production \( -path \*/bootstrap -o -path \*/build -o -path \*/.git \) -prune -o -type f -exec chmod 644 {} \;
 find /opt/config/production -exec chown puppet:puppet {} \;
 
 if [ "$http_proxy" != "" ] && [ -r /etc/default/puppet ] && [ "$(grep http_proxy /etc/default/puppet)" = "" ]
