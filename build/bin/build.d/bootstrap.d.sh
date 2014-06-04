@@ -65,16 +65,20 @@ then
    then
       Warning "'$BOOTSTRAP_DIR' contains no bootstrap files. Please check it."
    else
-      Info "Completing Maestro basic cloud-init with '$BOOTSTRAP_DIR'"
+      Info "Completing Box basic cloud-init with '$BOOTSTRAP_DIR'"
    fi
 fi
+if [ -d $BOOTSTRAP_EXTRA ]
+then
+   Info "Completing Box basic cloud-init with '$BOOTSTRAP_EXTRA'"
+fi
 
-BOOT_FILES="$(find bootstrap $BOOTSTRAP_DIR -maxdepth 1 \( -type f -o -type l \) -name \*.sh -exec basename {} \; | sort -u)"
+BOOT_FILES="$(find bootstrap $BOOTSTRAP_EXTRA $BOOTSTRAP_DIR -maxdepth 1 \( -type f -o -type l \) -name \*.sh -exec basename {} \; | sort -u)"
 
 echo "Read boot script: "
 for BOOT_FILE in $BOOT_FILES
 do
-   for DIR in bootstrap $BOOTSTRAP_DIR
+   for DIR in bootstrap $BOOTSTRAP_EXTRA $BOOTSTRAP_DIR
    do
       if [ ! -f $BOOT_BOX ]
       then
@@ -93,6 +97,10 @@ if [ -r $BOOT_BOX ]
 then
    Info "$BOOT_BOX added to the mime."
    TOMIME="$TOMIME $BOOT_BOX" 
+fi
+if [ -d "$BOOTSTRAP_EXTRA" ]
+then
+   rm -fr "$BOOTSTRAP_EXTRA"
 fi
 
 for FILE in $TOMIME

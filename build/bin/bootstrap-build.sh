@@ -34,6 +34,8 @@ APPPATH="."
 BIN_PATH="$(cd $(dirname $0); pwd)"
 BUILD_SCRIPT=$BIN_PATH/$(basename $0)
 
+BOOTHOOK=$BIN_PATH/build-tools/boothook.sh
+
 declare -A META
 
 function usage
@@ -52,9 +54,17 @@ You can change it with option --gitBranch or --gitBranchCur if your configuratio
 Using --build-config [1m<Config>[0m(with or without --build-conf-dir) will load information about:
 - BUILD_ID               : Optionally force to use a build ID.
 - APPPATH                : Path to bootstrap files to use.
-- FORJ_HPC_TENANTID      : HPCloud Project tenant ID used.
-- FORJ_HPC_COMPUTE       : HPCloud compute service to use.
-- FORJ_HPC_BLOCK_STORAGE : HPCloud Block storage service to use.
+- FORJ_HPC_TENANTID       : HPCloud Project tenant ID used.
+- FORJ_HPC_COMPUTE        : HPCloud compute service to use.
+- FORJ_HPC_NETWORKING     : HPCloud networking service to use.
+- FORJ_HPC_CDN            : HPCloud CDN service to use.
+- FORJ_HPC_OBJECT_STORAGE : HPCloud Object storage service to use.
+- FORJ_HPC_BLOCK_STORAGE  : HPCloud Block storage service to use.
+- FORJ_HPC_DNS            : HPCloud Domain name service to use.
+- FORJ_HPC_LOAD_BALANCER  : HPCloud Load balancer service to use.
+- FORJ_HPC_MONITORING     : HPCloud Monitoring service to use.
+- FORJ_HPC_DB             : HPCloud Mysql service to use.
+- FORJ_HPC_REPORTING      : HPCloud Reporting service to use.
 - FORJ_BASE_IMG          : HPCloud image ID to use.
 - FORJ_FLAVOR            : HPCloud flavor ID to use.
 - BOOTSTRAP_DIR          : Superseed default <BoxName> bootscripts. See Box bootstrap section for details.
@@ -73,22 +83,27 @@ build.sh will create a user_data to boot your box as wanted.
 To build it, build.sh will search for :
 1. include 'boothook.sh' - Used to configure your hostname and workaround meta.js missing file.
 2. check if <BoxName>/cloudconfig.yaml exist and add it.
-3. build a boot-maestro.sh from <BoxName/bootstrap/{#}-*.sh. <BOOTSTRAP_DIR> will be merged with the default bootstrap dir. The merged files list are sorted by there name. if build found the same file name from all bootstrap directories, build.sh will include <BoxName>/bootstrap, then your BOOTSTRAP_DIR list.
+3. build a 'boot box' shell script from <BoxName/bootstrap/{#}-*.sh. <BOOTSTRAP_DIR> will be merged with the default bootstrap dir. The merged files list are sorted by there name. if build found the same file name from all bootstrap directories, build.sh will include <BoxName>/bootstrap, then your BOOTSTRAP_DIR list.
 
 Then build.sh will create a mime file which will be sent to the box with user-data feature.
 
 
 Options details:
 ================
---box-name <BoxName>       : Defines the name of the box or box image to build.
+--box-name <BoxName>           : Defines the name of the box or box image to build.
 
---gitBranch <branch>       : The build will extract from git branch name. It sets the configuration build <config> to the branch name <branch>.
---gitBranchCur             : The build will use the default branch current set in your git repo. It sets the configuration build <config> to the current git branch.
+--gitBranch <branch>           : The build will extract from git branch name. It sets the configuration build <config> to the branch name <branch>.
+--gitBranchCur                 : The build will use the default branch current set in your git repo. It sets the configuration build <config> to the current git branch.
 
---build-conf-dir <confdir> : Defines the build configuration directory to load the build configuration file. You can set FORJ_BLD_CONF_DIR. By default, it will look in your current directory.
---build-config <config>    : The build config file to load <confdir>/<BoxName>.<Config>.env. By default, uses 'master' as Config.
+--build-conf-dir <confdir>     : Defines the build configuration directory to load the build configuration file. You can set FORJ_BLD_CONF_DIR. By default, it will look in your current directory.
+--build-config <config>        : The build config file to load <confdir>/<BoxName>.<Config>.env. By default, uses 'master' as Config.
 
--h                         : This help
+-h                             : This help
+
+user-data bootstrap options:
+============================
+--boothook <boothookFile>      : Optionnal. By default, boothook file used is build/bin/build-tools/boothook.sh. Use this option to set another one.
+--extra-bs-step <[Order:]File> : Add an extra user_data bootstrap step. This file in a specific 'Order' will be concatenated to the 'boot box' mime sequence, like BOOTSTRAP_DIR.
 
 By default, the config name is 'master'. But <Config> can be set to the name of the branch thanks to --gitBranch, --gitBranchCur or from --build-config" 
 
@@ -114,7 +129,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l box-name:,build-conf-dir:,gitBranch:,gitBranchCur,build-config:,gitLink:,debug,meta:,meta-data: -- "$@" )
+OPTS=$(getopt -o h -l box-name:,build-conf-dir:,gitBranch:,gitBranchCur,build-config:,gitLink:,debug,meta:,meta-data:,boothook:,extra-bs-step: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -169,6 +184,44 @@ while true ; do
         --meta-data)
             load-meta "$2"
             shift;shift;; 
+       --boothook)
+            if [ ! -f "$2" ]
+            then
+               Error 1 "'$2' is not a valid boothook file."
+            fi   
+            BOOTHOOK="$(pwd)/$2"
+            shift;shift;;
+        --extra-bs-step)
+            BS_STEP="$2"
+            BS_STEP_NUM="$(echo "$BS_STEP" | awk -F: '{ print $1}')"
+            BS_STEP_FILE="$(echo "$BS_STEP" | awk -F: '{ print $2}')"
+            if [ "$BS_STEP_FILE"  = "" ]
+            then
+               BS_STEP_FILE="$BS_STEP_NUM"
+               if [ "$(basename "$BS_STEP_FILE" | grep -e "^[0-9][0-9]*-")" = "" ]
+               then
+                  BS_STEP_NUM=99
+               else
+                  BS_STEP_NUM=""
+               fi
+            fi  
+            # Set Full path of step file.
+            BS_STEP_FILE="$(dirname "$(pwd)/$BS_STEP_FILE")/$(basename "$BS_STEP_FILE")"
+            if [ ! -r "$BS_STEP_FILE" ]
+            then
+               Warning "Bootstrap file '$BS_STEP_FILE' was not found. Unable to add it to your user_data bootstrap."
+            else
+               mkdir -p ~/.build/bs_step/$$
+               if [ "${BS_STEP_NUM}" = "" ]
+               then
+                  ln -sf "$BS_STEP_FILE" ~/.build/bs_step/$$/"$(basename "$BS_STEP_FILE").sh"
+               else
+                  ln -sf "$BS_STEP_FILE" ~/.build/bs_step/$$/${BS_STEP_NUM}-"$(basename "$BS_STEP_FILE").sh"
+               fi
+               BOOTSTRAP_EXTRA=~/.build/bs_step/$$/
+               Info "'$(basename "$BS_STEP_FILE")' added as extra user_data bootstrap step."
+            fi  
+            shift;shift;; 
         --) 
             shift; break;;
     esac
@@ -196,9 +249,20 @@ else
 fi
 if [ ! -r "$CONFIG" ]
 then
-   echo "List of valid configuration : {--box-name}.{'bld' or --build-config}.{'master' or --gitBranch or --gitBranchCur}.env"
-   ls -l $CONFIG_PATH/*.env
-   Error 1 "Unable to load '${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}' build configuration file. Please check it. (File $CONFIG not found)"
+   Info "Unable to load build configuration file."
+   echo "Here are the list of valid configuration from '$CONFIG_PATH':"
+   printf "%-10s | %-20s | %-10s\n--------------------------------------------\n" "BoxName" "ConfigName" "BranchName"
+   ls -1 $CONFIG_PATH/*.env | sed 's|'"$CONFIG_PATH"'/\(.*\)\.env$|\1|g' | awk -F. '{  
+                                                                                     MID=$0;
+                                                                                     gsub(sprintf("^%s.",$1), "",MID);
+                                                                                     gsub(sprintf(".%s$",$NF),"",MID);
+                                                                                     printf "%-10s | %-20s | %-10s\n",$1,MID,$NF
+                                                                                    }'
+   echo "--------------------------------------------
+Set BoxName    with --box-name. Option required.
+    ConfigName with --build-config. By default, ConfigName is 'bld'
+    BranchName with --gitBranch or --gitBranchCur. By default, BranchName is 'master'"
+   Error 1 "No file matching BoxName:${APP_NAME} ConfigName:${BUILD_CONFIG} BranchName:${GITBRANCH}. (${APP_NAME}.${BUILD_CONFIG}.${GITBRANCH}.env) Please check it."
 fi
 
 source "$CONFIG"

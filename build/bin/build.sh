@@ -70,14 +70,27 @@ The build configuration identified as <Config> will define where this box/image 
 You can change it with option --gitBranch or --gitBranchCur if your configuration file is tracked by a git repository.
 
 Using --build-config [1m<Config>[0m(with or without --build-conf-dir) will load information about:
-- BUILD_ID               : Optionally force to use a build ID.
-- APPPATH                : Path to bootstrap files to use.
-- FORJ_HPC_TENANTID      : HPCloud Project tenant ID used.
-- FORJ_HPC_COMPUTE       : HPCloud compute service to use.
-- FORJ_HPC_BLOCK_STORAGE : HPCloud Block storage service to use.
-- FORJ_BASE_IMG          : HPCloud image ID to use.
-- FORJ_FLAVOR            : HPCloud flavor ID to use.
-- BOOTSTRAP_DIR          : Superseed default <BoxName> bootscripts. See Box bootstrap section for details.
+- BUILD_ID                : Optionally force to use a build ID.
+- APPPATH                 : Path to bootstrap files to use.
+
+HPCloud services to configure:
+- FORJ_HPC_TENANTID       : HPCloud Project tenant ID used.
+- FORJ_HPC_COMPUTE        : HPCloud compute service to use.
+- FORJ_HPC_NETWORKING     : HPCloud networking service to use.
+- FORJ_HPC_CDN            : HPCloud CDN service to use.
+- FORJ_HPC_OBJECT_STORAGE : HPCloud Object storage service to use.
+- FORJ_HPC_BLOCK_STORAGE  : HPCloud Block storage service to use.
+- FORJ_HPC_DNS            : HPCloud Domain name service to use.
+- FORJ_HPC_LOAD_BALANCER  : HPCloud Load balancer service to use.
+- FORJ_HPC_MONITORING     : HPCloud Monitoring service to use.
+- FORJ_HPC_DB             : HPCloud Mysql service to use.
+- FORJ_HPC_REPORTING      : HPCloud Reporting service to use.
+
+Boot data needed:
+- FORJ_HPC_NET or FORJ_HPC_NETID : HPCloud Image name or Image ID to use for boot.
+- FORJ_BASE_IMG                  : HPCloud image ID to use for boot.
+- FORJ_FLAVOR                    : HPCloud flavor ID to use for boot.
+- BOOTSTRAP_DIR                  : Superseed default <BoxName> bootscripts. See Box bootstrap section for details.
                            
 
 It will load this data from <confdir or .>/<BoxName>.[1m<Config>[0m.env file
@@ -86,36 +99,51 @@ Depending on the <config> data, you can build your box/image to different tenant
 
 To build your image, you need to be in the directory which have your <BoxName> as a sub directory. 
 
-Box bootstrap:
-==============
+How your box is built?
+======================
+Your box is built is 2 big steps:
+1. user_data Box bootstrap
+2. local box bootstrap (defined in your repository/packages/files...)
 
-build.sh will create a user_data to boot your box as wanted.
-To build it, build.sh will search for :
-1. include 'boothook.sh' - Used to configure your hostname and workaround meta.js missing file. (default to build/bin/build-tools/boothook.sh)
+user_data Box bootstrap is build by build.sh, sent as user_data during the boot call (to create your box on the cloud). 
+As soon as the user_data, maestro user_data boot sequence will call an init.sh which will start the second step.
+
+user_data Box bootstrap:
+========================
+
+build.sh will create a user_data to boot your box with the cloudinit feature as wanted.
+To build it, build.sh will:
+1. Include 'boothook.sh'
+   Used to configure your hostname and workaround meta.js missing file. By default 'boothook.sh' is located in build/bin/build-tools/. You can change it with [1m--bootstrap[0m. See 'user-data bootstrap options' section for details.
 2. check if <BoxName>/cloudconfig.yaml exist and add it.
-3. build a boot-maestro.sh from <BoxName/bootstrap/{#}-*.sh. <BOOTSTRAP_DIR> will be merged with the default bootstrap dir. The merged files list are sorted by there name. if build found the same file name from all bootstrap directories, build.sh will include <BoxName>/bootstrap, then your BOOTSTRAP_DIR list.
+3. build a 'boot box' shell script sequence from <BoxName/bootstrap/{#}-*.sh. 
+   <BOOTSTRAP_DIR> environment variable will be merged with the default bootstrap dir. The merged files list are sorted by there name. if build found the same file name from all bootstrap directories, build.sh will include <BoxName>/bootstrap, then your BOOTSTRAP_DIR list.
+   Also, you can add single extra steps, with [1m--extra-bs-step[0m. See 'user-data bootstrap options' section for details.
 
-Then build.sh will create a mime file which will be sent to the box with user-data feature.
+Then build.sh will create a mime file which will be sent to the box with user-data feature executed by cloudinit at box build boot time sequence.
 
 
 Options details:
 ================
---build_ID <BuildID>       : identify a new build ID to create. Can be set in your build configuration.
---box-name <BoxName>       : Defines the name of the box or box image to build.
+--build_ID <BuildID>           : identify a new build ID to create. Can be set in your build configuration.
+--box-name <BoxName>           : Defines the name of the box or box image to build.
 
---gitBranch <branch>       : The build will extract from git branch name. It sets the configuration build <config> to the branch name <branch>.
---gitBranchCur             : The build will use the default branch current set in your git repo. It sets the configuration build <config> to the current git branch.
+--gitBranch <branch>           : The build will extract from git branch name. It sets the configuration build <config> to the branch name <branch>.
+--gitBranchCur                 : The build will use the default branch current set in your git repo. It sets the configuration build <config> to the current git branch.
 
---build-conf-dir <confdir> : Defines the build configuration directory to load the build configuration file. You can set FORJ_BLD_CONF_DIR. By default, it will look in your current directory.
---build-config <config>    : The build config file to load <confdir>/<BoxName>.<Config>.env. By default, uses 'master' as Config.
+--build-conf-dir <confdir>     : Defines the build configuration directory to load the build configuration file. You can set FORJ_BLD_CONF_DIR. By default, it will look in your current directory.
+--build-config <config>        : The build config file to load <confdir>/<BoxName>.<Config>.env. By default, uses 'master' as Config.
 
---debug-box                : Use this option to create the server, and debug it. No image will be created. The server will stay alive at the end of the build process.
---gitRepo <RepoLink>       : The box built will use a different git repository sent out to <user_data>. This repository needs to be read only. No keys are sent.
---meta <meta>              : Add a metadata. have to be Var=Value. You can use --meta several times in the command line. 
-                             On the configuration file, use META[<var>]='Var=Value' to force it.
--h                         : This help
+--debug-box                    : Use this option to create the server, and debug it. No image will be created. The server will stay alive at the end of the build process.
+--gitRepo <RepoLink>           : The box built will use a different git repository sent out to <user_data>. This repository needs to be read only. No keys are sent.
+--meta <meta>                  : Add a metadata. have to be Var=Value. You can use --meta several times in the command line. 
+                                 On the configuration file, use META[<var>]='Var=Value' to force it.
+-h                             : This help
 
---boothook <boothookFile>  : Optionnal. By default, boothook file used is build/bin/build-tools/boothook.sh. Use this option to set another one.
+user-data bootstrap options:
+============================
+--boothook <boothookFile>      : Optionnal. By default, boothook file used is build/bin/build-tools/boothook.sh. Use this option to set another one.
+--extra-bs-step <[Order:]File> : Add an extra user_data bootstrap step. This file in a specific 'Order' will be concatenated to the 'boot box' mime sequence, like BOOTSTRAP_DIR.
 
 By default, the config name is 'master'. But <Config> can be set to the name of the branch thanks to --gitBranch, --gitBranchCur or from --build-config
 
@@ -148,7 +176,7 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data:,boothook: -- "$@" )
+OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data:,boothook:,extra-bs-step: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
@@ -228,6 +256,37 @@ while true ; do
             fi   
             BOOTHOOK="$(pwd)/$2"
             shift;shift;;
+        --extra-bs-step)
+            BS_STEP="$2"
+            BS_STEP_NUM="$(echo "$BS_STEP" | awk -F: '{ print $1}')"
+            BS_STEP_FILE="$(echo "$BS_STEP" | awk -F: '{ print $2}')"
+            if [ "$BS_STEP_FILE"  = "" ]
+            then
+               BS_STEP_FILE="$BS_STEP_NUM"
+               if [ "$(basename "$BS_STEP_FILE" | grep -e "^[0-9][0-9]*-")" = "" ]
+               then
+                  BS_STEP_NUM=99
+               else
+                  BS_STEP_NUM=""
+               fi  
+            fi  
+            # Set Full path of step file.
+            BS_STEP_FILE="$(dirname "$(pwd)/$BS_STEP_FILE")/$(basename "$BS_STEP_FILE")"
+            if [ ! -r "$BS_STEP_FILE" ]
+            then
+               Warning "Bootstrap file '$BS_STEP_FILE' was not found. Unable to add it to your user_data bootstrap."
+            else
+               mkdir -p ~/.build/bs_step/$$
+               if [ "${BS_STEP_NUM}" = "" ]
+               then
+                  ln -sf "$BS_STEP_FILE" ~/.build/bs_step/$$/"$(basename "$BS_STEP_FILE").sh"
+               else
+                  ln -sf "$BS_STEP_FILE" ~/.build/bs_step/$$/${BS_STEP_NUM}-"$(basename "$BS_STEP_FILE").sh"
+               fi  
+               BOOTSTRAP_EXTRA=~/.build/bs_step/$$/
+               Info "'$(basename "$BS_STEP_FILE")' added as extra user_data bootstrap step."
+            fi  
+            shift;shift;; 
         --) 
             shift; break;;
     esac
