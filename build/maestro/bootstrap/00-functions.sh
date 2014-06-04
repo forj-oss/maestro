@@ -44,7 +44,7 @@ function GitLinkCheck
 exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
                  print POUT;
                  print POUT >> "/var/log/cloud-init.log";
-                 fflush();
+                 fflush("");
                }') 2>&1
 
 echo "################# BOOT-Ero Start step 1 #################"
