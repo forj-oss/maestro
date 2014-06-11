@@ -32,6 +32,17 @@ module.exports = function(req, res, next) {
           return next();
         }, function(bp_name){
           bp_name = JSON.parse(bp_name);
+          if (bp_name)
+             {
+              sails.log.debug('bp_name:'+bp_name);
+              sails.log.debug('req.session.blueprint_name:'+req.session.blueprint_name);
+             }
+          else
+             {
+              bp_name='Undefined'
+              sails.log.warn('bp-app service was not able to provide a blueprint shortname. used "Undefined" as blueprint shortname');
+             }
+
           req.session.blueprint_name = bp_name.charAt(0).toUpperCase() + bp_name.slice(1);
           return next();
         })
