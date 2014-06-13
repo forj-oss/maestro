@@ -14,4 +14,4 @@
 #
 ---
  blueprint:
-  layout_path: 'config/config.json'
+  layout_path: '/opt/config/production/config.json'
