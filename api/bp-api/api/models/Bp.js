@@ -29,7 +29,7 @@ module.exports = {
     },
     id: {
       type: 'string',
-      maxLength: 5,
+      maxLength: 8,
       minLength: 1,
       required: 'true'
     },
