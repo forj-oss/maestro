@@ -1,3 +1,6 @@
+# remove node_modules .bin files
+.bin/
+fixtures/
 *.pyc
 CDK-infra/blueprints/openstack/puppet/modules/eroplus_ui/files/ui/Gemfile.lock
 .vagrant
