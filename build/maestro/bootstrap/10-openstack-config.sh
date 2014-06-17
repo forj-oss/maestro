@@ -28,14 +28,15 @@ git config core.autocrlf false
 
 
 # TODO: check with chrissss how do we specify all the git repos?
-GitLinkCheck $MAESTRO_LINK
+BP_LINK="$(GetJson /meta-boot.js blueprintlink)"
+GitLinkCheck $BP_LINK
 if [ ! $? -eq 0 ] 
 then
-   echo "INFO: using default MAESTRO git url"
-   MAESTRO_LINK="https://review.forj.io/p/forj-oss/redstone"
+   echo "INFO: using default BP_LINK git url"
+   BP_LINK="https://review.forj.io/p/forj-oss/redstone"
 fi
 
-git clone $GITBRANCH_FLAG $MAESTRO_LINK redstone
+git clone $GITBRANCH_FLAG $BP_LINK redstone
 cd redstone
 git config core.autocrlf false
 
