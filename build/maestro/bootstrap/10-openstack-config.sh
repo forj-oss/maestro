@@ -35,7 +35,7 @@ then
    echo "INFO: using default BP_LINK git url"
    BP_LINK="https://review.forj.io/p/forj-oss/redstone"
 fi
-
+cd /opt/config/production/git
 git clone $GITBRANCH_FLAG $BP_LINK redstone
 cd redstone
 git config core.autocrlf false
