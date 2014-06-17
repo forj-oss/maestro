@@ -25,31 +25,45 @@ import logging
 import yaml
 import os
 import subprocess
+import distutils.spawn
+import string,datetime
 
 # Defining defaults
 
 # By default, we implements the required source yaml section. This can be update by a flag --source (NOT YET IMPLEMENTED)
-SOURCES="sources"
-#########################
+SOURCES="modules"
+BRANCH='master'
+BLUEPRINT_REF_PATH=os.path.join(os.sep,'usr','lib','forj','blueprints')
 
+##############################
 def help():
-  print 'bp --start <url|bp-name> [--debug] [-v]'
+  print 'bp --install <url|bp-name> [--branch <branchName>] [--debug] [-v]'
 
+##############################
 def load_bp(bp_element):
   "load_bp function read from a file or from an url, the blueprint yaml document. It returns the blueprint data in dict object."
   dUrl=urlparse(bp_element)
   
   re_filename=re.compile('^[a-zA-Z0-9]*$')
   if dUrl.scheme == '' and re_filename.match(bp_element): # Need to build the url with forj-oss link by default.
-     dUrl=ParseResult('http','catalog.forj.io','/master/'+bp_element+'-master.yaml','','','')
-     bp_element=dUrl.geturl()
-     logging.debug('Use default internet FORJ catalog: ' + bp_element)
-  
+# Disabled, until our catalog service is available.
+#     dUrl=ParseResult('http','catalog.forj.io','/master/'+bp_element+'-master.yaml','','','')
+#     bp_element=dUrl.geturl()
+#     logging.debug('Use default internet FORJ catalog: ' + bp_element)
+     sBP_file=os.path.join(os.sep,'opt','config','production','git','maestro','blueprint_samples',bp_element+'-master.yaml')
+     if os.path.exists(sBP_file):
+        bp_element=sBP_file
+        logging.debug('Use default internet FORJ catalog: ' + bp_element)
+     else:
+       logging.error('Unable to found "'+bp_element+'" from /opt/config/production/git/maestro/blueprint_samples/*-master.yaml. aborted. ')
+       sys.exit(1)
+# End of disabled section.
   if dUrl.scheme == '' :
      try:
-       fYaml_hdl = open(dUrl.path)
+       fYaml_hdl = open(bp_element)
      except IOError, e:
-       logging.error('Unable to open %s: %s',dUrl.path,e.msg)
+       logging.error('Unable to open %s: %s',dUrl.path,e.strerror)
+       return 0
   else:   
      fYaml_req = urllib2.Request(bp_element)
      try:
@@ -62,65 +76,258 @@ def load_bp(bp_element):
        sys.exit(1)
   
   fYaml = yaml.load(fYaml_hdl)
-  logging.debug(fYaml)
-  return fYaml
+  logging.debug(yaml.dump(fYaml))
+  return [fYaml,bp_element]
 
-def git_clone(url, to = "/opt/config/production/git"):
+##############################
+def cmd_call(tool,aCMD):
+  try:
+    logging.debug('Running : '+string.join(aCMD,' '))
+    iCode=subprocess.call(aCMD)
+  except OSError,e:
+    logging.error('%s: "%s" fails with return code: %d (%s)',tool,string.join(aCMD,' '),iCode,e.message) 
 
-  """git_clone(url,to): Execute a git clone of an url."""
+##############################
+def check_call(aCMD):
+  try:
+    output=subprocess.check_output(aCMD,stderr=subprocess.STDOUT)
+    logging.debug('Checking : %s\n%s',string.join(aCMD,' '),output)
+  except subprocess.CalledProcessError as oErr:
+    iCode=oErr.returncode
+    return {'output':output,'iCode':iCode}
+  return {'output':output,'iCode':0}
 
-  GIT='/usr/bin/git'
+##############################
+def git_clone(sRepo):
+
+  """git_clone(sRepo{'git','cloned-to','src-repo','branch','puppet-extra-modules'): Execute a git clone of an url.
+sRepo is a data structure which contains: [] means optional.
+git                    : url to clone
+src-repo               : Directory name of the cloned repo.
+[cloned-to]            : Optional. Path where to store the cloned repo.
+                         default: /opt/config/production/git
+[branch]               : Optional. Git branch to clone.
+                         default: 'master' (BRANCH)
+[puppet-extra-modules] : If set, will consider this repository as publishing additional puppet modules
+
+if the repository cloned is the main puppet blueprint module code, the <repo>/puppet/modules will be linked to
+/opt/config/production/blueprints/<repo-name aka src-repo>
+otherwise, if puppet-extra-modules is set, a link from <puppet-extra-modules> path will be created in 
+/opt/config/production/puppet/modules/<repo-name aka src-repo>
+This link is considered only if <puppet-extra-modules> directory contains at least one module containing 'manifests' as sub directory
+
+"""
+
+  GIT        = distutils.spawn.find_executable('git')
+  url        = sRepo['git']
+  to         = (sRepo['cloned-to'] if sRepo.has_key('cloned-to') else os.path.join(os.sep,'opt','config','production','git'))
+  gitbranch  = (sRepo['branch']    if sRepo.has_key('branch')    else BRANCH)
   
+  name       = sRepo['src-repo']
+  if sRepo.has_key('puppet-extra-modules'):
+     extra_mods = sRepo['puppet-extra-modules']
+     mods=''
+  else:
+     extra_mods=''
+     mods= os.path.join(to,name,'puppet','modules')
+  
+  sBlueprint_path=os.path.join(os.sep,'opt','config','production','blueprints')
+  sAdd_mod_path=os.path.join(os.sep,'opt','config','production','puppet','modules')
+
   logging.info("GIT: Cloning '%s' to '%s'",url,to)
   if not os.path.isdir(to) or not os.access(to, os.W_OK):
      logging.error("'%s' doesn't exist or is not writable. Please check. git clone aborted.",to)
      return
-  os.chdir(to)
   if not os.access(GIT,os.X_OK):
      logging.error("'%s' is not executable. Is git installed???",GIT)
      return
-  GIT_CMD=[GIT,'clone',url]
-  try:
-    iGitCode=subprocess.call(GIT_CMD)
-  except OSError,e:
-    logging.error('git_clone: "%s" fails with return code: %d (%s)',' '.join(GIT_CMD),iGitCode,e.message) 
 
+  # Define possible actions:
+  sAction={'rename':False}          # Rename the directory to clone over there
+  sAction['clone']=False            # Do the clone
+  sAction['checkout branch']=False  # The current branch have to be changed to the existing one
+  sAction['create branch']=False    # The current branch have to be changed to a new one to create.
+  sAction['branch attach']=False    # The wanted branch is not attached
+  sAction['remote rename']=False    # The remote exist but is incorrect. A rename is required.
+  sAction['remote create']=False    # The remote do not exist. Create it
+  sAction['remote set']=False       # The remote url is not set
+
+  if os.path.exists(os.path.join(to,name)):
+     # Series of checks: Is a dir? Is a git repository? Is correct branch? Is remote attached and is Origin? Is Origin set to the url?
+
+     if not os.path.isdir(os.path.join(to,name)) :
+        # not a dir: cloning.
+        logging.debug('%s not a dir: cloning.',os.path.join(to,name))
+        sAction['clone']=True            # Do the clone
+     elif not os.access(os.path.join(to,name),os.R_OK|os.X_OK):
+        # not accessible: Rename it and clone.
+        logging.debug('%s not accessible: Renaming it and cloning.',os.path.join(to,name))
+        sAction['rename']=True           # Rename the directory to clone over there
+        sAction['clone']=True            # Do the clone
+     else:
+        os.chdir(os.path.join(to,name))
+        oCheckResult=check_call([GIT,'rev-parse','--git-dir'])
+        iCode=oCheckResult['iCode']
+        output=oCheckResult['output']
+        if iCode != 0 :
+           # Not a git repository
+           logging.debug('%s Not a git repository: Renaming it and cloning.\nexecution : %s\noutput:\n%s',os.path.join(to,name),oErr.cmd,oErr.output)
+           sAction['rename']=True           # Rename the directory to clone over there
+           sAction['clone']=True            # Do the clone
+        else:
+           # Checking the branch configuration
+           oReBranch=re.compile('\*\s([\w-]+)\s+\w+\s+')
+
+           oCheckResult=check_call([GIT,'branch','-vv'])
+           iCode=oCheckResult['iCode']
+           output=oCheckResult['output']
+           
+           oResult=oReBranch.search(output)
+
+           if oResult.group(1) != gitbranch:
+              if re.search('[* ]\s+'+gitbranch+'\s+',output) != None:
+                 sAction['checkout branch']=True  # The current branch have to be changed to the existing one
+              else:
+                 sAction['create branch']=True    # The current branch have to be changed to a new one to create.
+
+           oReBranch=re.compile('\s+('+gitbranch+')+\s.*\[([\w-]+)/([\w-]+)')
+           oResult=oReBranch.search(output)
+
+           if iCode != 0:
+              # Error in getting branch name. So decide to simply rename and clone again.
+              logging.debug('Error in getting branch name. So decide to simply rename and clone again.\nexecution : %s\noutput:\n%s',oErr.cmd,oErr.output)
+              sAction['rename']=True           # Rename the directory to clone over there
+              sAction['clone']=True            # Do the clone
+           elif not sAction['create branch'] and oResult == None: # Branch not attached:
+              sAction['branch attach']=True    # The wanted branch is not attached. But right now, we do not know if remote exists or not.
+           elif not sAction['create branch'] and oResult.group(2) != 'origin' : # Branch attached to the wrong remote
+              sAction['branch attach']=True    # The wanted branch is not attached. But right now, we do not know if remote exists or not.
+           elif not sAction['create branch'] and oResult.group(3) != gitbranch: # Branch attached to origin but wrong remote branch.
+              sAction['branch attach']=True    # The wanted branch is not attached. But right now, we do not know if remote exists or not.
+
+           if iCode == 0 and not sAction['remote create']:
+              # Checking the remote configuration
+              oReBranch=re.compile('origin\s+(.*)\s+\(fetch')
+
+              oCheckResult=check_call([GIT,'remote','-v'])
+              iCode=oCheckResult['iCode']
+              output=oCheckResult['output']
+
+              oResult=oReBranch.search(output)
+
+              if iCode != 0:
+                 # Error in getting remote name. So decide to simply rename and clone again.
+                 logging.debug('Error in getting branch name. So decide to simply rename and clone again.\nexecution : %s\noutput:\n%s',oErr.cmd,oErr.output    )
+                 sAction['rename']=True           # Rename the directory to clone over there
+                 sAction['clone']=True            # Do the clone
+              elif oResult == None:
+                 sAction['remote create']=True
+                 sAction['remote rm']=True
+              elif oResult.group(1) != url:
+                 sAction['remote set']=True
+  else:
+     # simply cloning
+     sAction['clone']=True
+
+  logging.debug("Actions:")
+  logging.debug(sAction)
+
+  # Do action on git repo as described by sAction
+  if sAction['rename']: # Rename the directory to clone over there
+     cmd_call('git_clone',['rm','-fr',os.path.join(to,name)+'.bak'])
+     os.rename(os.path.join(to,name),os.path.join(to,name)+'.bak')
+  if sAction['clone']:  # Do the clone
+     os.chdir(to)
+     cmd_call('git_clone: git',[GIT,'clone',url,name,'-b',gitbranch])
+  os.chdir(os.path.join(to,name))
+  if sAction['checkout branch']:  # The current branch have to be changed.
+     cmd_call('git_clone',[GIT,'checkout',gitbranch])
+  if sAction['create branch']:  # The current branch have to be changed.
+     cmd_call('git_clone',[GIT,'checkout','-b',gitbranch])
+  if sAction['remote rename']:    # The remote exist but is incorrect. A rename is required.
+     if re.search('\n?origin-bak\s+',remote-output) != None: 
+        cmd_call('git_clone',[GIT,'remote','rm','origin-bak'])
+     cmd_call('git_clone',[GIT,'remote','rename','origin','origin-bak'])
+  if sAction['remote create']:    # The remote do not exist. Create it
+     cmd_call('git_clone',[GIT,'remote','add','origin',url])
+     cmd_call('git_clone',[GIT,'fetch','origin'])
+  if sAction['remote set']:       # The remote url is not set
+     cmd_call('git_clone',[GIT,'remote','set-url','origin',url])
+  if sAction['branch attach']:    # The wanted branch is not attached
+     cmd_call('git_clone',[GIT,'branch','--set-upstream',gitbranch,'origin/'+gitbranch])
+
+  cmd_call('git_clone: git',['chown','-R','puppet:puppet', os.path.join(to,name)])
+  
+  # Links managements to blueprints/ or puppet/modules/
+  if mods != '' and os.path.exists(mods): 
+     if os.path.lexists(os.path.join(sBlueprint_path,name)): 
+        cmd_call('git_clone: rm',['rm','-fr',os.path.join(sBlueprint_path,name)])
+     cmd_call('git_clone: ln',['ln','-sf', mods, os.path.join(sBlueprint_path,name)])
+  else:
+     if os.path.lexists(os.path.join(sAdd_mod_path,name)): 
+        cmd_call('git_clone: rm',['rm','-fr',os.path.join(sAdd_mod_path,name)])
+     cmd_call('git_clone: ln',['ln','-sf', extra_mods , os.path.join(sAdd_mod_path,name)])
+  
+
+##############################
 def install_bp(bp_element):
   "install_bp(bp_element) Loading the blueprint file and install the required element to make it work on Maestro."
-  fYaml=load_bp(bp_element)
+  fYaml,bp_element=load_bp(bp_element)
   
-  if not fYaml.has_key('blueprint'):
+
+  if not fYaml or not fYaml.has_key('blueprint'):
      logging.error('"%s" do not define required "blueprint/" yaml section.',bp_element)
      sys.exit(2)
 
   BP_DESC="Undefined blueprint"
   BP_yaml=fYaml['blueprint']
+  if not BP_yaml.has_key('name'):
+     logging.error('Your blueprint is not named! It does not have blueprint/name tag.')
+     sys.exit(2)
   if BP_yaml.has_key('description'):
      BP_DESC=BP_yaml['description']
   else:
      logging.warning('"%s" do not define "blueprint/description" data.',bp_element)
   
   logging.info('Blueprint downloaded: '+BP_DESC)
-  if not BP_yaml.has_key('requires') :
-    logging.error('"%s" do not define required "blueprint/requires" yaml section.',bp_element)
+  if not BP_yaml.has_key('locations') :
+    logging.error('"%s" do not define required "blueprint/locations" yaml section.',bp_element)
     sys.exit(2)
 
-  if BP_yaml['requires'].has_key(SOURCES):
-     dSource=BP_yaml['requires'][SOURCES]
-     for v in dSource:
-         if v.has_key('git'):
-            git_clone(v['git'])
+  if BP_yaml['locations'].has_key(SOURCES):
+     dSource=BP_yaml['locations'][SOURCES]
+     for vRepo in dSource:
+         if 'src-repo' in vRepo:
+            if 'git' in vRepo:
+               git_clone(vRepo)
+            else:
+               logging.warning("repo-src: Missing 'git' protocol. Currently only supports 'git'.")
          else:
-            logging.warning("Protocol '%s' not yet implemented.",k)
+            logging.warning("Supporting Only 'src-repo' repository type in /blueprint/locations/"+SOURCE)
+  if not os.path.exists(BLUEPRINT_REF_PATH):
+     cmd_call('install_bp',['mkdir','-p',BLUEPRINT_REF_PATH])
+     logging.info('%s has been created.',BLUEPRINT_REF_PATH)
+  try:
+    stream=open(os.path.join(BLUEPRINT_REF_PATH,BP_yaml['name']+'.yaml'),'w')
+    stream.write('# Yaml document automatically generated by \'{}\'. DO NOT UPDATE IT MANUALLY!\n#\n'.format('bp.py'))
+    stream.write('# Source : {}\n'.format(bp_element))
+    stream.write('# Date   : {:%Y-%m-%d %H:%M:%S}\n#\n---\n'.format(datetime.datetime.now()))
+  except IOError as oErr:
+     logging.error('Unable to write in \'%s\'.%s But Modules/repos has been already installed. Fix and retry.',oErr.strerror,os.path.join(BLUEPRINT_REF_PATH,BP_yaml['name']))
+  else:
+     yaml.dump(fYaml,stream)
+     stream.close()
+     logging.info('Blueprint \'%s\' is saved under \'%s\'',BP_yaml['name'],BLUEPRINT_REF_PATH)
   
+#########################
 
 def main(argv):
   """Main function"""
   
-  logging.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+  logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
   oLogging=logging.getLogger()
   try:
-     opts,args = getopt.getopt(argv,"hI:v",["help","install=","debug","verbose"])
+     opts,args = getopt.getopt(argv,"hI:vd",["help","install=","debug","verbose"])
   except getopt.GetoptError, e:
      print 'Error: '+e.msg
      help()
@@ -131,10 +338,10 @@ def main(argv):
      if opt in ('-h', '--help'):
         help()
         sys.exit()
-     elif opt in ('-v'):
+     elif opt in ('-v','--verbose'):
         if oLogging.level >20:
            oLogging.setLevel(oLogging.level-10)
-     elif opt in ('--debug'):
+     elif opt in ('--debug','-d'):
         print "Setting debug mode"
         oLogging.setLevel(logging.DEBUG)
      elif opt in ('-I', '--install'):
@@ -142,12 +349,13 @@ def main(argv):
         BP=arg
         action=1
   if action == 0:
-    print 'Error: At least --start is required.'
+    print 'Error: At least --install is required.'
     help()
   else:
     if ACTION == 'install_bp':
        install_bp(BP)
   sys.exit()
 
+#########################
 if __name__ == "__main__":
    main(sys.argv[1:])

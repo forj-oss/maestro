@@ -25,21 +25,4 @@ cd /opt/config/production/git
 git clone $GITBRANCH_FLAG http://jenkins.cdkdev.org:82/ubuntu/config.git
 cd config
 git config core.autocrlf false
-
-
-# TODO: check with chrissss how do we specify all the git repos?
-BP_LINK="$(GetJson /meta-boot.js blueprintlink)"
-GitLinkCheck $BP_LINK
-if [ ! $? -eq 0 ] 
-then
-   echo "INFO: using default BP_LINK git url"
-   BP_LINK="https://review.forj.io/p/forj-oss/redstone"
-fi
-cd /opt/config/production/git
-git clone $GITBRANCH_FLAG $BP_LINK redstone
-cd redstone
-git config core.autocrlf false
-
 set +x
-
-

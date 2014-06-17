@@ -16,14 +16,29 @@
 
 class hiera::data (
 ) {
+  if (! defined(File['/etc/puppet/hiera.yaml']))
+  {
+    file { '/etc/puppet/hiera.yaml':
+      ensure  => present,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0555',
+      source  => 'puppet:///modules/hiera/hiera/hiera.yaml',
+      replace => true,
+    }
+  }
 
-  file { '/etc/puppet/hiera.yaml':
-    ensure  => present,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0555',
-    source  => 'puppet:///modules/hiera/hiera/hiera.yaml',
-    replace => true,
+  if (! defined(File['/etc/puppet/hieradata']))
+  {
+    file { '/etc/puppet/hieradata':
+      ensure  => 'directory',
+      source  => 'puppet:///modules/hiera/hiera/hieradata',
+      recurse => true,
+      owner   => 'root',
+      group   =>'root',
+      mode    => '0555',
+      replace => true
+    }
   }
 
 }

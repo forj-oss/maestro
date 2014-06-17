@@ -36,15 +36,19 @@ node /.*(maestro|precise32).*/ {
   notice("openstack puppetmaster blueprint working for ${::fqdn}")
 
   class { 'hiera':
-    data_class => 'runtime_project::hiera_setup',
+    data_class => 'hiera::data',
   } ->
+  class { 'puppet': }
+  #->
   # puppetmaster : 4505, 4506
   # salt         : 8139, 8140
   # dashboard    : 80, 443, 3000
-  ::sysadmin_config::setup { 'setup puppetmaster and dashboard ports':
-    iptables_public_tcp_ports => [4505, 4506, 8139, 8140, 80, 443, 3000, 8080],
-    sysadmins                 => $sysadmins,
-  }
+
+  # TODO: This is not in maestro anymore...
+  #::sysadmin_config::setup { 'setup puppetmaster and dashboard ports':
+  #  iptables_public_tcp_ports => [4505, 4506, 8139, 8140, 80, 443, 3000, 8080],
+  #  sysadmins                 => $sysadmins,
+  #}
 }
 
 

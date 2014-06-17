@@ -25,7 +25,7 @@
 # (1) Connects to mysql and executes a script
 
 # Sample Usage:
-# puppet apply -e "class { 'maestro::app::kits_db': }" --modulepath=/opt/config/production/git/redstone/puppet/modules:/etc/puppet/modules; --verbose
+# puppet apply -e "class { 'maestro::app::kits_db': }" --modulepath=/opt/config/production/git/maestro/puppet/modules:/etc/puppet/modules; --verbose
 
 #
 class maestro::app::kits_db(

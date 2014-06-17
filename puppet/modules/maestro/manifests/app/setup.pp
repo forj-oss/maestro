@@ -26,7 +26,7 @@
 # (4) starts the rest api service
 
 # Sample Usage:
-# puppet apply -e "class { 'maestro::app::setup': }" --modulepath=/opt/config/production/git/redstone/puppet/modules:/etc/puppet/modules; --verbose
+# puppet apply -e "class { 'maestro::app::setup': }" --modulepath=/opt/config/production/git/maestro/puppet/modules:/etc/puppet/modules; --verbose
 
 
 class maestro::app::setup(
@@ -58,7 +58,7 @@ class maestro::app::setup(
     ensure   => latest,
     provider => 'git',
     revision => $vcs_revision,
-    source   => 'review:forj-ui/forj.config',
+    source   => 'https://review.forj.io/p/forj-ui/forj.config',
     require  => [ Package['optimist'],
                   Package['restify'],
                   Package['path'],
@@ -79,7 +79,7 @@ class maestro::app::setup(
     ensure   => latest,
     provider => 'git',
     revision => $vcs_revision,
-    source   => 'review:forj-ui/forj.mon',
+    source   => 'https://review.forj.io/p/forj-ui/forj.mon',
     require  => [ Package['optimist'],
                   Package['restify'],
                   Package['path'],

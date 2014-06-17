@@ -21,7 +21,7 @@ define salt::handle_files {
       owner   => 'salt',
       group   => 'salt',
       mode    => '0644',
-      source  => "puppet:///modules/runtime_project/salt/${name}",
+      source  => "puppet:///modules/maestro/salt/${name}",
       replace => true,
     }
   }

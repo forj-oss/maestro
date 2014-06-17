@@ -36,7 +36,7 @@
 # [*node_path*]
 #   nodejs modules path
 #
-# Example run: puppet apply -e "nodejs_wrap::pm2instance{'kitops': ensure => 'present', user => 'puppet', script_dir => '/opt/config/production/app/forj.config', script => 'kitops.js', node_path => '/usr/lib/node_modules', }" --modulepath=/opt/config/production/git/redstone/puppet/modules:/etc/puppet/modules --verbose
+# Example run: puppet apply -e "nodejs_wrap::pm2instance{'kitops': ensure => 'present', user => 'puppet', script_dir => '/opt/config/production/app/forj.config', script => 'kitops.js', node_path => '/usr/lib/node_modules', }" --modulepath=/opt/config/production/git/maestro/puppet/modules:/etc/puppet/modules --verbose
 #
 define nodejs_wrap::pm2instance(
   $script     = $title,

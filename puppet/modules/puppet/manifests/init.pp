@@ -82,11 +82,15 @@ class puppet (
     hasrestart => true,
   }
 
+  notice( "setting puppet.conf with '${modulepath}'")
+  notice( "bp_modulepath ${::bp_modulepath}")
+  notice( "extra_modulepath ${::extra_modulepath}")
   file { '/etc/puppet/puppet.conf':
     content => template('puppet/puppet.conf.erb'),
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
+    replace => true,
   }
 
   file { '/etc/puppet/etckeeper-commit-pre':

@@ -56,7 +56,7 @@ class maestro::ui::setup(
     ensure   => latest,
     provider => 'git',
     revision => $vcs_revision,
-    source   => 'review:forj-oss/maestro',
+    source   => 'https://review.forj.io/p/forj-oss/maestro',
     require  => [ Package['optimist'],
                   Package['restify'],
                   Package['path'],

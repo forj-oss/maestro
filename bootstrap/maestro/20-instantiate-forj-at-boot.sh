@@ -29,5 +29,8 @@ BLUEPRINT="$(GetJson /meta-boot.js blueprint)"
 if [ "$BLUEPRINT" != "" ]
 then # TODO: Support to receive a different layout then default one.
    /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
+   puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
 fi
+
+
 

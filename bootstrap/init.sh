@@ -99,9 +99,10 @@ then
 Maestro boot init repo: $DIR/$BOOT_FILE Starting..."
                if [ "$EMULATE" = True ]
                then
-                  echo "Maestro boot init repo: should start ${BOOT_FILE}..."
+                  echo "Maestro boot init repo: should start :
+INIT_FUNCTIONS=$INIT_FUNCTIONS $DIR/${BOOT_FILE}"
                else
-                  $DIR/$BOOT_FILE
+                  INIT_FUNCTIONS=$INIT_FUNCTIONS $DIR/$BOOT_FILE
                fi
                echo "Maestro boot init repo: $DIR/$BOOT_FILE executed.
 *****************************************"

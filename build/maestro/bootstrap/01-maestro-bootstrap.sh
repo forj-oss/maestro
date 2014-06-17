@@ -44,5 +44,6 @@ git clone $GITBRANCH_FLAG $MAESTRO_LINK maestro
 cd maestro
 git config core.autocrlf false
 
-ln -s /opt/config/production/git/maestro/puppet /opt/config/production
+mkdir /opt/config/production/puppet/
+ln -s /opt/config/production/git/maestro/puppet/manifests /opt/config/production/puppet
 set +x

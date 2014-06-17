@@ -51,24 +51,26 @@ class maestro::orchestrator::managedns (
   } else {
     # this is our hard coded default, but we should maintain this in our yaml config.
     # left here to help with testing.
+    # ChL: Hardcoded: Kept only maestro, as Maestro will know more from others nodes from hiera later. Maestro is aware only on itself, except hiera said something else.
     $dns_data = parseyaml("
   maestro:
     hostname: 'maestro'
     type: 'A'
     node_search: '/maestro.${instance_id}.*/'
-  review:
-    hostname: 'review'
-    type: 'A'
-    node_search: 'review.${instance_id}'
-  ci:
-    hostname: 'ci'
-    type: 'A'
-    node_search: 'ci.${instance_id}'
-  util:
-    hostname: 'util'
-    type: 'A'
-    node_search: 'util.${instance_id}'
 ")
+#  review:
+#    hostname: 'review'
+#    type: 'A'
+#    node_search: 'review.${instance_id}'
+#  ci:
+#    hostname: 'ci'
+#    type: 'A'
+#    node_search: 'ci.${instance_id}'
+#  util:
+#    hostname: 'util'
+#    type: 'A'
+#    node_search: 'util.${instance_id}'
+#")
   }
   # 3. get nodes to manage
   $nodes = keys($dns_data)

@@ -22,7 +22,7 @@
 #
 
 # Sample Usage:
-# puppet apply -e "class { 'maestro::app::tool_status': }" --modulepath=/opt/config/production/git/redstone/puppet/modules:/etc/puppet/modules; --verbose
+# puppet apply -e "class { 'maestro::app::tool_status': }" --modulepath=/opt/config/production/git/maestro/puppet/modules:/etc/puppet/modules; --verbose
 #
 
 class maestro::app::tool_status(

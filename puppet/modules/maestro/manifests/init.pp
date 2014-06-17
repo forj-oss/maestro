@@ -42,7 +42,8 @@ class maestro (
   # Install nodejs and pm2
   class {'nodejs_wrap':  }
   # we don't want this passed to us any other way.
-  $app_dir          = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app")
+  $env_dir          = hiera('maestro::app::app_dir',"/opt/config/${::environment}")
+  $app_dir          = "${env_dir}/app"
   if $provision_set == '' or $provision_set == undef
   {
     $provision = true
@@ -56,6 +57,20 @@ class maestro (
                     '/usr/sbin/',
                     '/usr/local/bin/'
                   ]
+  }
+
+  if ! defined(File["${env_dir}/blueprints"]) {
+      file { "${env_dir}/blueprints" :
+        ensure => directory,
+        mode   => '0755',
+      }
+  }
+
+  if ! defined(File["${env_dir}/puppet/modules"]) {
+      file { "${env_dir}/puppet/modules" :
+        ensure => directory,
+        mode   => '0755',
+      }
   }
 
   $ddl_home_dir = "${app_dir}/ddl"
@@ -74,9 +89,19 @@ class maestro (
       }
   }
 
+  include mysql_tuning
+  include maestro::requirements
+  include maestro::app::kits_db
+  include maestro::app::setup
+  include maestro::ui::setup
+  include maestro::backup::backup_server
+  include maestro::app::tool_status
+
+
+  # Fog file may not be installed, and following code may fails. But maestro ui should be already installed and configured, anyway.
   debug("instance_id is ${instance_id}")
   $instance = $instance_id
-  if ($provision == true)
+  if ($provision == true) and ($::fog != 'UNDEF')
   {
     # create a server with non-default values
     class { 'maestro::orchestrator::setupallservers':
@@ -88,10 +113,4 @@ class maestro (
     }
   }
 
-  include mysql_tuning
-  include maestro::app::kits_db
-  include maestro::app::setup
-  include maestro::ui::setup
-  include maestro::backup::backup_server
-  include maestro::app::tool_status
 }

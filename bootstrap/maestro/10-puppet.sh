@@ -36,11 +36,10 @@ fi
 # TODO: need to get to latest version of config repo so we can un-fork install_puppet.sh
 
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
-bash /opt/config/production/git/config/install_modules.sh
+#bash /opt/config/production/git/config/install_modules.sh
 bash /opt/config/production/git/maestro/puppet/install_modules.sh
-#TODO: check with chrissss, how does this get abstracted out of maestro project?  Seems this whole file should be abstracted.
-bash /opt/config/production/git/redstone/puppet/install_modules.sh
 bash /opt/config/production/git/maestro/hiera/hiera.sh
+
 
 find /opt/config/production -type d -exec chmod 755 {} \;
 find /opt/config/production \( -path \*/tools/bin -o -path \*/bootstrap -o -path \*/build -o -path \*/.git \) -prune -o -type f -exec chmod 644 {} \;
@@ -56,7 +55,6 @@ function run1
 {
 export environment=production
 export PUPPET_MODULES=/opt/config/$environment/puppet/modules
-export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/redstone/puppet/modules
 export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/maestro/puppet/modules
 export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/config/modules
 export PUPPET_MODULES=$PUPPET_MODULES:/etc/puppet/modules

@@ -65,7 +65,7 @@ class salt::master {
     owner   => 'salt',
     group   => 'salt',
     mode    => '0644',
-    source  => 'puppet:///modules/runtime_project/salt/master.yaml',
+    source  => 'puppet:///modules/maestro/salt/master.yaml',
     replace => true,
     require => Package['salt-master'],
   }

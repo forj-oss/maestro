@@ -26,7 +26,7 @@
 # (3) Optimizes puppet dashboard mysql tables
 
 # Sample Usage:
-# puppet apply -e "include puppetmaster::maintjobs" --modulepath=/opt/config/production/git/redstone/puppet/modules
+# puppet apply -e "include puppetmaster::maintjobs" --modulepath=/opt/config/production/git/maestro/puppet/modules
 
 #
 class puppet::dashboard::maintjobs(
