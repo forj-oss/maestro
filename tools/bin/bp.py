@@ -54,10 +54,10 @@ def load_bp(bp_element):
      fYaml_req = urllib2.Request(bp_element)
      try:
        fYaml_hdl = urllib2.urlopen(fYaml_req)
-     except URLError, e:
+     except urllib2.URLError, e:
        logging.error('Unable to contact the url "'+bp_element+'" : '+e.reason)
        sys.exit(1)
-     except URLError, e:
+     except urllib2.URLError, e:
        logging.error('Unable to retrieve the blueprint from the url "'+bp_element+'" : '+e.code)
        sys.exit(1)
   
