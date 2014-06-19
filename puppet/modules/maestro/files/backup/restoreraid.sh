@@ -1,17 +1,17 @@
 #!/bin/bash
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+
 #
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+    
 # restoreraid script:
 #  
 # works with the boxes where "restore.sh" script will perform the restore of app local files 
@@ -26,23 +26,24 @@ bkpfoldlist=""                              #--- array that contains the folder 
 avhst=""                                    #--- array where to capture available host's bkp folder path
 appname=""                                  #--- get or sets the app name for use on a request or as parameter
 hstname=""                                  #--- get or sets the hostname for use on a request or as parameter
-
+applist=""                                  #--- get or sets the available list of applications with backups
 ## ------ harcoded variables ------------------------------------------------------------------------------------------------------
 
-restore_sh="/usr/lib/forj/sbin/restore.sh"  #--- remote path where the restore.sh is located
-maincont="/mnt/backups"                     #--- Path that by default contains the backups of the instances.
-currentweek=$(date +'%Y-%W')                #--- Base for current week
-saltfileservbase="/srv/salt"                #--- base for salt srv file server
-year=$(date +'%Y')                          #--- system current year
-sc_mode=$1                                  #--- script flag main choice to control the behavior and tasks performed by the script.
-evtime="$(date +%d/%m-%k:%M:%S)"            #--- setteable time to markup a timestamp for an event.
-logfile="$maincont/restoreraider.log"       #--- set the path for the logfile to restoreraid operations
-#--- minion full qualified names (fqdn for boxes)
-minionls=""   #($(salt-key -L |grep forj ))       #--- minion array for 
+RESTORE_SH="/usr/lib/forj/sbin/restore.sh"  #--- remote path where the restore.sh is located
+MAINCONT="/mnt/backups"                     #--- Path that by default contains the backups of the instances.
+CURRENTWEEK=$(date +'%Y-%W')                #--- Base for current week
+SALTFILESERVBASE="/srv/salt"                #--- base for salt srv file server
+YEAR=$(date +'%Y')                          #--- system current YEAR
+SC_MODE=$1                                  #--- script flag main choice to control the behavior and tasks performed by the script.
+EVTIME="$(date +%d/%m-%k:%M:%S)"            #--- setteable time to markup a timestamp for an event.
+LOGDIR="$MAINCONT/restorelogs"
+LOGFILE="$LOGDIR/restoreraider.log"       #--- set the path for the LOGFILE to restoreraid operations
+#--- minion full qualified names (fqdn for boxes) ---------------------------------------------
+MINIONLS=""   #($(salt-key -L |grep forj ))       #--- minion array for 
 ci_fqdn=""    #$(salt-key -L | grep ci)
 review_fqdn=""   #$(salt-key -L | grep review)
 util_fqdn=""     #$(salt-key -L | grep util)
-
+BKPUSER="forj-bck"
 ###
 function Help() {
  BASE=$(basename $0)
@@ -128,9 +129,24 @@ Values (how to) use Eg:
 }
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function setev() {  #--- Sets timestamp
-    evtime="$(date +%d/%m-%k:%M:%S)"
+    EVTIME="$(date +%d/%m-%k:%M:%S)"
 }
 
+function mkLOGDIR {
+    if [ -d $LOGDIR ] ; then
+            if [ -f $MAINCONT/restorelogs/restoreraider.log ]; then
+                    setev
+                    echo "- Success: $EVTIME Log file validated, OK" >> $LOGFILE
+            else
+                    touch $LOGFILE
+                    echo "- Operations: $EVTIME Log file created" >> $LOGFILE
+            fi
+    else
+            mkdir -p $LOGDIR
+            chown $BKPUSER:$BKPUSER $LOGDIR
+            mkLOGDIR
+    fi
+}
 #function pushdisp () {   #--- send the tar-specific host file to the correspondent target minion host file.
 #  echo "push of app-tar file for backups in progress"
 #   
@@ -139,20 +155,20 @@ function setev() {  #--- Sets timestamp
 #function tarhostbkp()  { #--- package the list of paths into a file by specific
 #  tarbsnam=$1
 #  tarfiles=$2
-#  tar -cvzf $maincont/$tarbsnam.tar.gz ${tarfiles[@]}
+#  tar -cvzf $MAINCONT/$tarbsnam.tar.gz ${tarfiles[@]}
 #  if [ $? -eq 0 ]
-#     mv  $maincont/$tarbsnam.tar.gz $saltfileservbase/
+#     mv  $MAINCONT/$tarbsnam.tar.gz $SALTFILESERVBASE/
 #  fi 
 #}
 
 #function bkweeklist()  { #--- will seek,list and store and specific host-week array of paths
 #  spweek=$2              #--- parameter for week folder to search
 #  sphost=$1              #--- parameter for host
-#  weekcont=($(find $maincont -type d -path "*$sphost*$spweek"))
+#  weekcont=($(find $MAINCONT -type d -path "*$sphost*$spweek"))
 #  if [ -n ${weekcont} ]; then
 #       tarhostbkp $sphost ${weekcont[@]} 
 #  else
-#       echo "- Error : $evtime : Setting up percona repository unsuccessful" >> $logfile
+#       echo "- Error : $EVTIME : Setting up percona repository unsuccessful" >> $LOGFILE
 #  fi       
 #} 
 
@@ -162,12 +178,12 @@ function setev() {  #--- Sets timestamp
 #}
 
 #function bckpsort { #--- travel into minions array to retrieve a full set to restore
-#     for i in ${minionls[@]}; do 
+#     for i in ${MINIONLS[@]}; do 
 #        if [ -n $( echo $i |grep maestro) ] ; then 
 #              echo " salt master: $i" 
 #              echo "specific operations not yet designed"
 #        else
-#              echo "- Begin: $evtime minion: $i backup-restore" 
+#              echo "- Begin: $EVTIME minion: $i backup-restore" 
 #              find
 #        fi
 #     done;
@@ -179,56 +195,64 @@ function setev() {  #--- Sets timestamp
 #} 
 
 function gethostlist () { #--- get the list for app-folder(s)
-	echo "- Operations: $evtime Full-restore, retrieve list of backup containers in progress" >> $logfile     
-    avhst=($( find $maincont -type d -name "*io" ))  #--- Will list all the folders listed with io in the name
+    echo "- Operations: $EVTIME Full-restore,or list retrieve list of hosts folders backup containers in progress" >> $LOGFILE     
+    avhst=($( find $MAINCONT -type d -name "*io" ))  #--- Will list all the folders listed with io in the name
 }
 
-function applist () { #--- gets the list of available applications that have being at least backuped once 	
-	appavlist=""
+function getapplist () { #--- gets the list of available applications that have being at least backuped once 	
+    appfold=$1
+    echo "- Operations: $EVTIME Full-restore, retrieve list of applications backup containers in progress" >> $LOGFILE
+    applist=($(ls $i))
 }
 
 function pushfunc {     #--- Calls the minion to run 
     appi="$1"           #--- app name
     hdes="$2"           #--- minion name to use
     bkcont="$3"         #--- Path of the backup source
-    retcode=$( salt "$hdes" cmd.retcode "$restore_sh $appi $bkcont")  #--- call the minion restore.sh script
+    retcode=$( salt "$hdes" cmd.retcode "$RESTORE_SH $appi $bkcont")  #--- call the minion restore.sh script
     if [ "$retcode" == "0" ]; then
                 setev
-                echo "- Success: $evtime : Restore operation for $appi completed" >> $logfile
+                echo "- Success: $EVTIME : Restore operation for $appi completed" >> $LOGFILE
     else
        case $retcode in 
        "1")
               setev
-              echo "- Error: $evtime : Rsync operation for $appi restore failed, bup repository not set in place" >> $logfile
+              echo "- Error: $EVTIME : Rsync operation for $appi restore failed, bup repository not set in place" >> $LOGFILE
        ;;
        "2")  
               setev
-              echo "- Error: $evtime : Backup set folder for $appi not in place, no lrepo available to restore " >> $logfile                
+              echo "- Error: $EVTIME : Backup set folder for $appi not in place, no lrepo available to restore " >> $LOGFILE                
        ;;
        "3")
               setev
-              echo "- Error: $evtime : Application $appi cannot be stopped to perform the repo restoring  " >> 	$logfile
+              echo "- Error: $EVTIME : Application $appi cannot be stopped to perform the repo restoring  " >> 	$LOGFILE
        ;;
        "4")
               setev
-              echo "- Error: $evtime : tar operations for bup backup and place on $appi home folder, failed " >> $logfile
+              echo "- Error: $EVTIME : tar operations for bup backup and place on $appi home folder, failed " >> $LOGFILE
        ;;
        "5")
               setev
-              echo "- Error: $evtime : wrong permissions to set folders for $appi home folder, failed " >> $logfile
+              echo "- Error: $EVTIME : wrong permissions to set folders for $appi home folder, failed " >> $LOGFILE
        ;;
        "6")   setev
-              echo "- Error: $evtime : bup $appi repo does not exits, probably wrong pulled by the box " >> $logfile
+              echo "- Error: $EVTIME : bup $appi repo does not exits, probably wrong pulled by the box " >> $LOGFILE
        ;;
        "7")   setev
-              echo "- Error: $evtime : tar operations for $appi DB backup and place on mysql folder, failed " >> $logfile
+              echo "- Error: $EVTIME : tar operations for $appi DB backup and place on mysql folder, failed " >> $LOGFILE
        ;;
        "8")   setev
-              echo "- Error: $evtime : innobackupex operations, failed for $appi DB restoring " >> $logfile
+              echo "- Error: $EVTIME : innobackupex operations, failed for $appi DB restoring " >> $LOGFILE
        ;;
        "9")   setev
-              echo "- Error: $evtime : Starting, failed for $appi After restoring " >> $logfile
+              echo "- Error: $EVTIME : Starting, failed for $appi After restoring " >> $LOGFILE
        ;;       
+       "10")  setev
+              echo "- Error: $EVTIME : Starting, failed for MySQL server After restoring " >> $LOGFILE
+       ;;
+       "11")  setev
+              echo "- Error: $EVTIME : SSH, Wron configurations in the box " >> $LOGFILE
+       ;;
        esac
     fi
 }
@@ -247,65 +271,89 @@ function getlist () { #--- search for the selected week set for the different ca
                            for appi in ${appname[@]}; do
                                    hstname=$( echo $i | awk ' BEGIN { FS="/" } { print $4} ' | awk ' BEGIN { FS="."} { print $1 }' )
                                    hostdest=$(salt-key -L |grep $hstname)
-                                   mfpath=$( find $maincont -type d -name "$appi" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $2 }') 
-                                   bkhlist=($(find  $mfpath/* -maxdepth 0 -type d -name "*$year*" | sort -gr ))
-                                   #bkpfoldlist=($( find $maincont -type d  -path "*$currentweek" ))
+                                   mfpath=$( find $MAINCONT -type d -name "$appi" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $2 }') 
+                                   bkhlist=($(find  $mfpath/* -maxdepth 0 -type d -name "*$YEAR*" | sort -gr ))
+                                   #bkpfoldlist=($( find $MAINCONT -type d  -path "*$CURRENTWEEK" ))
                                    pushfunc $appi $hostdest ${bkhlist[0]}                     #--- call the function that links with the remote restore.sh in the boxes
                            done; 
                       done;
                else 
-                      echo "- Info : $evtime the array of backups it's empty" >> $logfile
+                      echo "- Info : $EVTIME the array of backups it's empty" >> $LOGFILE
                       exit 3                                  
                fi   
         # elif  ##--- pending TODO specific validations for different cases          
         fi 
     ;;
     "L")
-          
+        gethostlist
+        case $comodin in
+        "all")
+              if [ -n "$( echo ${avhst[@]} )" ]; then
+                      echo " The list of applications and backups sets is the following : \n" 
+                      for i in ${avhst[@]}; do
+                           hstname="echo ${avhst[$i]} | awk ' BEGIN { FS="/" } {print $4}'" #---- set for header of the info
+                           echo " Hostname :  $hstname \n"
+                           getapplist $i
+                           for e in ${applist[@]}; do
+                                bklist=($( ls -rS $i/$e ))
+                           done 
+                           
+                      done
+              else
+                      echo "- Info : $EVTIME No backups available to list" >> $LOGFILE
+                      exit 3
+              fi
+        ;;
+        "allp")
+        ;;
+        "*")
+        ;;
+        esac 
     ;;    
     # mfpath=$1
-    #bkhs=$(find  $mfpath/* -maxdepth 0 -type d -name "*$year*" | wc -l)
+    #bkhs=$(find  $mfpath/* -maxdepth 0 -type d -name "*$YEAR*" | wc -l)
     # "start backup history check ---"
     #if [ $daycheck == $(date +%u) ] ; then
     #      if (( $bkhs > $Wcheck )) ; then
-    #         bkhlist=($(find  $mfpath/* -maxdepth 0 -type d -name "*$year*" | sort -gr ))
+    #         bkhlist=($(find  $mfpath/* -maxdepth 0 -type d -name "*$YEAR*" | sort -gr ))
     #         rm -rf ${bkhlist[$Wcheck]}
-    #         #find $maincont -name "*$(( $(date +'%V') - 1))*.tar.gz"
+    #         #find $MAINCONT -name "*$(( $(date +'%V') - 1))*.tar.gz"
     #      fi
     #fi
     esac
 }
 
 #
-# mfpath=$( find $maincont -type d -name "$appsnm" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $2 }' )
+# mfpath=$( find $MAINCONT -type d -name "$appsnm" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $2 }' )
 function main () {
-    if [ -n "$sc_mode" ]; then
+    if [ -n "$SC_MODE" ]; then
            sec_param=$2 
            ter_param=$3
-	       case $sc_mode in
+           mkLOGDIR
+	       case $SC_MODE in
 	       "-A"|"-a"|"-Aw"|"-Ai"|"-Awi")
 	               #validins  ## retrieve values from the user; not in use now
 	               #printvals ## print values
 	               echo "option App-restore"
 	       ;;
-	       "-F"|"-f"|"-Fw")  ## FullBackup case "Beggining backup running at : $mydate " >> $logfile
+	       "-F"|"-f"|"-Fw")  ## FullBackup case "Beggining backup running at : $mydate " >> $LOGFILE
 	                setev
-	                echo "- Operations: $evtime option Full-restore, validation in progress" >> $logfile
+	                echo "- Operations: $EVTIME option Full-restore, validation in progress" >> $LOGFILE
                     if [ -z "$sec_param" ]; then 
-                            if [ "$sc_mode" == "-F" ] || [ "$sc_mode" == "-f" ]; then 
+                            if [ "$SC_MODE" == "-F" ] || [ "$SC_MODE" == "-f" ]; then 
                                            sec_param="F"
-                                           echo "$sc_mode = F or f"
+                                           echo "$SC_MODE = F or f"
                                            setev
-                                           echo "- Operations: $evtime Full restore automatic, Default last backup week set will be restored" >> $logfile
+                                           echo "- Operations: $EVTIME Full restore automatic, Default last backup week set will be restored" >> $LOGFILE
                                            getlist $sec_param
-                            elif [ "$sc_mode" = "-Fw" ]; then
-                                           echo "- Error: $evtime no set of backup seleted" >> $logfile
+                            elif [ "$SC_MODE" = "-Fw" ]; then
+                                           echo "- Error: $EVTIME no set of backup seleted" >> $LOGFILE
 	                                       echo "\n no Week chosen of Backup set to restore "
                                            read
                                            Help
                             fi
                     elif [ -n "$sec_param" ]; then
-                              if [ "$sc_mode" == "-F" ] || [ "$sc_mode" == "-f" ]; then
+                              if [ "$SC_MODE" == "-F" ] || [ "$SC_MODE" == "-f" ]; then
                                              case $sec_param in
                                              [1-4])
                                                 echo "weekset choosen $sec_param"
@@ -313,7 +361,7 @@ function main () {
                                              ;;
                                              "-w")
                                                 if [ -z "$ter_param" ]; then
-                	                                    echo "- Error: $evtime no set of backup seleted" >> $logfile
+                	                                    echo "- Error: $EVTIME no set of backup seleted" >> $LOGFILE
 	                                                    echo "\n no Week chosen"
                                                         read
                                                         Help
@@ -324,7 +372,7 @@ function main () {
                                                             week_no="$ter_param" 
                                                         ;;  
                                                         *)  
-                                                           echo "- Error: $evtime no set of backup seleted" >> $logfile
+                                                           echo "- Error: $EVTIME no set of backup seleted" >> $LOGFILE
                                                            echo "\n value out of range"
                                                            read
                                                            Help 
@@ -333,14 +381,14 @@ function main () {
                                                 fi
                                              ;;
                                              esac       
-                              elif [ "$sc_mode" == "-Fw" ]; then
+                              elif [ "$SC_MODE" == "-Fw" ]; then
                                                case $sec_param in
                                                [1-4])
                                                   echo "weekset choosen $sec_param"
                                                ;;  
                                                *)  
                                                   setev
-                                                  echo "- Error: $evtime no set of backup seleted" >> $logfile
+                                                  echo "- Error: $EVTIME no set of backup seleted" >> $LOGFILE
                                                   echo "\n value out of range"
                                                   read
                                                   Help
@@ -356,7 +404,7 @@ function main () {
 	               #if [ -f "$params" ]; then
 	               #    chkconff
 	               #else
-	               #    echo "- Error: $evtime Checking config file: Error"
+	               #    echo "- Error: $EVTIME Checking config file: Error"
 	               #fi
 	               echo "option Full-instance restore"
 	      ;;
@@ -366,32 +414,33 @@ function main () {
           ;;
           "-L"|"-l")
                    if [ -n "$sec_param" ]; then                
-                          sc_mode="L"
+                          SC_MODE="L"
                           case $sec_param in                    
                           "--all" )                               #---  $BASE -L --all          
                                 echo "will list all the applications and its backups"    #--- TODO 
-                                # getlist $sc_mode
+                                # getlist $SC_MODE "all" 
                           ;;
                           "--allapp")                             #---  $BASE -L --allapp  
                                 echo "will only list the applications"                   #--- TODO
-                                # getlist $sc_mode
+                                # getlist $SC_MODE "allp"
                           ;;
                           *)                                       #---  $BASE -L  <app_name> and other cases #---TODO
                                 echo "will list specific application backup information , set by name"
+                                # getlist $SC_MODE $sec_param
                           ;;
                           esac
                    else                                       
-                          echo "- Error: $evtime not parameter set for search Application to list" >> $logfile
+                          echo "- Error: $EVTIME not parameter set for search Application to list" >> $LOGFILE
                    fi                                  
                    
           ;;        
           *)
-                   echo " \"$sc_mode\" is non valid flag "
+                   echo " \"$SC_MODE\" is non valid flag "
                    Help
 	      ;;
 	      esac
     else
-          echo "- Error : $evtime : Non Parameter specified"  >> $logfile
+          echo "- Error : $EVTIME : Non Parameter specified"  >> $LOGFILE
           read
           Help
     fi

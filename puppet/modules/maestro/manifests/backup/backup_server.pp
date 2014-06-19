@@ -58,7 +58,7 @@ class maestro::backup::backup_server (
   }->
   notify{'Installed backup status script.':}
 
-  #Install restoreraid script
+  #Install restoreraid.sh script
     file { "${maestro::backup::params::box_backup_path}/restore" :
       ensure  => directory,
       owner   => $maestro::backup::params::box_backup_user,
@@ -66,9 +66,9 @@ class maestro::backup::backup_server (
       require => File [$maestro::backup::params::box_backup_path],
     }
 
-    file { "${maestro::backup::params::box_backup_path}/restore/restoreraid":
+    file { "${maestro::backup::params::box_backup_path}/restore/restoreraid.sh":
       ensure  => present,
-      source  => 'puppet:///modules/maestro/backup/restoreraid',
+      source  => 'puppet:///modules/maestro/backup/restoreraid.sh',
       mode    => '0555',
       require => File["${maestro::backup::params::box_backup_path}/restore"],
     }
