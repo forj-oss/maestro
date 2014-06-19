@@ -44,8 +44,8 @@ daycheck="1"                                     #activates the checking
 
 function bdamnp { ##--- perfoms simple operations for retrieve % of use of general on the filesystem
    bkpfsz=$( du -ac --max-depth=0 $maincont |sed -n 's/total/ /p')
-   sofs=$(( $(df $maincont | sed -n '/2/p' | awk ' { print $2 } ') /100 ))
-   sofs=$(( $(df $maincont | sed -n '2p' |awk ' {print $2 }') /100 ))
+   #sofs=$(( $(df $maincont | sed -n '/2/p' | awk ' { print $2 } ') /100 ))
+   sofs=$(( $(df $maincont | sed -n '2p' |awk ' {print $2 /100}') ))
    bkppusage=$(($bkpfsz/$sofs))
    echo "backup :" >> $bkpflag
    echo "   fs-usage : $bkppusage " >> $bkpflag
@@ -70,7 +70,7 @@ function sweeplist () { #--- sweeps old bkp history =--=--=
 
 function hostsfold { #--- list the host folders and reports the fs-usage
  #   sofs=$(( $(df $maincont | sed -n '/2/p' | awk ' { print $2 } ') /100 ))
-    sofs=$(( $(df $maincont |sed -n '2p' | awk ' {print $2 }' ) /100 ))
+    sofs=$(( $(df $maincont |sed -n '2p' | awk ' {print $2 /100}' ) ))
     > $tmpfile
     for hostfold in ${hostnam[@]}; do
          hostsizf=$( find $maincont -type d -name "*$hostfold*" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $1 } ')
@@ -99,7 +99,8 @@ function loglist (){ #--- validates the existance of a log file call
 }
 
 function appsfold { #--- list the app folders and reports fs and backup status
-    sofs=$(( $(df $maincont | sed -n '/2/p' | awk ' { print $2 } ') /100 ))
+    #sofs=$(( $(df $maincont | sed -n '/2/p' | awk ' { print $2 /100 } ') ))
+    sofs=$(( $(df $maincont | sed -n '2p' | awk ' {print $2 /100} ')))
     for appfold in ${appname[@]}; do 
              appsnm=$( find $maincont -type d  -path "*$appfold*" | sed -n '1p' | awk ' BEGIN { FS="/" } { print $5 } ' )
           mainfappsz=$( find $maincont -type d -name "$appsnm" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $1 }')

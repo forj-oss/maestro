@@ -51,8 +51,8 @@ class maestro::backup::backup_server (
   }
   cron { 'box_backupstatus':
     user    => $::maestro::backup::params::backup_user,
-    hour    => '00-03',
-    minute  => '*/30',
+    hour    => '03',
+    minute  => '30',
     command => "${home}/corebkpadm",
     require => File["${home}/corebkpadm"],
   }->

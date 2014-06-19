@@ -152,13 +152,14 @@ class maestro::backup::configure_box (
       mode    => '0755',
     } ->
     cron { 'box_backup':
-      user    => $maestro::backup::params::box_backup_user,
-      hour    => '00',
-      minute  => '00',
-      command => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
-      require => [  File["${sbin_path}/runbkp"],
-                    File[$confd_path],
-                    File["${sbin_path}/master_bkp.sh"] ],
+      user          => $maestro::backup::params::box_backup_user,
+      hour          => '00',
+      minute        => '20',
+      command       => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
+      environment   => [  'PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"'],
+      require       => [  File["${sbin_path}/runbkp"],
+                          File[$confd_path],
+                          File["${sbin_path}/master_bkp.sh"] ],
     }->
     notify{'Installed box_backup cron job.':}
   }
