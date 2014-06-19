@@ -21,7 +21,7 @@ class nodejs_wrap (
   $manage_repo  = hiera('nodejs_wrap::manage_repo', true),
   $proxy        = hiera('nodejs_wrap::proxy', inline_template('<%= ENV[\'http_proxy\'] %>')),
   $registry     = hiera('nodejs_warp::registry', undef),
-  $version      = hiera('nodejs_wrap::version', '0.10.28-1chl1~precise1'),
+  $version      = hiera('nodejs_wrap::version', '0.10.29-1chl1~precise1'),
 )
 {
   if $registry == undef
