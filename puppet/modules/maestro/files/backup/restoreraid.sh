@@ -291,22 +291,35 @@ function getlist () { #--- search for the selected week set for the different ca
               if [ -n "$( echo ${avhst[@]} )" ]; then
                       echo " The list of applications and backups sets is the following : \n" 
                       for i in ${avhst[@]}; do
-                           hstname="echo ${avhst[$i]} | awk ' BEGIN { FS="/" } {print $4}'" #---- set for header of the info
-                           echo " Hostname :  $hstname \n"
+                           hstname=$( echo $i | awk ' BEGIN { FS="/" } {print $4}' ) #---- set for header of the info
+                           echo "*** Hostname :  $hstname *** "
                            getapplist $i
                            for e in ${applist[@]}; do
                                 bklist=($( ls -rS $i/$e ))
+                                if [ -n ${bklist[@]} ]; then
+                                       echo "  - Application: $e "
+                                       indx=0
+                                       for a in ${bklist[@]};do
+                                           let "indx+=1"
+                                           echo "     $indx -  $a"
+                                       done
+                                else
+                                       echo "- Info : $EVTIME No backups available to list for APP: $e " >> $LOGFILE
+                                fi
                            done 
                            
                       done
               else
+                      echo "- $EVTIME : No backups available to list at this time"
                       echo "- Info : $EVTIME No backups available to list" >> $LOGFILE
                       exit 3
               fi
         ;;
         "allp")
+             echo "not yet full implemented, work in progress"
         ;;
         "*")
+             echo "not yet full implemented, work in progress"
         ;;
         esac 
     ;;    
@@ -325,10 +338,10 @@ function getlist () { #--- search for the selected week set for the different ca
 
 #
 # mfpath=$( find $MAINCONT -type d -name "$appsnm" -exec du -ac --max-depth=0 {} \; | sed -n '1p' | awk ' { print $2 }' )
-function main () {
+function main (){
+    sec_param=$2 
+    ter_param=$3
     if [ -n "$SC_MODE" ]; then
-           sec_param=$2 
-           ter_param=$3
            mkLOGDIR
 	       case $SC_MODE in
 	       "-A"|"-a"|"-Aw"|"-Ai"|"-Awi")
@@ -342,9 +355,10 @@ function main () {
                     if [ -z "$sec_param" ]; then 
                             if [ "$SC_MODE" == "-F" ] || [ "$SC_MODE" == "-f" ]; then 
                                            sec_param="F"
-                                           echo "$SC_MODE = F or f"
+                                           echo "Full-restore, in progress"
                                            setev
                                            echo "- Operations: $EVTIME Full restore automatic, Default last backup week set will be restored" >> $LOGFILE
+                                           echo "\n Performing Operations to restore your data, please dont stop the process \n" 
                                            getlist $sec_param
                             elif [ "$SC_MODE" = "-Fw" ]; then
                                            echo "- Error: $EVTIME no set of backup seleted" >> $LOGFILE
@@ -417,8 +431,8 @@ function main () {
                           SC_MODE="L"
                           case $sec_param in                    
                           "--all" )                               #---  $BASE -L --all          
-                                echo "will list all the applications and its backups"    #--- TODO 
-                                # getlist $SC_MODE "all" 
+                                echo "I will list all the applications and its backups \n"    #--- TODO 
+                                getlist $SC_MODE "all" 
                           ;;
                           "--allapp")                             #---  $BASE -L --allapp  
                                 echo "will only list the applications"                   #--- TODO
@@ -426,7 +440,7 @@ function main () {
                           ;;
                           *)                                       #---  $BASE -L  <app_name> and other cases #---TODO
                                 echo "will list specific application backup information , set by name"
-                                # getlist $SC_MODE $sec_param
+                                # getlist $SC_MODE $sec_paraml
                           ;;
                           esac
                    else                                       
@@ -446,4 +460,4 @@ function main () {
     fi
 }
 
-main              #-- call to main function 
+main $SC_MODE $2 $3             #-- call to main function 
