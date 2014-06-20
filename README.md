@@ -4,7 +4,6 @@ Directories structure:
 bootstrap     : Contains Box init code after server bootstraped.
 build/bin     : Contains scripts to build Maestro or node images or any distribution packages.
 build/maestro : Contains bootstrap to build a basic maestro image
-build/maestro : Contains bootstrap to build a basic maestro image
 build/node    : Contains bootstrap to build a basic node image.
 puppet        : Contains puppet modules to build maestro or node images.
 api           : Internal Maestro api
