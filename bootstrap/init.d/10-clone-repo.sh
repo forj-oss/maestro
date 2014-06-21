@@ -15,6 +15,7 @@
 # Implements a git clone capability requested by metadata variable 'repos'
 
 REPOS="$(GetJson /meta-boot.js repos)"
+GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
 
 function clone-repo
 {
