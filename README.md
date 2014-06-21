@@ -1,13 +1,13 @@
 Directories structure:
 ======================
 
-bootstrap     : Contains Box init code after server bootstraped.
-build/bin     : Contains scripts to build Maestro or node images or any distribution packages.
-build/maestro : Contains bootstrap to build a basic maestro image
-build/node    : Contains bootstrap to build a basic node image.
-puppet        : Contains puppet modules to build maestro or node images.
-api           : Internal Maestro api
-ui            : Maestro ui
+- bootstrap     : Contains Box init code after server bootstraped.
+- build/bin     : Contains scripts to build Maestro or node images or any distribution packages.
+- build/maestro : Contains bootstrap to build a basic maestro image
+- build/node    : Contains bootstrap to build a basic node image.
+- puppet        : Contains puppet modules to build maestro or node images.
+- api           : Internal Maestro api
+- ui            : Maestro ui
 
 How Maestro is created:
 =======================
@@ -18,7 +18,12 @@ This tool is based on hpcloud cli. You have to install it before. See http://doc
 
 * Configuring cloud credential
 
-* Starting your build
+See hpcloud cli documentation
+
+* Build your box
+
+To build a box named maestro, use the following:
+
     $ cd build
     $ bin/build.sh --box-name maestro --build-conf-dir conf
 
