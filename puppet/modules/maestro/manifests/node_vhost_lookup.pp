@@ -16,17 +16,17 @@
 class maestro::node_vhost_lookup(
   $alias_name  = hiera('maestro::node_vhost_lookup::alias_name', $::fqdn)
 ) {
-#  include gardener::requirements
-#  if str2bool($::vagrant_guest) == true {
-#    $vname = 'localhost'
-#  } elsif($alias_name != '' and domain_record_exists($alias_name, 'A' )) {
-#    $vname = $alias_name
-#  } elsif ( $::helion_public_ipv4 != '') {
-#    $vname = $::helion_public_ipv4
-#  } elsif ( $::ec2_public_ipv4 != '') {
-#    $vname = $::ec2_public_ipv4
-#  } else {
-#    fail('no public routable ip could be determined.  stop this puppet run')
+  include gardener::requirements
+  if str2bool($::vagrant_guest) == true {
+    $vname = 'localhost'
+  } elsif($alias_name != '' and domain_record_exists($alias_name, 'A' )) {
+    $vname = $alias_name
+  } elsif ( $::helion_public_ipv4 != '') {
+    $vname = $::helion_public_ipv4
+  } elsif ( $::ec2_public_ipv4 != '') {
+    $vname = $::ec2_public_ipv4
+  } else {
+    fail('no public routable ip could be determined.  stop this puppet run')
 # TODO delete after we determine this is good:    $vname = inline_template('<% if defined?(@ec2_public_ipv4) %><%= @ec2_public_ipv4 %><% elsif defined?(@ipaddress_eth0)%><%= @ipaddress_eth0 %><% else %><%= @fqdn %><% end %>')
-#  }
+  }
 }
