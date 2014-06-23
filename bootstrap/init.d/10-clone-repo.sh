@@ -31,7 +31,10 @@ function clone-repo
 
  if [ "$GITBRANCH" != "" ]
  then
+   echo "Using branch '$GITBRANCH'"
    GITBRANCH_FLAG="-b $GITBRANCH"
+ else
+   echo "Using default branch 'master'"
  fi
 
  for REPO in $(echo "$REPOS" | sed 's/|/ /g')
@@ -58,7 +61,7 @@ function clone-repo
 
 if [ "$REPOS" != "" ]
 then
-   _CWD=$(pwd)
+   _CWD="$(pwd)"
    clone-repo
-   cd $_CWDdd
+   cd "$_CWD"
 fi
