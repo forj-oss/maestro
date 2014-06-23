@@ -24,7 +24,7 @@
   :datadir: '/etc/puppet/hieradata'
 
 :hierarchy:
-  - "%{::osfamily}/layouts/%{::nodetype}"
+  - "%{::osfamily}/layouts/%{::nodetype}"                   # Contains yaml files for each nodes
   - "%{::osfamily}/subnodetype/%{::subnodetype}"
   - "%{::osfamily}/nodetype/%{::nodetype}"
   - "%{::osfamily}/fqdn/%{::fqdn}"
