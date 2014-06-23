@@ -53,10 +53,6 @@ class gardener::requirements {
     ensure: '1.19.0'
     provider: 'gem18'
     require: 'Package[nokogiri]'
-  hpcloud:
-    ensure: '2.0.6'
-    provider: 'gem18'
-    require: 'Package[fog]'
   dos2unix:
     ensure: 'latest'
   libxslt-dev:
@@ -66,6 +62,32 @@ class gardener::requirements {
 
   gardener::requirements_package { $packages:
       data => $package_data,
+  }
+
+  # custom installation for hpcloud from gem file for private cloud implementation support.
+  # currently forked on github at wenlock/unix_cli
+  if ! defined(File['/var/lib/forj']) {
+    file { '/var/lib/forj' :
+      ensure => directory,
+      mode   => '0755',
+    }
+  }
+  downloader {'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud/2.0.7/hpcloud-2.0.7.gem':
+            ensure          => present,
+            path            => '/var/lib/forj/hpcloud-2.0.7.gem',
+            md5             => '686720f60c81fd4147e68d06cb1f3fe6',
+            owner           => 'puppet',
+            group           => 'puppet',
+            mode            => 755,
+            replace         => false,
+            provider        => url,
+            require         => File['/var/lib/forj']
+  } ->
+  exec { 'gem1.8 install /var/lib/forj/hpcloud-2.0.7.gem':
+          path    => ['/bin', '/usr/bin'],
+          command => 'gem1.8 install --include-dependencies --no-rdoc --no-ri /var/lib/forj/hpcloud-2.0.7.gem',
+          require => Package['fog'],
+          unless  => 'gem1.8 list |grep "hpcloud\s(2.0.7)"',
   }
 
 }
