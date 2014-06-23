@@ -66,16 +66,20 @@ class gardener::requirements {
 
   # custom installation for hpcloud from gem file for private cloud implementation support.
   # currently forked on github at wenlock/unix_cli
+  $unix_cli_version='2.0.8'
+  $unix_cli_name='hpcloud'
+  $unix_cli_md5='93fc19d1afdcd37a5962b28b5517f94f'
+  $unix_cli_url='http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'
   if ! defined(File['/var/lib/forj']) {
     file { '/var/lib/forj' :
       ensure => directory,
       mode   => '0755',
     }
   }
-  downloader {'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud/2.0.7/hpcloud-2.0.7.gem':
+  downloader {"${unix_cli_url}/${unix_cli_version}/hpcloud-${unix_cli_version}.gem":
             ensure          => present,
-            path            => '/var/lib/forj/hpcloud-2.0.7.gem',
-            md5             => '686720f60c81fd4147e68d06cb1f3fe6',
+            path            => "/var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
+            md5             => $unix_cli_md5,
             owner           => 'puppet',
             group           => 'puppet',
             mode            => 755,
@@ -83,11 +87,11 @@ class gardener::requirements {
             provider        => url,
             require         => File['/var/lib/forj']
   } ->
-  exec { 'gem1.8 install /var/lib/forj/hpcloud-2.0.7.gem':
+  exec { "gem1.8 install /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem":
           path    => ['/bin', '/usr/bin'],
-          command => 'gem1.8 install --include-dependencies --no-rdoc --no-ri /var/lib/forj/hpcloud-2.0.7.gem',
+          command => "gem1.8 install --include-dependencies --no-rdoc --no-ri /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
           require => Package['fog'],
-          unless  => 'gem1.8 list |grep "hpcloud\s(2.0.7)"',
+          unless  => "gem1.8 list |grep '${unix_cli_name}\s(${unix_cli_version})'",
   }
 
 }
