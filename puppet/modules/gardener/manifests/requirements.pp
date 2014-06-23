@@ -68,7 +68,7 @@ class gardener::requirements {
   # currently forked on github at wenlock/unix_cli
   $unix_cli_version='2.0.8'
   $unix_cli_name='hpcloud'
-  $unix_cli_md5='93fc19d1afdcd37a5962b28b5517f94f'
+  $unix_cli_md5='25587f96f6edf7e50d3f58239437d162'
   $unix_cli_url='http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'
   if ! defined(File['/var/lib/forj']) {
     file { '/var/lib/forj' :
