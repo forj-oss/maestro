@@ -80,7 +80,7 @@ fi
 #if metadata does not exist grab it form the Upstream provided data ({metadata-json} is replaced by upstream code (build.sh))
 if [ ! -f $PREFIX/meta.js ] 
 then
-  echo '${metadata-json}' > /meta-boot.js
+  echo '${metadata-json}' > /meta.js
   echo "WARNING! /meta.js not found. Getting info from user_data"
 fi
 
