@@ -25,6 +25,7 @@
 
 :hierarchy:
   - "%{::osfamily}/layouts/%{::nodetype}"                   # Contains yaml files for each nodes
+  - "%{::osfamily}/layouts/layouts"                         # Contains any definition that have to be available on all nodes of the layout.
   - "%{::osfamily}/subnodetype/%{::subnodetype}"
   - "%{::osfamily}/nodetype/%{::nodetype}"
   - "%{::osfamily}/fqdn/%{::fqdn}"
