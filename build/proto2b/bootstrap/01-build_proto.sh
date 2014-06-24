@@ -14,8 +14,8 @@
 #   limitations under the License.
 #
 
-_PUPPET_MASTER="$(GetJson $PREFIX/meta.js erosite)"
-_PUPPET_MASTER_FQDN="${_PUPPET_MASTER}.$(GetJson $PREFIX/meta.js erodomain)"
+_PUPPET_MASTER="$(GetJson $PREFIX/meta-boot.js erosite)"
+_PUPPET_MASTER_FQDN="${_PUPPET_MASTER}.$(GetJson $PREFIX/meta-boot.js erodomain)"
 
 sed -e "s/^certname.*=.*/certname = $_PUPPET_MASTER_FQDN/" /etc/puppet/puppet.conf --in-place
 sed -e "s/^server.*=.*/server = $_PUPPET_MASTER_FQDN/" /etc/puppet/puppet.conf --in-place

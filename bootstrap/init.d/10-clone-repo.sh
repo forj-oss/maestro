@@ -32,7 +32,6 @@ function clone-repo
  if [ "$GITBRANCH" != "" ]
  then
    echo "Using branch '$GITBRANCH'"
-   GITBRANCH_FLAG="-b $GITBRANCH"
  else
    echo "Using default branch 'master'"
  fi
@@ -48,7 +47,7 @@ function clone-repo
        continue
     fi
     cd /opt/config/production/git
-    git clone $GITBRANCH_FLAG $REPO_LINK $REPO_DIRNAME
+    CloneRepo $REPO_DIRNAME $REPO_LINK $GITBRANCH
     if [ ! -d $REPO_DIRNAME ]
     then
        echo "ERROR! 20-clone-repo.sh: $REPO_LINK was not cloned to $REPO_DIRNAME"

@@ -17,6 +17,7 @@
 
 function GetJson
 {
+ SaveDebugInfo
  python -c "
 import json
 import os.path
@@ -35,11 +36,24 @@ else:
    print '$3'
    print >> sys.stderr, 'Warning! File \"$1\" was not found. Default value to \"$3\"'
 "
+ RestoreDebugINfo
+}
+
+function SaveDebugInfo
+{
+ DEBUG_INF="$(set -o | grep -e 'xtrace *on' -e 'verbose *on'| sed 's/ *on//g')"
+ set -
+}
+
+function RestoreDebugInfo
+{
+ set -o $DEBUG_INF
 }
 
 # make sure that the passed in gitlink is a valid git repository url
 function GitLinkCheck
 {
+ SaveDebugInfo
    _LINK=$1
    if [ "$_LINK" = "" ] || [ "$_LINK" = "default" ] ; then
      # this is a default git url, return non-zero so the caller knows.
@@ -73,6 +87,67 @@ function GitLinkCheck
            return 1 
        fi
    fi
+ RestoreDebugINfo
+}
+
+function Load_test-box_repos()
+{
+ SaveDebugInfo
+ TEST_BOX="$(GetJson $PREFIX/meta.js 'test-box' '')"
+ if [ "$TEST_BOX" != "" ]
+ then
+    echo "Loading test-box data..."
+    # Format is : "repo;branch|[...]"
+    # Loading in an Array.
+    declare -A TEST_BOX_REPOS
+    for REPO in $(echo "$TEST_BOX" | sed 's/|/ /g')
+    do
+       REPO_NAME="$(echo $REPO | awk -F';' '{print $1}')"
+       REPO_NAME_BRANCH="$(echo $REPO | awk -F';' '{print $1}')"
+       if [ "$REPO_NAME" != "" ] && [ "$REPO_NAME_BRANCH" != "" ]
+       then
+          TEST_BOX_REPOS["$REPO_NAME"]="$REPO_NAME_BRANCH"
+       fi
+    done
+ fi
+ RestoreDebugINfo
+}
+
+function CloneRepo()
+{ # $1 is reponame, $2 Default url, $3 Default branch
+  # Will wait for the repo and branch to exist, before moving away.
+ SaveDebugInfo
+ if [ "$1" = "" ] || [ "$2" = "" ] || [ "$3" = "" ]
+ then
+    echo "ERROR!!! Unable to clone a repo if one of RepoName ($1), Url ($2), branch ($3) are empty"
+    return 1
+ fi
+ GITBRANCH="$3"
+ GITNAME="$1"
+ GITURL="$2"
+ git clone -b $GITBRANCH $GITURL $GITNAME
+ if [ ${TEST_BOX_REPOS[$GITNAME]} != "" ]
+ then
+    echo "Test-box: Searching for branch '$GITBRANCH' from ~ubuntu/git/${GITNAME}.git"
+    while [ ! -d ~ubuntu/git/${GITNAME}.git ]
+    do
+       sleep 5
+    done
+    echo "~ubuntu/git/${GITNAME}.git is existing! Waiting for branch to become available."
+    cd ~ubuntu/git/${GITNAME}.git
+    while [ "$(gitbranch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
+    do
+       sleep 5
+    done
+    cd -
+    cd $GITNAME
+    git remote add testing /home/ubuntu/git/${GITNAME}.git/
+    git fetch testing
+    git stash -k -u
+    git checkout --track remotes/testing/${TEST_BOX_REPOS[$GITNAME]}
+    cd -
+ fi
+ RestoreDebugInfo
 }
 
 # TODO: find if we can source meta.js values from facter since we

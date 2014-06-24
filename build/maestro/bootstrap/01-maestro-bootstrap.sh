@@ -15,15 +15,11 @@
 # Identify branch to use for GIT clones
 
 # Reading meta-data
-GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
-MAESTRO_LINK="$(GetJson /meta-boot.js maestrolink)"
+GITBRANCH="$(GetJson /meta-boot.js gitbranch master)"
+MAESTRO_LINK="$(GetJson /meta-boot.js maestrolink "https://review.forj.io/p/forj-oss/maestro")"
 
 # Show instructions runs
 set -x 
-if [ "$GITBRANCH" != "" ]
-then
-    GITBRANCH_FLAG="-b $GITBRANCH"
-fi
 
 # Get maestro repository for bootstrap
 
@@ -40,7 +36,7 @@ then
    MAESTRO_LINK="https://review.forj.io/p/forj-oss/maestro"
 fi
 
-git clone $GITBRANCH_FLAG $MAESTRO_LINK maestro
+CloneRepo maestro $MAESTRO_LINK $GITBRANCH
 cd maestro
 git config core.autocrlf false
 

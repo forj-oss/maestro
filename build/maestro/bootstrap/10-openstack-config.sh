@@ -22,7 +22,7 @@ export HOME=/root
 # Uses local stable resource instead of internet one. See ubuntu@jenkins.cdkdev.org
 
 cd /opt/config/production/git
-git clone $GITBRANCH_FLAG http://jenkins.cdkdev.org:82/ubuntu/config.git
+CloneRepo config http://jenkins.cdkdev.org:82/ubuntu/config.git $GITBRANCH
 cd config
 git config core.autocrlf false
 set +x

@@ -88,13 +88,14 @@ fi
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
 if [ "$_test_data" == "" ]
 then
-  echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "ssh://review/forj-oss/maestro","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
-  echo "WARNING! /config/meta.js not found. HARDCODING DATA"
+  echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "htts://review.for.io/p/forj-oss/maestro","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
+  echo "WARNING! $PREFIX/meta.js not found. HARDCODING DATA"
 fi
 
-cp $PREFIX/meta.js /meta-boot.js
+cp $PREFIX/meta.js /meta-boot.js # Keep a stable meta.js file during bootstrap
 chmod 644 /meta-boot.js
 
+echo "Current meta data detected: "
 cat $PREFIX/meta.js
 
 if [ ! -f $PREFIX/meta.js ]
@@ -104,7 +105,7 @@ then
 fi
 
 # Proxy management
-_PROXY="$(GetJson $PREFIX/meta.js webproxy)"
+_PROXY="$(GetJson $PREFIX/meta-boot.js webproxy)"
 if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
 then
     set -x
@@ -122,13 +123,13 @@ Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
 fi	
 # hostname, and domain settings have to be fixed to make puppet master/agent running together.
 
-# Loading Metadata (before debug mode to limit unwanted output...)
-_SITE="$(GetJson $PREFIX/meta.js cdksite)"
-_DOMAIN="$(GetJson $PREFIX/meta.js cdkdomain)"
-_PUPPET_MASTER_IP="$(GetJson $PREFIX/meta.js eroip)"
-_PUPPET_MASTER="$(GetJson $PREFIX/meta.js erosite)"
-_PUPPET_DOMAIN="$(GetJson $PREFIX/meta.js erodomain)"
-#APT_MIRROR="$(GetJson $PREFIX/meta.js apt-mirror | sed 's/\//\\\//g') "
+# Loading Metadata
+_SITE="$(GetJson $PREFIX/meta-boot.js cdksite)"
+_DOMAIN="$(GetJson $PREFIX/meta-boot.js cdkdomain)"
+_PUPPET_MASTER_IP="$(GetJson $PREFIX/meta-boot.js eroip)"
+_PUPPET_MASTER="$(GetJson $PREFIX/meta-boot.js erosite)"
+_PUPPET_DOMAIN="$(GetJson $PREFIX/meta-boot.js erodomain)"
+#APT_MIRROR="$(GetJson $PREFIX/meta-boot.js apt-mirror | sed 's/\//\\\//g') "
 
 set -x
 _FQDN=$_SITE.$_DOMAIN
