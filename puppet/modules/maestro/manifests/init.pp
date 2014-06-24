@@ -21,15 +21,45 @@ class maestro (
   $ssh_user_keys    = hiera('maestro::ssh_user_keys', ['jenkins']),
   $instance_domain  = hiera('maestro::instance_domain', $domain),
   $instance_id      = hiera('maestro::instance_id', $::maestro_id),
-  $image_name       = hiera('maestro::image_name', 'Ubuntu Precise 12.04 LTS Server 64-bit 20121026 (b)'),
-  $flavor_name      = hiera('maestro::flavor_name', 'standard.xsmall'),
-  $key_name         = hiera('maestro::key_name', 'nova'),
+  $image_name_arg   = hiera('maestro::image_name', 'Ubuntu Precise 12.04 LTS Server 64-bit 20121026 (b)'),
+  $flavor_name_arg  = hiera('maestro::flavor_name', 'standard.xsmall'),
+  $key_name_arg     = hiera('maestro::key_name', 'nova'),
   $network_name     = hiera('maestro::network_name', $::netname),
   $provision_set    = hiera('maestro::provision', $::provision),
   $security_groups  = hiera('maestro::security_goups', 'default'),
   $environment      = $settings::environment,
 )
 {
+  # configure meta.js defaults
+  if $flavor_name_arg == undef or $flavor_name_arg == ''
+  {
+    $flavor_name = 'standard.medium'
+    warning('using hard value for flavor_name')
+  }
+  else
+  {
+    $flavor_name = $flavor_name_arg
+  }
+
+  if $image_name_arg == undef or $image_name_arg == ''
+  {
+    $image_name = 'proto2b'
+    warning('using hard value for image_name')
+  }
+  else
+  {
+    $image_name = $image_name_arg
+  }
+
+  if $key_name_arg == undef or $key_name_arg == ''
+  {
+    $key_name = 'nova'
+    warning('using hard value for key_name')
+  }
+  else
+  {
+    $key_name = $key_name_arg
+  }
   # maestro is nothing without a puppet master,
   # make sure we execute the puppet master first!
   require puppet::puppetmaster
