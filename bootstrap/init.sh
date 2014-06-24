@@ -46,6 +46,7 @@ BOX_BOOT_DIR="$1"
 
 source $BIN_PATH/functions
 
+declare -A TEST_BOX_REPOS
 Load_test-box_repos # Loading test-box information for external bootstrapping (development)
 
 # Load build.d files

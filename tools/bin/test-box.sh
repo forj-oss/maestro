@@ -43,7 +43,7 @@ where:
  - interactive               : Give you interactive access to start some local or remote commands.
 
 Options:
- --repo <REPONAME> : Without this option, by default, it will select CDK-infra as repository. You can work with a different one.
+ --repo <REPONAME> : Without this option, by default, it will select maestro as repository. You can work with a different one.
                      you can set TEST_REPONAME Variable.
  --repo-dir <DIR>  : By default, the path owned by root, is /opt/config/production/git/ by convention (puppet references). You can change it.
                      If the DIR doesn't exist, it will be created by $BASE
@@ -194,7 +194,7 @@ if [ "$TEST_REPONAME" != "" ]
 then
    REPO="$TEST_REPONAME"
 else
-   REPO="CDK-infra"
+   REPO="maestro"
 fi
 
 if [ "$TEST_REPODIR" != "" ]
@@ -285,7 +285,7 @@ fi
 
 if [ "$(git remote -v | grep "origin *.*$REPO")" = "" ]
 then
-   echo "Are you sure to be in [1m$REPO[0m repository??? Move to a $REPO clone repo directory and retry."
+   echo "Are you sure to be in [1m$REPO[0m repository??? Move to a $REPO clone repo directory or set TEST_REPONAME to the one you want and retry."
    exit 1
 fi
 

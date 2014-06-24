@@ -39,6 +39,7 @@ blueprint:
     modules: 
       - src-repo: redstone
         git: https://review.forj.io/p/forj-oss/redstone
+        puppet-apply: install
       - src-repo: config
         git: http://jenkins.cdkdev.org:82/ubuntu/config.git
         puppet-extra-modules: /opt/config/production/git/config/modules

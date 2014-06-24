@@ -102,11 +102,10 @@ function Load_test-box_repos()
     echo "Loading test-box data..."
     # Format is : "repo;branch|[...]"
     # Loading in an Array.
-    declare -A TEST_BOX_REPOS
     for REPO in $(echo "$TEST_BOX" | sed 's/|/ /g')
     do
        REPO_NAME="$(echo $REPO | awk -F';' '{print $1}')"
-       REPO_NAME_BRANCH="$(echo $REPO | awk -F';' '{print $1}')"
+       REPO_NAME_BRANCH="$(echo $REPO | awk -F';' '{print $2}')"
        if [ "$REPO_NAME" != "" ] && [ "$REPO_NAME_BRANCH" != "" ]
        then
           TEST_BOX_REPOS["$REPO_NAME"]="$REPO_NAME_BRANCH"
@@ -132,24 +131,55 @@ function CloneRepo()
  git clone -b $GITBRANCH $GITURL $GITNAME
  if [ "${TEST_BOX_REPOS[$GITNAME]}" != "" ]
  then
-    echo "Test-box: Searching for branch '$GITBRANCH' from ~ubuntu/git/${GITNAME}.git"
-    while [ ! -d ~ubuntu/git/${GITNAME}.git ]
-    do
-       sleep 5
-    done
-    echo "~ubuntu/git/${GITNAME}.git is existing! Waiting for branch to become available."
-    cd ~ubuntu/git/${GITNAME}.git
-    while [ "$(gitbranch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
-    do
-       sleep 5
-    done
-    cd -
-    cd $GITNAME
-    git remote add testing /home/ubuntu/git/${GITNAME}.git/
-    git fetch testing
-    git stash -k -u
-    git checkout --track remotes/testing/${TEST_BOX_REPOS[$GITNAME]}
-    cd -
+    echo "Test-box: Searching for branch '"${TEST_BOX_REPOS[$GITNAME]}"' from ~ubuntu/git/${GITNAME}.git"
+    if [ ! -d ~ubuntu/git/${GITNAME}.git ] || [ "$(cd ~ubuntu/git/${GITNAME}.git ; git branch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
+    then
+       echo "Test-box: Waiting for ~ubuntu/git/${GITNAME}.git to exist.
+On your workstation, you can start test-box.sh --configure <IP> --repo ${GITNAME}"
+       while [ ! -d ~ubuntu/git/${GITNAME}.git ]
+       do
+          sleep 5
+       done
+       echo "~ubuntu/git/${GITNAME}.git is existing! Waiting for branch to become available."
+       cd ~ubuntu/git/${GITNAME}.git
+       while [ "$(git branch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
+       do
+          sleep 5
+       done
+       cd -
+       cd $GITNAME
+       echo "Test-box: Waiting for remote testing to be created in $(pwd)"
+       while [ "$(git remote | grep testing)" = "" ]
+       do
+          sleep 5
+       done
+       echo "Test-box: Waiting for branch testing-${TEST_BOX_REPOS[$GITNAME]} to be created/attached in $(pwd)"
+       while [ "$(git branch | grep "* ${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+       do
+          sleep 5
+       done
+       echo "Test-box: $(pwd) is checked out to ${TEST_BOX_REPOS[$GITNAME]} branch, connected to ~ubuntu/git/${GITNAME}.git ${TEST_BOX_REPOS[$GITNAME]}"
+       cd -
+    else
+       cd $GITNAME
+       if [ "$(git remote | grep testing)" = "" ]
+       then
+          git remote add testing /home/ubuntu/git/${GITNAME}.git/
+       fi
+       git fetch testing
+       git stash -k -u
+       if [ "$(git branch | grep "${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+       then
+          if [ "$(git branch | grep "* ${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+          then
+             git checkout ${TEST_BOX_REPOS[$GITNAME]}
+          fi
+          git branch --set-upstream testing/${TEST_BOX_REPOS[$GITNAME]} ${TEST_BOX_REPOS[$GITNAME]}
+       else
+          git checkout --track remotes/testing/${TEST_BOX_REPOS[$GITNAME]}
+       fi
+       cd -
+    fi
  fi
  RestoreDebugInfo
 }

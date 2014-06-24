@@ -33,7 +33,9 @@ import string,datetime
 # By default, we implements the required source yaml section. This can be update by a flag --source (NOT YET IMPLEMENTED)
 SOURCES="modules"
 BRANCH='master'
+TEST_BOX=''
 BLUEPRINT_REF_PATH=os.path.join(os.sep,'usr','lib','forj','blueprints')
+GIT_REPOS_DIR=os.path.join(os.sep,'opt','config','production','git')
 
 ##############################
 def help():
@@ -118,9 +120,11 @@ This link is considered only if <puppet-extra-modules> directory contains at lea
 
 """
 
+  global TEST_BOX
+
   GIT        = distutils.spawn.find_executable('git')
   url        = sRepo['git']
-  to         = (sRepo['cloned-to'] if sRepo.has_key('cloned-to') else os.path.join(os.sep,'opt','config','production','git'))
+  to         = (sRepo['cloned-to'] if sRepo.has_key('cloned-to') else GIT_REPOS_DIR)
   gitbranch  = (sRepo['branch']    if sRepo.has_key('branch')    else BRANCH)
   
   name       = sRepo['src-repo']
@@ -257,6 +261,32 @@ This link is considered only if <puppet-extra-modules> directory contains at lea
      cmd_call('git_clone',[GIT,'branch','--set-upstream',gitbranch,'origin/'+gitbranch])
 
   cmd_call('git_clone: git',['chown','-R','puppet:puppet', os.path.join(to,name)])
+
+  if TEST_BOX != "":
+     # TODO: Re-organize to have multiple test-box repos to test.
+     logging.debug("test-box: Set it for %s",TEST_BOX)
+     reObj=re.compile('(.*):(.*)')
+     oResult=reObj.search(TEST_BOX)
+     if oResult.group(1) == name: # Need test-box on this repo.
+        gitbranch=oResult.group(2)
+     
+        # Checking the branch configuration
+        oReBranch=re.compile('\*\s([\w-]+)\s+\w+\s+')
+
+        oCheckResult=check_call([GIT,'branch','-vv'])
+        iCode=oCheckResult['iCode']
+        output=oCheckResult['output']
+    
+        oResult=oReBranch.search(output)
+
+        if oResult.group(1) != gitbranch:
+           cmd_call('git_clone: git',[GIT,'remote','add', 'testing','/home/ubuntu/git/'+name+'.git'])
+           cmd_call('git_clone: git',[GIT,'fetch','testing'])
+           cmd_call('git_clone: git',[GIT,'branch',gitbranch])
+           cmd_call('git_clone',[GIT,'branch','--set-upstream',gitbranch,'testing/'+gitbranch])
+           cmd_call('git_clone',[GIT,'checkout',gitbranch])
+           cmd_call('git_clone',[GIT,'pull'])
+           
   
   # Links managements to blueprints/ or puppet/modules/
   if mods != '' and os.path.exists(mods): 
@@ -294,12 +324,18 @@ def install_bp(bp_element):
     logging.error('"%s" do not define required "blueprint/locations" yaml section.',bp_element)
     sys.exit(2)
 
+  BP_BootSeq=[]
+
   if BP_yaml['locations'].has_key(SOURCES):
      dSource=BP_yaml['locations'][SOURCES]
      for vRepo in dSource:
          if 'src-repo' in vRepo:
             if 'git' in vRepo:
                git_clone(vRepo)
+               if vRepo.has_key('puppet-apply'): 
+                  modules_path =os.path.join(GIT_REPOS_DIR, vRepo['src-repo'],'puppet/modules')
+                  manifest_file=os.path.join(GIT_REPOS_DIR, vRepo['src-repo'],'puppet/manifests',vRepo['puppet-apply']+'.pp')
+                  BP_BootSeq.append(['puppet','apply','--modulepath='+modules_path,manifest_file])
             else:
                logging.warning("repo-src: Missing 'git' protocol. Currently only supports 'git'.")
          else:
@@ -319,15 +355,20 @@ def install_bp(bp_element):
      stream.close()
      logging.info('Blueprint \'%s\' is saved under \'%s\'',BP_yaml['name'],BLUEPRINT_REF_PATH)
   
+  # If needed, execute a blueprint boot.
+  if len(BP_BootSeq):
+     for BootSeq in BP_BootSeq:
+         cmd_call('install_bp',BootSeq)
 #########################
 
 def main(argv):
   """Main function"""
   
+  global TEST_BOX
   logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
   oLogging=logging.getLogger()
   try:
-     opts,args = getopt.getopt(argv,"hI:vd",["help","install=","debug","verbose"])
+     opts,args = getopt.getopt(argv,"hI:vd",["help","install=","debug","verbose","branch=",'test-box='])
   except getopt.GetoptError, e:
      print 'Error: '+e.msg
      help()
@@ -344,6 +385,11 @@ def main(argv):
      elif opt in ('--debug','-d'):
         print "Setting debug mode"
         oLogging.setLevel(logging.DEBUG)
+     elif opt in ('--branch'):
+        BRANCH=arg
+     elif opt in ('--test-box'):
+        logging.debug('Setting or test-box detected.')
+        TEST_BOX=arg
      elif opt in ('-I', '--install'):
         ACTION="install_bp"
         BP=arg

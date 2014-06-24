@@ -21,6 +21,7 @@ then
    exit 1
 fi
 
+declare -A TEST_BOX_REPOS
 Load_test-box_repos # Loading test-box information for external bootstrapping (development)
 
 . /etc/environment
