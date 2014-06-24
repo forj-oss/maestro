@@ -21,8 +21,8 @@ group(:development, :test) do
     puppetversion = ['2.7.25']
   end
   gem 'puppet', puppetversion, :require => false
-  gem 'puppetlabs_spec_helper'
-  gem 'puppet-lint'
+  gem 'puppetlabs_spec_helper', '0.5.1'
+  gem 'puppet-lint', '0.3.2'
   gem 'rake'
   gem 'rspec', "~> 2.10.0", :require => false
 end

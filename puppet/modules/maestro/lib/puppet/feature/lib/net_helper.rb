@@ -40,7 +40,7 @@ module Puppet
       end
     
       ## open a url and return the data
-      def openurl(url, code = '200', use_proxy = true)
+      def openurl(url, code = '200', use_proxy = true, timeout = 5)
         data = nil
         uri = URI.parse(url)
         proxy_uri = nil
@@ -48,7 +48,7 @@ module Puppet
         debug("#{uri.host} #{uri.port} #{proxy_uri.host} #{proxy_uri.port}") if proxy_uri != nil
         debug("#{uri.host} #{uri.port}") if proxy_uri == nil
         http = (proxy_uri != nil) ? Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port) : Net::HTTP.new(uri.host, uri.port)
-       # http.read_timeout = 200 # provide a short timeout for facter
+        http.read_timeout = timeout # provide a short timeout for facter
         if uri.scheme == "https"
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -61,8 +61,8 @@ module Puppet
         }
         return data
       end
-      def open_jsonurl(url, code = '200', use_proxy = true)
-        data = self.openurl(url, code, use_proxy)
+      def open_jsonurl(url, code = '200', use_proxy = true, timeout = 5)
+        data = self.openurl(url, code, use_proxy, timeout)
         if data != '' and data != nil
           data.gsub!('\'', '"')
           data.gsub!('\"', '"')
