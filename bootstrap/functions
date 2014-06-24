@@ -36,7 +36,7 @@ else:
    print '$3'
    print >> sys.stderr, 'Warning! File \"$1\" was not found. Default value to \"$3\"'
 "
- RestoreDebugINfo
+ RestoreDebugInfo
 }
 
 function SaveDebugInfo
@@ -90,7 +90,7 @@ function GitLinkCheck
            return 1 
        fi
    fi
- RestoreDebugINfo
+ RestoreDebugInfo
 }
 
 function Load_test-box_repos()
@@ -110,10 +110,11 @@ function Load_test-box_repos()
        if [ "$REPO_NAME" != "" ] && [ "$REPO_NAME_BRANCH" != "" ]
        then
           TEST_BOX_REPOS["$REPO_NAME"]="$REPO_NAME_BRANCH"
+          echo "Test-box: repo '$REPO_NAME' added with '$REPO_NAME_BRANCH'"
        fi
     done
  fi
- RestoreDebugINfo
+ RestoreDebugInfo
 }
 
 function CloneRepo()
