@@ -31,7 +31,7 @@ blueprint:
   name: redstone
   description: Openstack development model
   icon: 
-    file : openstack.png
+    file : redstone.png
     content : (--- base64 encoded ---)
   # by default, it should refer to our forj web documentation, to present the blueprint documentation. But we can propose to change it.
   documentation : 'http://openstack.org/forj'
