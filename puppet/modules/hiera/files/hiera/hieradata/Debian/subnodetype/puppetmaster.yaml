@@ -28,10 +28,6 @@ classes:
 #  - postfix::server
 
 #hiera::data_class: 'runtime_project::hiera_setup' # Set by blueprint on maestro, in order to install layouts yaml, at least.
-
-puppet::reports::graphite::status: 'enabled'
-puppet::reports::graphite::graphite_port: '2003'
-
 packages::versioned:
   puppet-common:
     ensure: '2.7.*'
