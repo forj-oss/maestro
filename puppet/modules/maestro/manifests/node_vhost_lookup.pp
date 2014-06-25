@@ -17,13 +17,23 @@ class maestro::node_vhost_lookup(
   $alias_name  = hiera('maestro::node_vhost_lookup::alias_name', $::fqdn)
 ) {
   include gardener::requirements
-  if str2bool($::vagrant_guest) == true {
+  if $::maestro_id != undef and $::maestro_id != ''
+  {
+    $compute_public_ip = compute_public_ip_lookup("${::hostname}.${::maestro_id}")
+  } else
+  {
+    $compute_public_ip = compute_public_ip_lookup($::hostname)
+  }
+
+  if str2bool($::vagrant_guest) == true {  # use a vagrant localhost when doing local testing
     $vname = 'localhost'
-  } elsif($alias_name != '' and domain_record_exists($alias_name, 'A' )) {
+  } elsif($alias_name != '' and domain_record_exists($alias_name, 'A' )) { # use dns when it's available via cloud api's.
     $vname = $alias_name
-  } elsif ( $::helion_public_ipv4 != '') {
+  } elsif ($compute_public_ip != '' and $compute_public_ip != undef) { # use the cloud public ip when it's available.
+    $vname = $compute_public_ip
+  } elsif ( $::helion_public_ipv4 != '') { # fall back to trying an external service from hpcloud
     $vname = $::helion_public_ipv4
-  } elsif ( $::ec2_public_ipv4 != '') {
+  } elsif ( $::ec2_public_ipv4 != '') { # fall back to trying an external service from ec2
     $vname = $::ec2_public_ipv4
   } else {
     fail('no public routable ip could be determined.  stop this puppet run')
