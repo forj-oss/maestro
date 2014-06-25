@@ -42,6 +42,7 @@ define cacerts::add_ssh_host (
       exec { "ssh ${host_alias}" :
         command => "printf 'host ${host_alias}\n\thostname ${host_address}\n\tuser ${host_user}\n\tStrictHostKeyChecking no\n\tidentityfile ${home}/.ssh/${keyfile_name}\n'>> ${home}/.ssh/config",
         onlyif  => $host_exists_cmd,
+        path    => ['/bin','/usr/bin'],
       }
     }
     else
