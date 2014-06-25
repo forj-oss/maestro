@@ -44,7 +44,18 @@ then # TODO: Support to receive a different layout then default one.
                                                              s/^ *modulepath *= *//g')"
    echo "Repplying: puppet apply /opt/config/production/git/maestro/puppet/manifesst/site.pp --modulepath=<from puppet.conf>"
    echo "puppet.conf: modulepath = $MODPATH"
+# run standalone for MODPATH to update in puppet.conf
+   service puppetmaster stop
+   service apache2 restart
+   service puppet-dashboard-workers restart
    puppet apply --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
+
+# restart puppet so all new factors and hiera are loaded. 
+   service puppetmaster stop
+   service apache2 restart
+   service puppet-dashboard-workers restart
+# re run manifest to get the latest changes from new facters
+   puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
 fi
 
 
