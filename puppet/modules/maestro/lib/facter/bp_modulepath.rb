@@ -16,14 +16,18 @@ Facter.add(:bp_modulepath) do
     blueprints_path = '/opt/config/production/blueprints'
     bp_modulepath = ''
     begin
-       Dir.foreach(blueprints_path) do |item|
-          next if item == '.' or item == '..'
-          module_path = blueprints_path + '/' + item
-          if File.exists?(module_path) && File.directory?(module_path)
-             debug('Blueprint installed: '+item)
-            bp_modulepath = bp_modulepath + module_path + ':'
-          end
-       end
+      if File.exists?(blueprint_path)
+        Dir.foreach(blueprints_path) do |item|
+            next if item == '.' or item == '..'
+            module_path = blueprints_path + '/' + item
+            if File.exists?(module_path) && File.directory?(module_path)
+               debug('Blueprint installed: '+item)
+              bp_modulepath = bp_modulepath + module_path + ':'
+            end
+         end
+      else
+        debug("#{blueprint_path} not found , facter empty")
+      end
     rescue Exception => e
       debug(e.message)
       debug(e.backtrace.inspect)
