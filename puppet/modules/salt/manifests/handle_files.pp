@@ -16,12 +16,12 @@
 #
 define salt::handle_files {
   if ! defined(File[$name]) {
-    file { "/srv/reactor/${name}.sls":
+    file { "/srv/reactor/puppet_apply_${name}.sls":
       ensure  => present,
       owner   => 'salt',
       group   => 'salt',
       mode    => '0644',
-      source  => "puppet:///modules/maestro/salt/${name}",
+      content => template('salt/puppet_apply_node.erb'),
       replace => true,
     }
   }

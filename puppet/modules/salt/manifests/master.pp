@@ -13,7 +13,9 @@
 #    limitations under the License.
 # Class salt::master
 #
-class salt::master {
+class salt::master (
+  $salt_reactor_jobs = hiera_array('salt::salt_reactor',undef)
+){
 
   if ($::osfamily == 'Debian') {
     include apt
@@ -60,12 +62,13 @@ class salt::master {
     require => User['salt'],
   }
 
+# uses $salt_reactor_jobs for nodes of script reactor scripts to run
   file { '/etc/salt/master':
     ensure  => present,
     owner   => 'salt',
     group   => 'salt',
     mode    => '0644',
-    source  => 'puppet:///modules/maestro/salt/master.yaml',
+    content => template('salt/master.yaml.erb'),
     replace => true,
     require => Package['salt-master'],
   }

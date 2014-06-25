@@ -104,5 +104,3 @@ maestro::ui::setup::revision: '%{::gitbranch}'
 nodejs_wrap::node_env: "%{::maestro::params::node_env}"
 
 salt::salt_master: "%{::erosite}.%{::erodomain}"
-salt::salt_reactor:
-  - 'puppet_apply_maestro'
