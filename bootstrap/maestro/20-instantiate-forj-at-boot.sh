@@ -39,7 +39,12 @@ then # TODO: Support to receive a different layout then default one.
       echo "Test-box: use bp.py with test-box '$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}'"
       /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v --test-box "$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}"
    fi
-   puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
+   #puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
+   MODPATH="$(grep modulepath /etc/puppet/puppet.conf | sed 's/\$environment/production/g
+                                                             s/^ *modulepath *= *//g')"
+   echo "Repplying: puppet apply /opt/config/production/git/maestro/puppet/manifesst/site.pp --modulepath=<from puppet.conf>"
+   echo "puppet.conf: modulepath = $MODPATH"
+   puppet apply --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
 fi
 
 
