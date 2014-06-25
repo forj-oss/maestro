@@ -17,7 +17,7 @@
 #
 
 class maestro (
-  $nodes            = hiera('maestro::nodes', ['review']),
+  $nodes            = hiera('maestro::nodes', undef),
   $ssh_user_keys    = hiera('maestro::ssh_user_keys', ['jenkins']),
   $instance_domain  = hiera('maestro::instance_domain', $domain),
   $instance_id      = hiera('maestro::instance_id', $::maestro_id),
@@ -131,7 +131,7 @@ class maestro (
   # Fog file may not be installed, and following code may fails. But maestro ui should be already installed and configured, anyway.
   debug("instance_id is ${instance_id}")
   $instance = $instance_id
-  if ($provision == true) and ($::fog != 'UNDEF')
+  if ($provision == true) and ($::fog != 'UNDEF') and ($nodes != undef)
   {
     # create a server with non-default values
     class { 'maestro::orchestrator::setupallservers':

@@ -270,6 +270,10 @@ do
      "--remove")
        ACTION="REMOVE"
        shift;;
+     "--push-to")
+       ACTION="SYNC"
+       ERO_IP=$2
+       shift;shift;;
      *)
        echo -e "\E[033;31mError: Incorrect option. Run this script without parameters to visualize the correct options."
        exit
@@ -385,6 +389,49 @@ On the server, as root, you can do a git pull from $REPO_DIR/${REPO}. And test y
 
 When you are done, you will be able to merge to the master branch or any other branch you would use. As your commits were for testing, you may need to merge all your commits to one. So, think to use 'git rebase -i' to merge your pending commits to few commits before git push (or git-push for git review)\n"
 
+     ;;
+    "SYNC")
+     if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" != "" ]
+     then
+        echo "option --push-to cannot be used from a testing branch. Do your update from any other branch you want. --push-to will push it to your testing branch with merge feature."
+        exit 1
+     fi
+     REST_BRANCH=$CUR_BRANCH
+     if [ "$(git branch | grep "\w*testing-${USER}-$ERO_IP$")" = "" ]
+     then
+        echo "Branch testing-${USER}-$ERO_IP is not found. Do a '$(basename $0) --configure $ERO_IP ; git checkout $REST_BRANCH', before using --push-to function."
+        exit 1
+     fi
+     local_task git checkout testing-${USER}-$ERO_IP
+     local_task git merge $REST_BRANCH
+
+     # Do SENT
+     CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+     if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
+     then
+        echo "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
+        exit 1
+     fi
+
+     ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
+     fix_ero_ip
+
+     local_task git push testing-$ERO_IP HEAD:testing-$USER
+     CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
+     ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
+     if [ $? -ne 0 ]
+     then
+        echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
+        exit 1
+     fi
+     REMOTE_USER="$(ssh $CONNECTION "id -un" | dos2unix)"
+     check_remote_branch
+     remote_root_task git reset --hard testing/testing-$USER
+     remote_root_task git clean -f
+     remote_root_task git pull testing testing-$USER
+     ssh -O exit $CONNECTION
+     # SEND done
+     local_task git checkout $REST_BRANCH
      ;;
     "SEND")
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]

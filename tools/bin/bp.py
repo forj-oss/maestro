@@ -26,7 +26,7 @@ import yaml
 import os
 import subprocess
 import distutils.spawn
-import string,datetime
+import string,datetime,time
 
 # Defining defaults
 
@@ -264,10 +264,10 @@ This link is considered only if <puppet-extra-modules> directory contains at lea
 
   if TEST_BOX != "":
      # TODO: Re-organize to have multiple test-box repos to test.
-     logging.debug("test-box: Set it for %s",TEST_BOX)
      reObj=re.compile('(.*):(.*)')
      oResult=reObj.search(TEST_BOX)
      if oResult.group(1) == name: # Need test-box on this repo.
+        logging.info("test-box: Configuring repo '%s'...",name)
         gitbranch=oResult.group(2)
      
         # Checking the branch configuration
@@ -281,12 +281,34 @@ This link is considered only if <puppet-extra-modules> directory contains at lea
 
         if oResult.group(1) != gitbranch:
            cmd_call('git_clone: git',[GIT,'remote','add', 'testing','/home/ubuntu/git/'+name+'.git'])
+           if not os.path.exists('/home/ubuntu/git/'+name+'.git'):
+              logging.info('/home/ubuntu/git/'+name+'.git does\'exist. waiting test-box to occurs from your workstation.')
+              while not os.path.exists('/home/ubuntu/git/'+name+'.git'):
+                time.sleep(5)
+           os.chdir('/home/ubuntu/git/'+name+'.git')
+
+           # Checking the branch configuration
+           oReBranch=re.compile('[*\s]*([\w-]+)\s+\w+\s+')
+           oCheckResult=check_call([GIT,'branch','-vv'])
+           oResult=oReBranch.search(oCheckResult['output'])
+           if oResult == None or oResult.group(1) != gitbranch:
+              logging.info('test-box: %s is missing from \'%s\'',gitbranch,'/home/ubuntu/git/'+name+'.git')
+              time.sleep(5)
+              oCheckResult=check_call([GIT,'branch','-vv'])
+              oResult=oReBranch.search(oCheckResult['output'])
+              while oResult == None or oResult.group(1) != gitbranch:
+                 time.sleep(5)
+                 oCheckResult=check_call([GIT,'branch','-vv'])
+                 oResult=oReBranch.search(oCheckResult['output'])
+
+           os.chdir(os.path.join(to,name))
            cmd_call('git_clone: git',[GIT,'fetch','testing'])
            cmd_call('git_clone: git',[GIT,'branch',gitbranch])
            cmd_call('git_clone',[GIT,'branch','--set-upstream',gitbranch,'testing/'+gitbranch])
            cmd_call('git_clone',[GIT,'checkout',gitbranch])
            cmd_call('git_clone',[GIT,'pull'])
            
+        logging.info('test-box: repo \'%s\' is configured with branch \'%s\'',name,gitbranch)
   
   # Links managements to blueprints/ or puppet/modules/
   if mods != '' and os.path.exists(mods): 
@@ -332,9 +354,9 @@ def install_bp(bp_element):
          if 'src-repo' in vRepo:
             if 'git' in vRepo:
                git_clone(vRepo)
-               if vRepo.has_key('puppet-apply'): 
+               if vRepo.has_key('install') and vRepo['install'].has_key('puppet-apply'): 
                   modules_path =os.path.join(GIT_REPOS_DIR, vRepo['src-repo'],'puppet','modules')+':'+os.path.join(GIT_REPOS_DIR,'maestro','puppet','modules')
-                  manifest_file=os.path.join(GIT_REPOS_DIR, vRepo['src-repo'],'puppet','manifests',vRepo['puppet-apply']+'.pp')
+                  manifest_file=os.path.join(GIT_REPOS_DIR, vRepo['src-repo'],'puppet','manifests',vRepo['install']['puppet-apply']+'.pp')
                   BP_BootSeq.append(['puppet','apply','--modulepath='+modules_path,manifest_file])
             else:
                logging.warning("repo-src: Missing 'git' protocol. Currently only supports 'git'.")
@@ -358,6 +380,10 @@ def install_bp(bp_element):
   # If needed, execute a blueprint boot.
   if len(BP_BootSeq):
      for BootSeq in BP_BootSeq:
+         if BootSeq[1] == 'puppet' :
+            logging.info('Starting blueprint install: puppet apply of "%s"',BootSeq[4])
+         else:
+            logging.info('Starting blueprint install: Running "%s"'," ".join(BootSeq))
          cmd_call('install_bp',BootSeq)
 #########################
 
@@ -388,7 +414,7 @@ def main(argv):
      elif opt in ('--branch'):
         BRANCH=arg
      elif opt in ('--test-box'):
-        logging.debug('Setting or test-box detected.')
+        logging.debug('test-box: Added \'%s\'.',arg)
         TEST_BOX=arg
      elif opt in ('-I', '--install'):
         ACTION="install_bp"

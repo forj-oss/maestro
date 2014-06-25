@@ -16,6 +16,9 @@
 # platform specific configuration for ubuntu/debian
 #
 ---
+classes:
+  - jimador::manage
+
 packages::install:
   - 'build-essential'
   - 'apt-transport-https'

@@ -26,7 +26,7 @@ fi
 
 BLUEPRINT="$(GetJson /meta-boot.js blueprint)"
 
-declare -A TEST_BOX
+declare -A TEST_BOX_REPOS
 Load_test-box_repos
 
 if [ "$BLUEPRINT" != "" ]
@@ -36,7 +36,8 @@ then # TODO: Support to receive a different layout then default one.
       /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
    else
       # TODO: Be able to pass all TEST_BOX list to bp.py and wait if needed.
-      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v --test-box "$BLUEPRINT:${TEST_BOX[$BLUEPRINT]}"
+      echo "Test-box: use bp.py with test-box '$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}'"
+      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v --test-box "$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}"
    fi
    puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
 fi

@@ -23,7 +23,6 @@ classes:
   - maestro
   - salt
   - maestro::backup::configure_box
-  - jimador::manage
   - maestro::params
   - maestro::node_vhost_lookup
   - gardener
@@ -36,7 +35,7 @@ sysadmin_config::swap::block_size: '1M'
 puppet::reports: 'http'
 puppet::reporturl: "http://%{::erosite}.%{::erodomain}:3000/reports/upload"
 puppet::manifestdir: "/opt/config/$environment/git/maestro/puppet/manifests"
-puppet::modulepath: "%{::bp_modulepath}%{::extra_modulepath}/opt/config/$environment/git/maestro/puppet/modules:/etc/puppet/modules:/opt/config/$environment/git/config/modules:"
+puppet::modulepath: "%{::bp_modulepath}/opt/config/$environment/git/maestro/puppet/modules:%{::extra_modulepath}/opt/config/$environment/git/config/modules:/etc/puppet/modules"
 puppet::puppetmaster: "%{::erosite}.%{::erodomain}"
 puppet::puppetmaster::certname: "%{::erosite}.%{::erodomain}"
 
