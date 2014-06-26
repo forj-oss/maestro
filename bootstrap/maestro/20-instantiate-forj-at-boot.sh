@@ -31,6 +31,13 @@ Load_test-box_repos
 
 if [ "$BLUEPRINT" != "" ]
 then # TODO: Support to receive a different layout then default one.
+# restart puppet for install.pp
+   service puppetmaster stop
+   service apache2 restart
+   service puppet-dashboard-workers restart
+# TODO: remove after we're done debuggin:
+   find /etc/puppet/hieradata
+
    if [ "${TEST_BOX[$BLUEPRINT]}" = "" ]
    then
       /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
@@ -44,6 +51,9 @@ then # TODO: Support to receive a different layout then default one.
                                                              s/^ *modulepath *= *//g')"
    echo "Repplying: puppet apply /opt/config/production/git/maestro/puppet/manifesst/site.pp --modulepath=<from puppet.conf>"
    echo "puppet.conf: modulepath = $MODPATH"
+
+# TODO: remove after we're done debuggin:
+   find /etc/puppet/hieradata
 # run standalone for MODPATH to update in puppet.conf
    service puppetmaster stop
    service apache2 restart
