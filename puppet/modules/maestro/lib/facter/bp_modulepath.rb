@@ -16,7 +16,7 @@ Facter.add(:bp_modulepath) do
     blueprints_path = '/opt/config/production/blueprints'
     bp_modulepath = ''
     begin
-      if File.exists?(blueprint_path)
+      if File.exists?(blueprints_path)
         Dir.foreach(blueprints_path) do |item|
             next if item == '.' or item == '..'
             module_path = blueprints_path + '/' + item
