@@ -53,6 +53,7 @@ BOOTHOOK=$BIN_PATH/build-tools/boothook.sh
 
 MIME_SCRIPT=$BIN_PATH/build-tools/write-mime-multipart.py
 
+TEST_BOX_SCRIPT="$(which test-box.sh)"
 
 declare -A META
 
@@ -62,9 +63,9 @@ function usage
  then
     Warning "$1"
  fi
- echo "$0 --build_ID <BuildID> --box-name <BoxName> [--debug-box] [--gitBranch <branch>/--gitBranchCur] [[--build-conf-dir <confdir>] --build-config <config>] [--gitRepo <RepoLink>] | -h
-Script to build a Box identified as <BoxName>. You can create an image or simple that box to test it.
-It uses 'hpcloud' cli. You may need to install it.
+ echo "$0 --build_ID <BuildID> --box-name <BoxName> [--debug-box] [--test-box=<LocalrepoPath>] [--gitBranch <branch>/--gitBranchCur] [[--build-conf-dir <confdir>] --build-config <config>] [--gitRepo <RepoLink>] | -h
+Script to build a Box identified as <BoxName>. You can create an image or simply that box to test it (--debug-box).
+It uses 'hpcloud' cli. You may need to install it, before.
 
 The build configuration identified as <Config> will define where this box/image will be created. By default, it is fixed to 'master'.
 You can change it with option --gitBranch or --gitBranchCur if your configuration file is tracked by a git repository.
@@ -134,6 +135,9 @@ Options details:
 --build-conf-dir <confdir>     : Defines the build configuration directory to load the build configuration file. You can set FORJ_BLD_CONF_DIR. By default, it will look in your current directory.
 --build-config <config>        : The build config file to load <confdir>/<BoxName>.<Config>.env. By default, uses 'master' as Config.
 
+--test-box                     : Create test-box meta from the repository path provided. 
+                                 The remote server should interpret 'test-box' to wait for your local repository to be sent out to the box. 
+                                 build.sh will try to discover which repository the box is requesting to send out your repository branch to the remote box, automatically, if test-box is in your PATH.
 --debug-box                    : Use this option to create the server, and debug it. No image will be created. The server will stay alive at the end of the build process.
 --gitRepo <RepoLink>           : The box built will use a different git repository sent out to <user_data>. This repository needs to be read only. No keys are sent.
 --meta <meta>                  : Add a metadata. have to be Var=Value. You can use --meta several times in the command line. 
@@ -176,19 +180,23 @@ then
    usage
 fi
 
-OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,meta:,meta-data:,boothook:,extra-bs-step: -- "$@" )
+OPTS=$(getopt -o h -l setBranch:,box-name:,build-conf-dir:,debug-box,build_ID:,gitBranch:,gitBranchCur,gitRepo:,build-config:,gitLink:,debug,no-debug,meta:,meta-data:,boothook:,extra-bs-step:,test-box: -- "$@" )
 if [ $? != 0 ]
 then
     usage "Invalid options"
 fi
 eval set -- "$OPTS"
 
-GIT_REPO=review:CDK-public
+GIT_REPO=review:forj-oss/maestro
+
  
 while true ; do
     case "$1" in
         -h) 
             usage;;
+        --no-debug)
+            set +x
+            shift;;
         --debug)
             set -x
             shift;;
@@ -239,6 +247,32 @@ while true ; do
             GIT_REPO="$(echo "$2" | awk '{ print $1}')"
             Warning "Your git repository '$2' currently can not be tested by this script. Hope you checked it before building the box."
             shift;shift;; 
+        "--test-box")
+            if [ ! -d "$2" ]
+            then
+               Error 1 "$2 is not an accessible repository directory. Please check"
+            fi
+            cd "$2"
+            git rev-parse --show-toplevel 2>/dev/null 1>&2
+            if [ $? -ne 0 ]
+            then
+               Error 1 "'$1' is not a valid repository. Please check and retry."
+            fi
+            REPO_TO_ADD="$(LANG= git remote show origin -n | awk '$1 ~ /Fetch/ { print $3 }'| sed 's!^.*/\([a-z]*\)\(.git\)\?!\1!g')"
+            if [ "$REPO_TO_ADD" = "" ]
+            then
+               Error 1 "Unable to identify the repository name from git remote 'origin'. Please check '$2'"
+            fi
+            if [ "${META['test-box']}" = "" ]
+            then
+                META['test-box']="test-box=$REPO_TO_ADD;testing-$(id -un)"
+            else
+                META['test-box']="${META['test-box']}|$REPO_TO_ADD;testing-$(id -un)"
+            fi
+            TEST_BOX[$REPO_TO_ADD]=testing-$(id -un)
+            Info "Test-box: Repository '$REPO_TO_ADD' added to the list."
+            cd - >/dev/null
+            shift;shift;;
         --meta)
             META_NAME="$(echo "$2" | awk -F= '{print $1}' | awk '{ print $1}')"
             META_VAL="$( echo "$2" | awk -F= '{print $2}' | awk '{ print $1}')"

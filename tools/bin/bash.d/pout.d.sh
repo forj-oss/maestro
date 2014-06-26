@@ -44,5 +44,3 @@ function Warning
 {
  echo "${LIGHTYELLOW}WARNING${DFL_COLOR}! $BOLD$1$DFL_COLOR"
 }
-
-MIME_SCRIPT=$BIN_PATH/build-tools/write-mime-multipart.py
