@@ -26,7 +26,7 @@ Facter.add(:bp_modulepath) do
             end
          end
       else
-        debug("#{blueprint_path} not found , facter empty")
+        debug("#{blueprints_path} not found , facter empty")
       end
     rescue Exception => e
       debug(e.message)
