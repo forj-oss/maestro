@@ -63,10 +63,49 @@ define nodejs_wrap::pm2instance(
                 mode    => '0775',
                 recurse => true,
               }
+              # handle the defaults
+              $node_environment = ["NODE_PATH=${node_path}" , "NODE_ENV=${node_env}"]
+              # handle setting HTTP_PROXY
+              $http_host = inline_template('<%= (ENV["HTTP_PROXY"] == nil) ? nil : URI.parse(ENV["HTTP_PROXY"]).host %>')
+              $http_port = inline_template('<%= (ENV["HTTP_PROXY"] == nil) ? nil : URI.parse(ENV["HTTP_PROXY"]).port %>')
+              if $http_host != '' and $http_host != undef
+              {
+                $http_proxy_host = ["HTTP_PROXY_HOST=${http_host}"]
+              } else
+              {
+                $http_proxy_host = []
+              }
+              if $http_port != '' and $http_port != undef
+              {
+                $http_proxy_port = ["HTTP_PROXY_PORT=${http_port}"]
+              } else
+              {
+                $http_proxy_port = []
+              }
+              # handle setting HTTPS_PROXY
+              $https_host = inline_template('<%= (ENV["HTTPS_PROXY"] == nil) ? nil : URI.parse(ENV["HTTPS_PROXY"]).host %>')
+              $https_port = inline_template('<%= (ENV["HTTPS_PROXY"] == nil) ? nil : URI.parse(ENV["HTTPS_PROXY"]).port %>')
+              if $https_host != '' and $https_host != undef
+              {
+                $https_proxy_host = ["HTTPS_PROXY_HOST=${https_host}"]
+              } else
+              {
+                $https_proxy_host = []
+              }
+              if $https_port != '' and $https_port != undef
+              {
+                $https_proxy_port = ["HTTPS_PROXY_PORT=${https_port}"]
+              } else
+              {
+                $https_proxy_port = []
+              }
+              # combine them all to make pm2instance_environment
+              $pm2instance_environment = split(inline_template('<%= (@node_environment + @http_proxy_host + @http_proxy_port + @https_proxy_host + @https_proxy_port).join(\',\') %>'),',')
+              debug("using environment for pm2instance => ${pm2instance_environment}")
               exec { "${ensure} pm2 script ${pm2name}":
                       command     => "pm2 start '${script}' -n ${pm2name} -u ${user} -i ${instance} --run-as-user ${user} --run-as-group ${user}",
                       cwd         => $script_dir,
-                      environment => ["NODE_PATH=${node_path}", "NODE_ENV=${node_env}"],
+                      environment => $pm2instance_environment,
                       path        => $::path,
                       require     => [ Package['pm2'], File[$script_dir],],
                       onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
