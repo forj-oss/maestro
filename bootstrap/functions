@@ -134,6 +134,7 @@ function CloneRepo()
     echo "Test-box: Searching for branch '"${TEST_BOX_REPOS[$GITNAME]}"' from ~ubuntu/git/${GITNAME}.git"
     if [ ! -d ~ubuntu/git/${GITNAME}.git ] || [ "$(cd ~ubuntu/git/${GITNAME}.git ; git branch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
     then
+       echo "build.sh: test-box-repo=${GITNAME}"
        echo "Test-box: Waiting for ~ubuntu/git/${GITNAME}.git to exist.
 On your workstation, you can start test-box.sh --configure <IP> --repo ${GITNAME}"
        while [ ! -d ~ubuntu/git/${GITNAME}.git ]

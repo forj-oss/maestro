@@ -283,6 +283,7 @@ This link is considered only if <puppet-extra-modules> directory contains at lea
            cmd_call('git_clone: git',[GIT,'remote','add', 'testing','/home/ubuntu/git/'+name+'.git'])
            if not os.path.exists('/home/ubuntu/git/'+name+'.git'):
               logging.info('/home/ubuntu/git/'+name+'.git does\'exist. waiting test-box to occurs from your workstation.')
+              logging.info('build.sh: test-box-repo=%s',name)
               while not os.path.exists('/home/ubuntu/git/'+name+'.git'):
                 time.sleep(5)
            os.chdir('/home/ubuntu/git/'+name+'.git')

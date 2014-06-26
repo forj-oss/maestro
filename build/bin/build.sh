@@ -53,9 +53,10 @@ BOOTHOOK=$BIN_PATH/build-tools/boothook.sh
 
 MIME_SCRIPT=$BIN_PATH/build-tools/write-mime-multipart.py
 
-TEST_BOX_SCRIPT="$(which test-box.sh)"
+TEST_BOX_SCRIPT="../tools/bin/test-box.sh"
 
 declare -A META
+declare -A TEST_BOX
 
 function usage
 {
@@ -269,7 +270,7 @@ while true ; do
             else
                 META['test-box']="${META['test-box']}|$REPO_TO_ADD;testing-$(id -un)"
             fi
-            TEST_BOX[$REPO_TO_ADD]=testing-$(id -un)
+            TEST_BOX[$REPO_TO_ADD]=$(pwd)
             Info "Test-box: Repository '$REPO_TO_ADD' added to the list."
             cd - >/dev/null
             shift;shift;;
@@ -585,6 +586,58 @@ do
   if [ "$BUILD_STATUS" = "ACTIVE (cloud_init)" ]
   then
      hpcloud servers:console $BUILD_ID 10  -a $FORJ_HPC> $INSTANT_LOG
+
+     if [ "$TEST_BOX_SCRIPT" != "" ]
+     then
+        TEST_BOX_REPO="$(grep -e 'build.sh: test-box-repo=' $INSTANT_LOG | tail -n 1 | sed 's/^.*build.sh: test-box-repo=\(.*\)/\1/g')"
+        if [ "$TEST_BOX_REPO" != "" ] 
+        then
+           TEST_BOX_DIR="${TEST_BOX[$TEST_BOX_REPO]}"
+           if [ "$TEST_BOX_DIR" != "" ]
+           then
+              case "$TEST_BOX_DIR" in
+                WARNED | DONE)
+                 ;;
+                *)
+                 echo 'test-box: your box is waiting for a test-box repository. One moment.'
+                 cd "$TEST_BOX_DIR"
+                 if [ "$(git rev-parse --abbrev-ref HEAD| grep "testing-$(id -un)-$PUBIP")" != "" ]
+                 then
+                    Warning "test-box: Your local repo '$TEST_BOX_REPO' is on the testing branch. build.sh do not support it. Please do the test-box work manually from '$TEST_BOX_DIR'"
+                    TEST_BOX[$TEST_BOX_REPO]=WARNED
+                 fi
+                 if [ "$(git branch --list testing-$(id -un)-$PUBIP)" != "" ]
+                 then
+                    Info "test-box: Removing old branch..."
+                    git branch -d testing-$(id -un)-$PUBIP
+                    if [ $? -ne 0 ]
+                    then
+                       Warning "test-box: Please review the issue about the testing branch and execute '$TEST_BOX_SCRIPT --push-to $PUBIP'"
+                       TEST_BOX[$TEST_BOX_REPO]=WARNED
+                    fi
+                 fi
+                 if [ "${TEST_BOX[$TEST_BOX_REPO]}" = $TEST_BOX_DIR ] # No warning, go on.
+                 then
+                    echo "Running : $TEST_BOX_SCRIPT --push-to $PUBIP --repo $TEST_BOX_REPO"
+                    $TEST_BOX_SCRIPT --push-to $PUBIP --repo $TEST_BOX_REPO
+                    if [ $? -ne 0 ]
+                    then
+                       Warning "test-box: 'test-box.sh' fails. Please review, and retry it manually."
+                    fi
+                    Info "test-box is done. check for errors. If needed, restart the test-box work manually to fix it."
+                    TEST_BOX[$TEST_BOX_REPO]=DONE
+                 fi
+                 cd - >/dev/null
+                 ;;
+              esac
+           else
+              printf "\n"
+              Warning "Manual test-box action required! Your box is currently waiting for repo '$TEST_BOX_REPO'
+Usually, execute '$TEST_BOX_SCRIPT --push-to $PUBIP' where your repository update to test is located."
+              TEST_BOX[$TEST_BOX_REPO]=WARNED
+           fi
+        fi
+     fi
 
      cat $INSTANT_LOG | md5sum > ${INSTANT_LOG}.new
      if [ "$(cat ${INSTANT_LOG}.new)" != "$(cat ${INSTANT_LOG}.md5)" ]

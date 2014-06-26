@@ -26,9 +26,9 @@ function Help()
          $BASE [options] --restore
          $BASE [options] --send
          $BASE [options] --ssend <commit message>
+         $BASE [options] --push-to
          $BASE [options] --report <branch>
          $BASE [options] --remove
-         $BASE [options] --interactive
 where:
  - configure <Ero IpAddress> : Configure an eroplus to become a testing environment. The IP is the public address of the eroplus to use.
                                By default, configure will push your current branch code to the remote box. If you need to get the remote code locally and test on it, use --ref remote.
@@ -36,11 +36,11 @@ where:
 
  - restore                   : Restaure master branch on the testing environment. (git checkout master on the remote server)
  - send                      : shortcut to git push (in your workstation) and git pull on the eroPlus box.
+ - push-to <Server>          : Will merge all update on your current branch to the server testing branch, and send the update to the remote box (like --send)
  - ssend <commit message>    : Will auto add all files and commit with the message, then will execute standard 'send' command.
  - report                    : Will merge and rebase your code from the current testing branch to any branch you want. Then it will propose to remove your testing branch, like is proposed by 'remove' command.
  - remove                    : Will remove local and remote branch. This is exactly the invert of configure.
                                !!! Warning !!! You need to merge your code to
- - interactive               : Give you interactive access to start some local or remote commands.
 
 Options:
  --repo <REPONAME> : Without this option, by default, it will select maestro as repository. You can work with a different one.
@@ -49,6 +49,10 @@ Options:
                      If the DIR doesn't exist, it will be created by $BASE
                      You can set TEST_REPODIR Variable.
  --ref remote|local: During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
+ --commit <Msg>    : Will commit your code, with a specific <message>
+ --commit-all <Msg>: Same as --commit, but the commit will add all tracked updated files to the commit.
+ --fixup [Commit]  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+ --squash [Commit] : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
 
 This script helps to implement everything to create a test environment connected to a testing local branch.
 It helps you to test some code controlled by git (limit data loss risk, and environment controlled.) on a remote kit."
@@ -164,8 +168,7 @@ function configure_from_remote
  echo "Checking remote repository..."
  if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
  then
-    echo "$REPO_DIR/$REPO was not found on the remote server $ERO_IP"
-    exit 1
+    Error 1 "$REPO_DIR/$REPO was not found on the remote server $ERO_IP"
  fi
  if ssh $CONNECTION [ ! -d git/${REPO}.git ]
  then
@@ -183,7 +186,100 @@ function configure_from_remote
 
 }
 
+function do_send()
+{ # Function which describe how to send the update to the remote server.
+ fix_ero_ip
+
+ local_task git push testing-$ERO_IP HEAD:testing-$USER
+ CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
+ ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
+ if [ $? -ne 0 ]
+ then
+    Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
+ fi
+ REMOTE_USER="$(ssh $CONNECTION "id -un" | dos2unix)"
+ check_remote_branch
+ remote_root_task git reset --hard testing/testing-$USER
+ remote_root_task git clean -f
+ remote_root_task git pull testing testing-$USER
+}
+
+function do_add_all
+{
+ echo "Added tracked AND untracked files to commit"
+ git add -A :/
+}
+
+function do_configure
+{
+ fix_ero_ip
+ echo "Checking kit connection..."
+ CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
+ ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
+ if [ $? -ne 0 ]
+ then
+    Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box configure your ~/.ssh/config.
+Typical input you can add in your .ssh/config:
+
+host 15.125.*
+        user ubuntu
+        StrictHostKeyChecking no
+        IdentityFile ~/.hpcloud/keypairs/nova.pem
+        ProxyCommand corkscrew MyProxy 8080 %h %p # <= This line is optional. Required if direct access is prohibited.
+"
+ fi
+
+ REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
+
+ if [ "$REF" = local ]
+ then
+    configure_from_local
+ else
+    configure_from_remote
+ fi
+ ssh -O exit $CONNECTION
+ printf "[1mDONE[0m\nYou are now in a new testing branch. Every commits here are specifics to this branch. a git push will move your code to the remote kit.
+On the server, as root, you can do a git pull from $REPO_DIR/${REPO}. And test your code.
+
+When you are done, you will be able to merge to the master branch or any other branch you would use. As your commits were for testing, you may need to merge all your commits to one. So, think to use 'git rebase -i' to merge your pending commits to few commits before git push (or git-push for git review)\n"
+}
+
+function do_commit
+{
+ OPT="$1"
+ shift
+ if [ -n "$1" ]; then
+    message=$1
+ else
+    message="Anonymous commit $(date '+%Y-%d-%m %H:%M:%S')"
+ fi
+ case "$OPT" in
+   "--commit-all")
+      git commit -am "$message"
+      ;;
+   "--commit")
+      git commit -m "$message"
+      ;;
+   '--squash' | "--fixup" )
+      git commit $OPT $1
+      ;;
+ esac
+ if [ $? -ne 0 ]
+ then
+    Error 1 "Unable to commit your code. Please review git error and instructions and retry."
+ fi
+}
+
 REF=local
+BIN_PATH=$(cd $(dirname $0); pwd)
+
+# Load build.d files
+
+for INC_FILE in $BIN_PATH/bash.d/*.d.sh
+do
+  source $INC_FILE
+done
+
 
 if [ $# -eq 0 ]
 then
@@ -204,6 +300,13 @@ else
    REPO_DIR="/opt/config/production/git/"
 fi
 
+OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to: -- "$@" )
+if [ $? != 0 ]
+then
+    usage "Invalid options"
+fi
+eval set -- "$OPTS"
+
 while [ $# -ne 0 ]
 do
   case "$1" in
@@ -214,9 +317,7 @@ do
            REF=$1
            ;;
         *)
-          echo "--ref accepts only 'remote' or 'local' option."
-          Help
-          exit 1
+           Error 1 "Incorrect option '$1' for --ref. It accepts only 'remote' or 'local' option."
            ;;
        esac
        shift
@@ -244,16 +345,25 @@ do
        shift;;
      "--ssend")
        shift
-       if [ -n "$1" ]; then
-          message=$1
-       else
-          message="Anonymous commit $(date '+%Y-%d-%m %H:%M:%S')"
-       fi
-       git add -A :/
-       echo "Added all changes to commit"
-       git commit -m "$message"
+       do_add_all
+       do_commit --commit-all "$1"
        ACTION="SEND"
        shift;;
+     "--commit-all")
+       shift
+       do_add_all
+       do_commit --commit-all "$1"
+       shift;;
+     "--commit" | "--fixup" | "--squash")
+       if [ "$(echo "$2" | cut -c1-2)"  = -- ]
+       then
+          do_commit "$1" ""
+       else
+          do_commit "$1" "$2"
+          shift
+       fi
+       shift;;
+       # Adding this repository PATH to the test-box list to send out.
      "--report")
        shift
        REPORT_BRANCH="$1"
@@ -264,9 +374,6 @@ do
        fi
        ACTION="REPORT"
        shift;;
-     "--interactive")
-       ACTION="INTER"
-       shift;;
      "--remove")
        ACTION="REMOVE"
        shift;;
@@ -274,133 +381,43 @@ do
        ACTION="SYNC"
        ERO_IP=$2
        shift;shift;;
+     --) 
+       shift; break;;
      *)
-       echo -e "\E[033;31mError: Incorrect option. Run this script without parameters to visualize the correct options."
-       exit
+       Error 1 "Incorrect option '$1'. Run this script without parameters to visualize the correct options."
+       exit;;
   esac
 done
 
 git rev-parse --show-toplevel 2>/dev/null
 if [ $? -ne 0 ]
 then
-   echo "You are not in a git repository. Move to a $REPO clone repo directory and retry"
-   exit 1
+   Error 1 "You are not in a git repository. Move to a $REPO clone repo directory and retry"
 fi
 
 if [ "$(git remote -v | grep "origin *.*$REPO")" = "" ]
 then
-   echo "Are you sure to be in [1m$REPO[0m repository??? Move to a $REPO clone repo directory or set TEST_REPONAME to the one you want and retry."
-   exit 1
+   Error 1 "Are you sure to be in [1m$REPO[0m repository??? Move to a $REPO clone repo directory or set TEST_REPONAME to the one you want and retry."
 fi
 
 CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 
 case $ACTION in
-    "INTER")
-        if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
-        then
-           echo "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
-           exit 1
-        fi
-
-        ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
-        fix_ero_ip
-
-        CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
-        echo "Making remote connection..."
-        ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=yes $CONNECTION -f -N
-        if [ $? -ne 0 ]
-        then
-           echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-           exit 1
-        fi
-        REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
-        echo "Use help to get list of commands. Type exit to quit the interactive mode of eroplus testing."
-        read -p "eroPlus testing > " COMMAND
-        while [ "$COMMAND" != "exit" ]
-        do
-          set -- $COMMAND
-          case "$1" in
-            help)
-               echo "commands are:
-help       : This help.
-local  | l : To execute some local command, like git checkout.
-remote | r : To execute some root command on the eroplus box, from $REPO_DIR/$REPO directory.
-exit       : To quit the interactive mode."
-               ;;
-            local | l)
-               shift
-               if [ "$1" = "" ]
-               then
-                  local_task bash --login
-               else
-                  local_task $*
-               fi
-               ;;
-            remote | r)
-               shift
-               if [ "$1" = "" ]
-               then
-                  remote_root_task bash --login
-               else
-                  remote_root_task $*
-               fi
-               ;;
-          esac
-          read -p "eroPlus testing > " COMMAND
-        done
-        ssh -O exit $CONNECTION
-        ;;
     "CONFIGURE")
-       echo "Checking nova.pem key..."
-       ssh-add -l | grep nova.pem
-       if [ $? -eq 1 ]
-       then
-          echo "nova.pem not found. Trying to automatically add it..."
-          if [ -e ~/.ssh/nova.pem ]; then
-            ssh-add ~/.ssh/nova.pem
-          else
-            echo "nova.pem not found in ~/.ssh directory"
-            exit
-          fi
-       fi
-       fix_ero_ip
-       echo "Checking kit connection..."
-       CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
-       ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
-       if [ $? -ne 0 ]
-       then
-          echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-          exit 1
-       fi
-
-       REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
-
-       if [ "$REF" = local ]
-       then
-          configure_from_local
-       else
-          configure_from_remote
-       fi
-       ssh -O exit $CONNECTION
-       printf "[1mDONE[0m\nYou are now in a new testing branch. Every commits here are specifics to this branch. a git push will move your code to the remote kit.
-On the server, as root, you can do a git pull from $REPO_DIR/${REPO}. And test your code.
-
-When you are done, you will be able to merge to the master branch or any other branch you would use. As your commits were for testing, you may need to merge all your commits to one. So, think to use 'git rebase -i' to merge your pending commits to few commits before git push (or git-push for git review)\n"
-
+        do_configure
      ;;
     "SYNC")
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" != "" ]
      then
-        echo "option --push-to cannot be used from a testing branch. Do your update from any other branch you want. --push-to will push it to your testing branch with merge feature."
-        exit 1
+        Error 1 "option --push-to cannot be used from a testing branch. Do your update from any other branch you want. --push-to will push it to your testing branch with merge feature."
      fi
      REST_BRANCH=$CUR_BRANCH
      if [ "$(git branch | grep "\w*testing-${USER}-$ERO_IP$")" = "" ]
      then
-        echo "Branch testing-${USER}-$ERO_IP is not found. Do a '$(basename $0) --configure $ERO_IP ; git checkout $REST_BRANCH', before using --push-to function."
-        exit 1
+        do_configure
+        local_task git checkout $REST_BRANCH
+        exit 
      fi
      local_task git checkout testing-${USER}-$ERO_IP
      local_task git merge $REST_BRANCH
@@ -409,26 +426,12 @@ When you are done, you will be able to merge to the master branch or any other b
      CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
      then
-        echo "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
-        exit 1
+        Error 1 "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
      fi
 
-     ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
      fix_ero_ip
 
-     local_task git push testing-$ERO_IP HEAD:testing-$USER
-     CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
-     ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
-     if [ $? -ne 0 ]
-     then
-        echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-        exit 1
-     fi
-     REMOTE_USER="$(ssh $CONNECTION "id -un" | dos2unix)"
-     check_remote_branch
-     remote_root_task git reset --hard testing/testing-$USER
-     remote_root_task git clean -f
-     remote_root_task git pull testing testing-$USER
+     do_send
      ssh -O exit $CONNECTION
      # SEND done
      local_task git checkout $REST_BRANCH
@@ -436,26 +439,11 @@ When you are done, you will be able to merge to the master branch or any other b
     "SEND")
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
      then
-        echo "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
-        exit 1
+        Error 1 "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
      fi
 
      ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
-     fix_ero_ip
-
-     local_task git push testing-$ERO_IP HEAD:testing-$USER
-     CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
-     ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
-     if [ $? -ne 0 ]
-     then
-        echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-        exit 1
-     fi
-     REMOTE_USER="$(ssh $CONNECTION "id -un" | dos2unix)"
-     check_remote_branch
-     remote_root_task git reset --hard testing/testing-$USER
-     remote_root_task git clean -f
-     remote_root_task git pull testing testing-$USER
+     do_send
      ssh -O exit $CONNECTION
      ;;
     "REPORT")
@@ -464,8 +452,7 @@ When you are done, you will be able to merge to the master branch or any other b
     "REMOVE")
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
      then
-        echo "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
-        exit 1
+        Error 1 "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
      fi
      ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
      fix_ero_ip
@@ -480,8 +467,7 @@ When you are done, you will be able to merge to the master branch or any other b
      ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
      if [ $? -ne 0 ]
      then
-        echo "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-        exit 1
+        Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
      fi
      REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
      echo "Removing remote branch... The remote testing repo won't be removed to prevent other tester to loose their branch."
