@@ -18,7 +18,12 @@
 #
 #
 
-class gardener::requirements {
+class gardener::requirements(
+  $unix_cli_version = hiera('gardener::requirements::unix_cli_version', '2.0.8'),
+  $unix_cli_name    = hiera('gardener::requirements::unix_cli_name', 'hpcloud'),
+  $unix_cli_md5     = hiera('gardener::requirements::unix_cli_md5', '25587f96f6edf7e50d3f58239437d162'),
+  $unix_cli_url     = hiera('gardener::requirements::unix_cli_url', 'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'),
+) {
 
 # this option for installing fog simply isn't availabe because of bugs
 # with gem installation with multiple rubys installed, package defaults
@@ -66,10 +71,6 @@ class gardener::requirements {
 
   # custom installation for hpcloud from gem file for private cloud implementation support.
   # currently forked on github at wenlock/unix_cli
-  $unix_cli_version='2.0.8'
-  $unix_cli_name='hpcloud'
-  $unix_cli_md5='25587f96f6edf7e50d3f58239437d162'
-  $unix_cli_url='http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'
   if ! defined(File['/var/lib/forj']) {
     file { '/var/lib/forj' :
       ensure => directory,

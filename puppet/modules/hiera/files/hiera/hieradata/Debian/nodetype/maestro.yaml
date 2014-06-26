@@ -100,7 +100,4 @@ maestro::security_groups: '%{::security_groups}'
 maestro::app::setup::revision: '%{::gitbranch}'
 maestro::ui::setup::revision: '%{::gitbranch}'
 
-# nodejs wrap global defaults - Used by pm2
-nodejs_wrap::node_env: "%{::maestro::params::node_env}"
-
 salt::salt_master: "%{::erosite}.%{::erodomain}"
