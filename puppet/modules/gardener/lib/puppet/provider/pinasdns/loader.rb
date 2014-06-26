@@ -47,8 +47,7 @@ module Pinas
             extend ::Puppet::PinasDNSHP  # for pinas/lib/dns/hp gives get_dns
             Puppet.debug "loadded Pinas::DNS::Provider::Loader for #{get_provider}"
           else
-            #raise "Pinas::DNS::Provider::Loader does not support this provider in #{get_provider}."
-            Puppet.debug "Pinas::DNS::Provider::Loader: fog provider not defined. Loader loaded partially."
+            Puppet.warning "Pinas::Compute::Provider::Loader fog provider not defined. Loader loaded partially."
           end
         end
         

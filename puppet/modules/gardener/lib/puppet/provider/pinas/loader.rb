@@ -48,7 +48,7 @@ module Pinas
             
             Puppet.debug "loadded Pinas::Compute::Provider::Loader for #{get_provider}"
           else
-            raise "Pinas::Compute::Provider::Loader does not support this provider in #{get_provider}."
+            Puppet.warning "Pinas::Compute::Provider::Loader fog provider not defined. Loader loaded partially."
           end
           
         end
