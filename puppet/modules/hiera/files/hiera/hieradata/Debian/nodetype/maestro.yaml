@@ -95,6 +95,7 @@ maestro::flavor_name: '%{::flavor_name}'
 maestro::key_name: '%{::key_name}'
 maestro::network_name: '%{::network_name}'
 maestro::security_groups: '%{::security_groups}'
+maestro::meta_data: 'http_proxy=%{::webproxy}'
 
 # maestro ui /app configuration
 maestro::app::setup::revision: '%{::gitbranch}'

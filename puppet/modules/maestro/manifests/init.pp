@@ -27,6 +27,7 @@ class maestro (
   $network_name     = hiera('maestro::network_name', $::netname),
   $provision_set    = hiera('maestro::provision', $::provision),
   $security_groups  = hiera('maestro::security_goups', 'default'),
+  $meta_data        = hiera('maestro::meta_data',''),
   $environment      = $settings::environment,
 )
 {
@@ -139,6 +140,7 @@ class maestro (
       nodes           => $nodes,
       instance        => $instance,
       ssh_gen_keys    => $ssh_user_keys,
+      extra_metadata  => $meta_data,
       require         => Class['puppet::puppetmaster'],
     }
   }

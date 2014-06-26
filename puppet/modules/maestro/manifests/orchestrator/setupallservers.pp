@@ -19,7 +19,8 @@ class maestro::orchestrator::setupallservers(
     $nodes           = ['review'],
     $instance        = undef,
     $instance_domain = $domain,
-    $ssh_gen_keys    = ['jenkins']
+    $ssh_gen_keys    = ['jenkins'],
+    $extra_metadata  = '',
 )
 {
   debug('setting up all the servers')
@@ -36,10 +37,19 @@ class maestro::orchestrator::setupallservers(
   $instance_serial_start = inline_template('<% i = @instance.to_i(36) + 10000  %><%= i.to_s.hex.to_s.length.even? ? i.to_s.hex.to_s : \'0\' + i.to_s.hex.to_s %>')
   debug("instance_serial_start = ${instance_serial_start}")
 
-  $eroip = inline_template('<% if defined?(@helion_public_ipv4) %><%= @helion_public_ipv4 %><% elsif defined?(@ec2_public_ipv4)%><%= @ec2_public_ipv4 %><% else %><%= @fqdn %><% end %>')
+  include maestro::node_vhost_lookup
+  $eroip = $maestro::node_vhost_lookup::vname
 
+  # parse the extra data
+  # add a comma to the end if there is none provided
+  if $extra_metadata != '' and $extra_metadata != undef
+  {
+    $parsed_extra_metadata = inline_template('<%= (@extra_metadata.end_with? ",") ? @extra_metadata : @extra_metadata + ',' %>')
+  } else {
+    $parsed_extra_metadata = ''
+  }
   # list all the servers we will create here
-  $metadata = "erosite=${::hostname},erodomain=${instance_domain},eroip=${eroip},cdkdomain=${instance_domain},cdksite=<%= server_name %>"
+  $metadata = "${parsed_extra_metadata}erosite=${::hostname},erodomain=${instance_domain},eroip=${eroip},cdkdomain=${instance_domain},cdksite=<%= server_name %>"
   cacerts::cacerts_createssh { 'init':
         domain       => $instance_domain,
         environment  => $environment,
