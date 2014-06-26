@@ -31,7 +31,7 @@ Default configuration uses the "private" network name, so either define such a n
 To build a box named maestro, use the following:
 
     $ cd build
-    $ vi /conf/maestro.box.master.env
+    $ vi conf/maestro.box.master.env
     $ bin/build.sh --box-name maestro --build-conf-dir conf --build-config box
 
 it will create a Maestro box image, by building a server and snapshooting it.
