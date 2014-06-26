@@ -20,7 +20,7 @@ class nodejs_wrap (
   $dev_package  = hiera('nodejs_wrap::dev_package', false),
   $manage_repo  = hiera('nodejs_wrap::manage_repo', true),
   $proxy        = hiera('nodejs_wrap::proxy', inline_template('<%= ENV[\'http_proxy\'] %>')),
-  $registry     = hiera('nodejs_warp::registry', undef),
+  $registry     = hiera('nodejs_wrap::registry', undef),
   $version      = hiera('nodejs_wrap::version', '0.10.29-1chl1~precise1'),
 )
 {
