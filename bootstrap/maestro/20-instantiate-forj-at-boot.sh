@@ -48,7 +48,7 @@ then # TODO: Support to receive a different layout then default one.
    service puppetmaster stop
    service apache2 restart
    service puppet-dashboard-workers restart
-   puppet apply --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
+   puppet apply --debug --verbose --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
 
 # restart puppet so all new factors and hiera are loaded. 
    service puppetmaster stop
