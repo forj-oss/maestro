@@ -6,7 +6,7 @@ Directories structure:
 - build/maestro : Contains bootstrap to build a basic maestro image
 - build/node    : Contains bootstrap to build a basic node image.
 - puppet        : Contains puppet modules to build maestro or node images.
-- api           : Internal Maestro api
+- api/bp-api    : Blueprint  api to expose blueprint toolset
 - ui            : Maestro ui
 
 How Maestro is created:
