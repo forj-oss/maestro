@@ -111,12 +111,17 @@ module Puppet
           new_server = @compute.servers.create(options)
           new_server.wait_for { ready?}
         rescue Exception => e
-           Puppet.crit "Error: #{e}"
+           Puppet.crit "servers.create Error: #{e}"
            raise Puppet::Error, "Error : #{e}"
         end
   
         Puppet.notice "server created #{server_name}"
-        server_ip_assign(server_name)
+        begin
+          server_ip_assign(server_name)
+        rescue  Exception => e
+          Puppet.crit "server_ip_assign Error: #{e}"
+          raise Puppet::Error, "Error : #{e}"
+       end
   
       end
       # get the public ip of the server
@@ -162,34 +167,88 @@ module Puppet
           if addresses['private'].count < 2
           # check if already assigned
             new_ip = nil
-            ip = get_free_floating_ip
+            ip = get_free_floating_ip(server)
             if ip != nil
               begin
                 new_ip = @compute.associate_address(server.id, ip)
+                Puppet.notice "#{server_name} assigned ip => #{new_ip}"
               rescue Exception => e
                   Puppet.err e
-                  raise Puppet::Error, "Error : #{e}"
+                  raise Puppet::Error, "associate_address Error : #{e}"
               end
             else
+              Puppet.warning "unable to assign server an ip : #{server_name}"
               return nil
             end
           end
         else
+          Puppet.warning "unable to find server to assign new ip #{server_name}"
           return nil
         end
         return ip
       end
       # get an ip that is already allocated but unassigned to a server
       # if one is not assigned, getting a new floating ip generated, and return that.
-      def get_free_floating_ip
+      def get_free_floating_ip(server)
         @compute.addresses.each do |address|
+          Puppet.debug "found a free address to assign #{address.ip}" if address.instance_id == nil
           return address.ip if address.instance_id == nil
         end
         #if no free address generate new address
-        new_ip = @compute.allocate_address.body['floating_ip']['ip']
+        Puppet.debug "generate a free address"
+        ext_net = nil
+        begin
+          ext_net = get_first_external_network
+        rescue Exception => e
+            Puppet.err e
+            raise Puppet::Error, "get_first_external_network Error : #{e}"
+        end
+        response = nil
+        if ext_net != nil
+           Puppet.debug "using #{ext_net.name}"
+           ext_net_id = ext_net.id
+           #TODO: consider creating options for the hash below so we can 
+           # provide more flexiblity in external network config.
+           hsh = {
+                      #:tenant_id           => server.tenant_id
+                      #:floating_network_id => ext_net_id   #,
+                      #:port_id => @port,
+                      #:fixed_ip_address => @fixed_ip,
+                      #:floating_ip_address => @floating_ip
+                    }
+           begin
+             Puppet.debug hsh
+             response = @network.create_floating_ip(ext_net_id, hsh)
+             Puppet.debug "got response = > #{response.status}"
+           rescue Exception => e
+               Puppet.err e
+               raise Puppet::Error, "create_floating_ip Error : #{e}"
+           end
+        else
+           Puppet.warning "unable to get a valid external network"
+        end
+
+        Puppet.debug "no free address available, create a new one."
+        new_ip = nil
+        unless response.nil?
+          new_ip = response.body['floating_ip']['ip']
+          Puppet.debug "allocated a new address => #{new_ip}"
+        end
         return new_ip
       end
-  
+
+      def get_first_external_network
+        if @network != nil
+          @network.networks.each{ |n|
+            Puppet.debug "looking for external network #{n.name}"
+            if n.router_external == true
+              return n
+            end
+          }
+        end
+        return nil
+      end
+
       #TODO: move to common
       def meta_to_hash(str)
         key_pairs = str.split(',')
