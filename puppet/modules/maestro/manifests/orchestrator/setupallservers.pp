@@ -44,7 +44,8 @@ class maestro::orchestrator::setupallservers(
   # add a comma to the end if there is none provided
   if $extra_metadata != '' and $extra_metadata != undef
   {
-    $parsed_extra_metadata = inline_template('<%= (@extra_metadata.end_with? ",") ? @extra_metadata : @extra_metadata + ',' %>')
+    $meta_template = '<%= (@extra_metadata.end_with? ",") ? @extra_metadata : @extra_metadata + "," %>'
+    $parsed_extra_metadata = inline_template($meta_template)
   } else {
     $parsed_extra_metadata = ''
   }
