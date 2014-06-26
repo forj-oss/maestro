@@ -43,40 +43,47 @@ returns : true/false
 
     EOS
    ) do |args|
-       Puppet.debug "in is_domain_managed.."
-       unless  Puppet.features.fog?
-         Puppet.warning "unable to continue, fog libraries are not ready, try running:
-                       puppet agent --tags 'gardener::requirements'
-                       or 
-                       puppet apply --modulepath=\$PUPPET_MODULES -e 'include gardener::requirements'
-                       returning false and skipping."
-         return :undefined
-       end
+      Puppet.debug "in is_domain_managed.."
+      unless  Puppet.features.fog?
+        Puppet.warning "unable to continue, fog libraries are not ready, try running:
+                      puppet agent --tags 'gardener::requirements'
+                      or 
+                      puppet apply --modulepath=\$PUPPET_MODULES -e 'include gardener::requirements'
+                      returning false and skipping."
+        return :undefined
+      end
 
-       unless Puppet.features.pinas?
-         Puppet.warning "Pinas common libraries unavailable, skip for this run."
-         return :undefined
-       end
-       @loader = ::Pinas::DNS::Provider::Loader
-       unless @loader.get_provider != nil
-         Puppet.warning "Pinas fog configuration missing."
-         return :undefined
-       end
+      unless Puppet.features.pinas?
+        Puppet.warning "Pinas common libraries unavailable, skip for this run."
+        return :undefined
+      end
 
-       if (args.size != 1) then
-          raise(Puppet::ParseError, "is_domain_managed: Wrong number of arguments "+
-            "given #{args.size} for 1")
-       end
+      # check for FOG_RC
+      unless Puppet.features.fog_credentials?
+        Puppet.warning "fog_credentials unavailable, skip for this run."
+        return :undefined
+      end
+
+      @loader = ::Pinas::DNS::Provider::Loader
+      unless @loader.get_provider != nil
+        Puppet.warning "Pinas fog configuration missing."
+        return :undefined
+      end
+
+      if (args.size != 1) then
+         raise(Puppet::ParseError, "is_domain_managed: Wrong number of arguments "+
+           "given #{args.size} for 1")
+      end
        
-       @domain = args[0]
-       @dnsservice = ::Pinas::DNS::Provider::DNS
-       Puppet.debug("checking if domain ( #{@domain} ) is managed.")
-       begin
-         pinasdns = @dnsservice.instance(@loader.get_dns)
-         return pinasdns.zone_exist?(@domain)
-       rescue Exception => e
-         Puppet.warning "unable to check if domain is manged."
-         return :undefined
-       end
+      @domain = args[0]
+      @dnsservice = ::Pinas::DNS::Provider::DNS
+      Puppet.debug("checking if domain ( #{@domain} ) is managed.")
+      begin
+        pinasdns = @dnsservice.instance(@loader.get_dns)
+        return pinasdns.zone_exist?(@domain)
+      rescue Exception => e
+        Puppet.warning "unable to check if domain is manged."
+        return :undefined
+      end
     end
 end

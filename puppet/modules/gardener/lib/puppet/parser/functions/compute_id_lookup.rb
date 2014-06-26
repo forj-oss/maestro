@@ -64,6 +64,13 @@ When a compute resource is not found, the return value is ''
          Puppet.warning "Pinas common libraries unavailable, skip for this run."
          return nil
        end
+
+       # check for FOG_RC
+       unless Puppet.features.fog_credentials?
+         Puppet.warning "fog_credentials unavailable, skip for this run."
+         return nil
+       end
+
        @loader = ::Pinas::Compute::Provider::Loader
        unless @loader.get_provider != nil
          Puppet.warning "Pinas fog configuration missing."
