@@ -66,9 +66,7 @@ class maestro (
   require puppet::puppetmaster
 
   # requirements
-  class {'maestro::requirements':
-    require => Class['nodejs_wrap'],
-  }
+  include maestro::requirements
 
   # Install nodejs and pm2
   class {'nodejs_wrap':  }

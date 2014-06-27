@@ -33,33 +33,43 @@ class maestro::requirements(
   pm2:
     ensure: '0.8.2'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   forever:
     ensure: '0.10.11'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   optimist:
     ensure: '0.6.1'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   restify:
     ensure: '2.6.3'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   path:
     ensure: '0.4.9'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   mysql:
     ensure: '2.1.1'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   js-yaml:
     ensure: '3.0.2'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   async:
     ensure: '0.2.10'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   validator:
     ensure: '3.5.1'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
   openid:
     ensure: '0.5.5'
     provider: 'npm'
+    require: 'Class[nodejs_wrap]'
 ")
   }
   $packages = keys($package_data)
