@@ -14,13 +14,15 @@ PuppetLint.configuration.send('disable_80chars')
 PuppetLint.configuration.send('disable_class_parameter_defaults')
 
 #require 'puppetlabs_spec_helper/rake_tasks'
+# This module could be used to instrument the location of a fog_rc file 
+# and pull it from a secure location for purposes of this rakefile run
 CLOUDCREDS_DIR=(ENV['CLOUDCREDS_DIR'] == nil || ENV['CLOUDCREDS_DIR'] == '') ? '/opt/workspace/git/infra/puppet/modules/cloudcreds' : ENV['CLOUDCREDS_DIR']
 
 Dir.glob("#{CLOUDCREDS_DIR}/Rakefile").each { |r| load r }
 def check_cloudcreds
 
   unless defined?(::CloudCreds::RAKE_ROOT)
-    if ENV['FOG_RC'] == nil or ENV['FOG_RC'] == nil
+    if ENV['FOG_RC'] == nil or ENV['FOG_RC'] == ''
       message = "FOG_RC should be configured or cloudcreds module should be used to define a dynamic FOG_RC \n CLOUDCREDS_DIR => #{CLOUDCREDS_DIR}" 
       raise ArgumentError, message
     else
@@ -29,7 +31,7 @@ def check_cloudcreds
   end
 
   unless File.exist?(::CloudCreds::RAKE_ROOT)
-    if ENV['FOG_RC'] == nil or ENV['FOG_RC'] == nil
+    if ENV['FOG_RC'] == nil or ENV['FOG_RC'] == ''
       message = "FOG_RC should be configured or set CLOUDCREDS_DIR environment, this Rakefile requires cloudcreds module"
       raise ArgumentError, message
     else
@@ -37,6 +39,14 @@ def check_cloudcreds
     end
   end
   return true
+end
+
+# Check if the FOG_RC export is enabled, and return true
+def is_fogrc?
+  if ENV['FOG_RC'] != nil and ENV['FOG_RC'] != '' and File.exist?(ENV['FOG_RC'])
+    return true
+  end
+  return false 
 end
 #
 # task definitions
@@ -79,8 +89,8 @@ namespace :gardener do
   task :spec, :fog_spec do |t, args|
     args.spec(:fog_spec => :default)
     puts "Running gardener test... #{args}"
-    if check_cloudcreds
-      Rake::Task['cloudcreds:spec_noclean'].invoke(args[0])
+    if ! is_fogrc? and check_cloudcreds
+      Rake::Task['cloudcreds:spec_noclean'].invoke(args[0])  #experimental hook for dealing with fog credentials.  Not yet supported.
     end
     cd GARDENER_RAKE_ROOT
     puts "using : #{ENV['FOG_RC']}"

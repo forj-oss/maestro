@@ -19,7 +19,8 @@ include ::SpecUtilities::Puppet
 include ::SpecUtilities::Exec
 def is_dns_enabled?
   begin
-    fog = YAML.load_file(ENV['FOG_RC'])["dns"]
+    fog = nil
+    fog = YAML.load_file(ENV['FOG_RC'])["dns"] if ENV['FOG_RC'] != nil and File.exists?(ENV['FOG_RC'])
     return (fog != nil)
   rescue Errno::ENOENT
     return false

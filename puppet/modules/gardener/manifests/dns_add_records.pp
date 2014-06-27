@@ -63,6 +63,7 @@ define gardener::dns_add_records (
         zone         => $zone_name,
         record_type  => $data[$action_node]['type'],
         compute_name => $compute_name_lookup,
+        require      => Class['gardener::requirements'],
       }
     }
 }

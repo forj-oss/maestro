@@ -50,7 +50,7 @@ class maestro::orchestrator::setupallservers(
     $parsed_extra_metadata = ''
   }
   # list all the servers we will create here
-  $metadata = "${parsed_extra_metadata}erosite=${::hostname},erodomain=${instance_domain},eroip=${eroip},cdkdomain=${instance_domain},cdksite=<%= server_name %>"
+  $metadata = "${parsed_extra_metadata}erosite=${::hostname},erodomain=${instance_domain},eroip=${eroip},cdkdomain=${instance_domain},cdksite=<%= server_name %>,kitopsip=${::ipaddress}"
   cacerts::cacerts_createssh { 'init':
         domain       => $instance_domain,
         environment  => $environment,

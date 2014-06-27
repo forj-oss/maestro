@@ -23,6 +23,7 @@ define gardener::gen_userdata (
   $t_full_q_hostname = '',
   $t_site            = '',
   $http_proxy        = '',
+  $template          = undef,
 )
 {
   Exec { path => [  '/usr/local/bin',
@@ -33,6 +34,12 @@ define gardener::gen_userdata (
                     '/var/lib/gems/1.8/gems/hpcloud-1.9.1/bin/'
           ] }
 
+  if $template != undef
+  {
+    $metadata = to_json(to_hash(split($template['meta_data'],',')))
+  } else {
+    $metadata = ''
+  }
   # we do this so that pinas can templify the hostname of the target
   # server. or we can offer an alternate hostname that will be registered
   # in puppet.conf certname
@@ -61,8 +68,6 @@ define gardener::gen_userdata (
   $gardner_script_dir = 'puppet:///modules/gardener/scripts'
   file { "/tmp/write-mime-multipart.${site}.py":
         ensure  => present,
-        owner   => 'root',
-        group   => 'root',
         mode    => '0555',
         source  => "${gardner_script_dir}/write-mime-multipart.py",
         replace => true,

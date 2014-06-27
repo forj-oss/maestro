@@ -47,12 +47,14 @@ module SpecUtilities
         begin
            command += " "
            command.concat(args)
+           puts command
            output = `#{command}`
            exit_status = $?.exitstatus
 
            output.split(/\r?\n/).each { |line| 
              p line
            }
+           puts "Exit Status ( #{exit_status} )"
            return (exit_status == 0)
         rescue Exception => e
            puts "Problem running command -> #{command}"

@@ -26,20 +26,12 @@ class gardener::requirements(
   $unix_cli_url      = hiera('gardener::requirements::unix_cli_url', 'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'),
 ) {
 
-# this option for installing fog simply isn't availabe because of bugs
-# with gem installation with multiple rubys installed, package defaults
-# to system ruby installed, and puppet on 2.7.X Ubuntu only works with
-# ruby 1.8....which is a slight issue for fog due to nokogiri 1.6.X
-#      package { 'fog':
-#        ensure => present,
-#        provider => gem
-#      } ->
   tag 'gardener::requirements'
 
   if $unix_cli_download == true
   {
     # custom installation for hpcloud from gem file for private cloud implementation support.
-    # currently forked on github at wenlock/unix_cli
+    # currently forked on github at wenlock/unix_cli .... leaving here in case future bugs
     if ! defined(File['/var/lib/forj']) {
       file { '/var/lib/forj' :
         ensure => directory,
@@ -65,6 +57,7 @@ class gardener::requirements(
     }
     $hpcloud_package = ''
   } else {
+# prefered method for installation.
     $hpcloud_package = "  hpcloud:
     ensure: '${unix_cli_version}'
     provider: 'gem18'

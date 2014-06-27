@@ -98,7 +98,7 @@ When a compute resource is not found, the return value is ''
        rescue Exception => e
          Puppet.err "unable to get compute service for #{@compute_name}"
          Puppet.err "#{e}"
-         raise "unable to get compute service for #{@compute_name}"
+         raise "unable to get compute service for #{@compute_name}, error #{e}"
        end
        # determin the compute id
        compute_id = ''

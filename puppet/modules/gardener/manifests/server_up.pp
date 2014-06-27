@@ -29,16 +29,17 @@ class gardener::server_up (
 )
 {
   # TODO: remove at some point.  This should be used sense we require params to be configured. include gardener::params
+  require gardener::params
   include gardener::requirements
   # see pinas.rb server_name
-  $udata     = $gardener::params::template_userdata
   $full_host = "<% if server_id == \'\' %><%= server_name %>.${::domain}<%else%><%= server_host %>.${::domain}<%end%>"
   gardener::gen_userdata{'template':
                           domain            => $instance_domain,
-                          userdata          => $udata,
+                          userdata          => $gardener::params::template_userdata,
                           t_full_q_hostname => $full_host,
                           t_site            => '<%= server_name %>',
                           http_proxy        => '<%= ENV[\'http_proxy\'] %>',
+                          template          => $gardener::params::template,
                   }
   debug("using params => ${gardener::params::template}")
   pinas {"server_up ${blueprint}":
@@ -51,7 +52,6 @@ class gardener::server_up (
     provider        => $gardener::params::cloud_provider,
     require         => [
                         Class['gardener::requirements'],
-                        Class['gardener::params'],
                         Gardener::Gen_userdata['template']
                         ],
     delay           => $server_delay,

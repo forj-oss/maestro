@@ -22,7 +22,7 @@ Puppet.features.add(:fog_credentials) do
     if ENV["FOG_RC"].nil? 
              ENV["FOG_RC"]="/opt/config/fog/cloud.fog"
     end
-    fog_rc ENV["FOG_RC"]
+    fog_rc=ENV["FOG_RC"]
     Puppet.debug "enabling feature check for fog_credentials on fog file => #{fog_rc}"
     if File.exist?(fog_rc)
       cloud_info=YAML.load_file(fog_rc)

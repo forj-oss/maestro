@@ -1,4 +1,3 @@
-# == gardener::server_destroy
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-class gardener::server_destroy (
-  $nodes            = ['pinas1'],
-  $instance_id      = '',
-  $do_threaded      = true,
-  $blueprint        = 'openstack',
-)
-{
-  include gardener::requirements
-  pinas {"server_destroy ${blueprint}":
-    ensure       => absent,
-    instance_id  => $instance_id,
-    nodes        => $nodes,
-    do_parallel  => $do_threaded,
-    require      => Class['gardener::requirements'],
-  }
-}
+require 'spec_helper'
+
+describe 'to_json', :default => true do
+  it 'should change { \'a\' => \'1\' } to { "a" : "1" }' do
+   should run.with_params({ "a" => "1" }).and_return("{\"a\":\"1\"}")
+  end
+
+  it 'should change [1,2] to [ "1" , "2" }' do
+   should run.with_params([1,2]).and_return("[1,2]")
+  end
+
+  it 'should throw exception Puppet::ParseError with no arguments' do
+    should run.with_params().and_raise_error(Puppet::ParseError)
+  end
+end

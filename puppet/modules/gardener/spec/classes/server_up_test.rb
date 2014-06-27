@@ -18,7 +18,6 @@ describe 'gardener::server_up', :default => true do
   let(:params) { {:nodes => ['rspecnode1'], :instance_id => '42', :instance_domain => 'cdkdev.org.'} }
 #  let(:title) { 'nginx' }
   context 'with default values' do
-    it { should contain_class('gardener::params') }
     it { should contain_class('gardener::requirements') }
     it { should compile }
   end

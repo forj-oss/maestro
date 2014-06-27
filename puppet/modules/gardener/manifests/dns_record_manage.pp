@@ -43,10 +43,7 @@ define gardener::dns_record_manage (
         record_type     => $record_type,
         ip_data         => $ip_address,
         provider        => record,
-        require         => [
-                        Class['gardener::requirements'],
-                        Class['gardener::params'],
-                        ],
+        require         => Class['gardener::requirements'],
       }
     } else
     {

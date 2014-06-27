@@ -20,35 +20,49 @@ Manage cloud things for forj kits.
 
   - class for creating / destroying list of static nodes (server_up, server_destroy)
   - type for managing those nodes: pinas
+  - various parsers for compute public and private ip lookup
+  - helper functions for converting metadata from json to hash and strings
+  - domain record lookup and management
+  - configured to work with hiera
+  - support for openstack 13.5, deprecation for 12.12 will come next.
+  - usage of unix_cli objects
 
 ## WIP ##
-  - dns 
   - object storage
 
 ## Planned ##
   - attached storage
-  - more providers (AWS, rackspace, openstack 13.5)
+  - more providers (AWS, rackspace)
+
 ## Intended Audience ##
-  users of forj kits
-  
+  users of forj blueprints
+
 ## Testing ##
   setup your environment for testing:
-  gem1.8 install bundler
-  bundle install --gemfile .gemfile
+* Install puppet
+    /opt/workspace/git/maestro/puppet/install_puppet.sh 
+* Install 3rd party modules
+    /opt/workspace/git/maestro/puppet/install_modules.sh 
+* Install hiera
+    /opt/workspace/git/maestro/hiera/hiera.sh 
+
+* Install required gems 
+    gem1.8 install bundler --no-rdoc --no-ri
+    bundle install --gemfile .gemfile
+
+### Run Test ###
+* Setup fog file configuration as described below
+  rake spec
+
+### Perform lint testing ###
+  rake lint
   
-  Requirements, you'll need rake and spec modules.  I also highly recommend puppet-lint.
-  You can install bootstrap these with compiler_tools module from forj project.
-  This can be done by applying the following puppet manifest:
-  
+### Test setup automation ###
+  Use these modules to setup an automated build server for testing:
+  puppet -e "include gardener
   include compiler_tools::install::rubydev
-  include compiler_tools::install::puppetlint
-  
-  This should now make 'rake lint' and 'rake spec' commands available.
-  
-  Next step is to install the gardner base requirements.  You can do this with 
-  the following puppet manifest : 
-       puppet -e "include gardener::requirements"
-       
+  include compiler_tools::install::puppetlint"
+
   Now your ready for testing.   You can do this by running the commands in the 
   same directory as the Rakefile.
   
@@ -90,7 +104,7 @@ Manage cloud things for forj kits.
     provider: hp
 
    In this example, we use hp cloud for providing both compute and dns management.
-   The tenant / project we use are two seperate projects and availability zones.
+   The tenant / project we use are two separate projects and availability zones.
    
    After running gardener, you will also have access to hpcloud cli, that you 
    can use to run other commands to do things such as verify account access or
@@ -99,6 +113,14 @@ Manage cloud things for forj kits.
    for compute / network operations.   You can specify different fog configuration
    files by setting the FOG_RC environment variable to different files when
    executing gardener commands.
+
+## Debugging tips ##
+* Use export FOG_DEBUG=true , this will show excon debug output ... note, passwords will show up to.
+* Use export SPEC_PP_OFF=false, this will turn off the :apply flag and prevent puppet apply steps.
+* Use ruby-debug + debugger statement in source, this enables interactive debugging on source.
+** rake debugging can be done with rdebug rake spec.
+** rspec debugging can be done with rspec -d <spec file>
+** rspec debugging when called from rake can be done by setting SPEC_OPTS='-d' export
 
 ## LICENSE ##
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.

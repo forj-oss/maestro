@@ -1,4 +1,3 @@
-# == gardener::server_destroy
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-class gardener::server_destroy (
-  $nodes            = ['pinas1'],
-  $instance_id      = '',
-  $do_threaded      = true,
-  $blueprint        = 'openstack',
-)
-{
-  include gardener::requirements
-  pinas {"server_destroy ${blueprint}":
-    ensure       => absent,
-    instance_id  => $instance_id,
-    nodes        => $nodes,
-    do_parallel  => $do_threaded,
-    require      => Class['gardener::requirements'],
-  }
-}
+
+require 'spec_helper'
+
+describe "apply gen_userdata", :apply => true do
+  context 'with puppet apply' do
+    it "should create ~/mime.txt." do
+      apply("include gardener::tests::gen_userdata").should be(true)
+    end
+  end
+end

@@ -90,7 +90,7 @@ When a compute resource is not found, the return value is ''
         Puppet.debug  "got compute object."
        rescue Exception => e
          Puppet.err "unable to get compute service for #{@compute_name}"
-         raise "unable to get compute service for #{@compute_name}"
+         raise "unable to get compute service for #{@compute_name}, error #{e}"
        end
        return pinascompute.server_get_private_ip(@compute_name)
     end

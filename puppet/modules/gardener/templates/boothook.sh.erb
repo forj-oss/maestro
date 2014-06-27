@@ -67,7 +67,7 @@ sed -e "s/domain-name, domain-name-servers, domain-search, host-name,/domain-nam
 # maestro to /etc/hosts
 
 _PUPPET_MASTER_IP=<% if defined?(@helion_public_ipv4) %><%= @helion_public_ipv4 %><% elsif defined?(@ec2_public_ipv4) %><%= @ec2_public_ipv4 %><% else %><%= @ipaddress %><% end %>
-_PUPPET_MASTER_PRIV_IP=<%= @ipaddress %>
+
 _PUPPET_MASTER=<%= @hostname %>
 _PUPPET_MASTER_FQDN=<%= @fqdn %>
 
@@ -98,7 +98,9 @@ EOF
     dpkg -i $puppet_deb
     rm $puppet_deb
 
-_METADATA="{\"cdkdomain\": \"${_INSTANCE_DOMAIN}\", \"cdksite\": \"${_SITE}\", \"eroip\": \"${_PUPPET_MASTER_IP}\", \"erodomain\": \"${_INSTANCE_DOMAIN}\", \"erosite\": \"${_PUPPET_MASTER}\", \"kitopsip\": \"${_PUPPET_MASTER_PRIV_IP}\"}"
+#TODO: delete once we have new metadata from params
+#_METADATA="{\"cdkdomain\": \"${_INSTANCE_DOMAIN}\", \"cdksite\": \"${_SITE}\", \"eroip\": \"${_PUPPET_MASTER_IP}\", \"erodomain\": \"${_INSTANCE_DOMAIN}\", \"erosite\": \"${_PUPPET_MASTER}\", \"kitopsip\": \"${_PUPPET_MASTER_PRIV_IP}\"}"
+_METADATA="<%= @metadata %>"
 echo "${_METADATA}" > /meta.js
 
 set +x
