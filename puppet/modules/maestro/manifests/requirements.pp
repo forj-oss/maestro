@@ -29,47 +29,47 @@ class maestro::requirements(
   sails:
     ensure: '0.9.13'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   pm2:
     ensure: '0.8.2'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   forever:
     ensure: '0.10.11'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   optimist:
     ensure: '0.6.1'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   restify:
     ensure: '2.6.3'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   path:
     ensure: '0.4.9'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   mysql:
     ensure: '2.1.1'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   js-yaml:
     ensure: '3.0.2'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   async:
     ensure: '0.2.10'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   validator:
     ensure: '3.5.1'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
   openid:
     ensure: '0.5.5'
     provider: 'npm'
-    require: 'Class[nodejs_wrap]'
+    require: 'Class[nodejs]'
 ")
   }
   $packages = keys($package_data)
