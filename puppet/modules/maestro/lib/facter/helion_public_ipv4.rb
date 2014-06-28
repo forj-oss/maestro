@@ -33,8 +33,7 @@ Facter.add('helion_public_ipv4') do
     begin
       public_ipv4_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
       utilurl = UtilURI.new
-      ipv4 = utilurl.openurl(public_ipv4_url, code = '200', (utilurl.getproxyuri.nil? ? false : true))
-      return ipv4
+      ipv4 = utilurl.openurl(public_ipv4_url, code = '200', use_proxy = false, timeout = 15)
     rescue Timeout::Error => detail
       debug("Error in contacting #{public_ipv4_url}: #{detail}")
       ipv4 = String.new
@@ -42,5 +41,6 @@ Facter.add('helion_public_ipv4') do
       debug("other exception, unable to get data from connection, #{e}")
       ipv4 = String.new
     end
+    ipv4
   end
 end
