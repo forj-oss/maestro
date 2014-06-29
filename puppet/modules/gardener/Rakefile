@@ -38,14 +38,15 @@ def check_cloudcreds
   end
   return true
 end
-
+#
+# task definitions
+#
 Rake::Task["spec"].clear
 desc "Default spec execution"
 task :spec, :fog_spec do |t, args|
   args.spec(:fog_spec => :default)
   Rake::Task['gardener:spec'].invoke(args[0])
 end
-
 
 namespace :gardener do
   desc "Setup default _spec test"

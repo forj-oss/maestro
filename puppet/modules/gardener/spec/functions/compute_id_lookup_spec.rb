@@ -19,7 +19,7 @@ require 'spec_helper'
 describe 'compute_id_lookup', :default => true do
   context 'with default values' do
     it "will lookup a private ip on a node and" do
-      should run.with_params('node1').and_return('')
+      should run.with_params('node1').and_return("")
     end
   end
 end

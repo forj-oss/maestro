@@ -19,10 +19,11 @@
 #
 
 class gardener::requirements(
-  $unix_cli_version = hiera('gardener::requirements::unix_cli_version', '2.0.8'),
-  $unix_cli_name    = hiera('gardener::requirements::unix_cli_name', 'hpcloud'),
-  $unix_cli_md5     = hiera('gardener::requirements::unix_cli_md5', '25587f96f6edf7e50d3f58239437d162'),
-  $unix_cli_url     = hiera('gardener::requirements::unix_cli_url', 'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'),
+  $unix_cli_download = hiera('gardener::requirements::unix_cli_download', false),
+  $unix_cli_version  = hiera('gardener::requirements::unix_cli_version', '2.0.8'),
+  $unix_cli_name     = hiera('gardener::requirements::unix_cli_name', 'hpcloud'),
+  $unix_cli_md5      = hiera('gardener::requirements::unix_cli_md5', '25587f96f6edf7e50d3f58239437d162'),
+  $unix_cli_url      = hiera('gardener::requirements::unix_cli_url', 'http://nexus.cdkdev.org:8080/nexus/content/repositories/cdk-content/io/forj/cli/hpcloud'),
 ) {
 
 # this option for installing fog simply isn't availabe because of bugs
@@ -34,6 +35,42 @@ class gardener::requirements(
 #        provider => gem
 #      } ->
   tag 'gardener::requirements'
+
+  if $unix_cli_download == true
+  {
+    # custom installation for hpcloud from gem file for private cloud implementation support.
+    # currently forked on github at wenlock/unix_cli
+    if ! defined(File['/var/lib/forj']) {
+      file { '/var/lib/forj' :
+        ensure => directory,
+        mode   => '0755',
+      }
+    }
+    downloader {"${unix_cli_url}/${unix_cli_version}/hpcloud-${unix_cli_version}.gem":
+              ensure          => present,
+              path            => "/var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
+              md5             => $unix_cli_md5,
+              owner           => 'puppet',
+              group           => 'puppet',
+              mode            => 755,
+              replace         => false,
+              provider        => url,
+              require         => File['/var/lib/forj']
+    } ->
+    exec { "gem1.8 install /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem":
+          path    => ['/bin', '/usr/bin'],
+          command => "gem1.8 install --include-dependencies --no-rdoc --no-ri /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
+          require => Package['fog'],
+          unless  => "gem1.8 list |grep '${unix_cli_name}\s(${unix_cli_version})'",
+    }
+    $hpcloud_package = ''
+  } else {
+    $hpcloud_package = "  hpcloud:
+    ensure: '${unix_cli_version}'
+    provider: 'gem18'
+    require: 'Package[fog]'
+"
+  }
   $package_data = parseyaml("
   make:
     ensure: 'latest'
@@ -62,37 +99,12 @@ class gardener::requirements(
     ensure: 'latest'
   libxslt-dev:
     ensure: 'latest'
+${hpcloud_package}
 ")
   $packages = keys($package_data)
 
   gardener::requirements_package { $packages:
       data => $package_data,
-  }
-
-  # custom installation for hpcloud from gem file for private cloud implementation support.
-  # currently forked on github at wenlock/unix_cli
-  if ! defined(File['/var/lib/forj']) {
-    file { '/var/lib/forj' :
-      ensure => directory,
-      mode   => '0755',
-    }
-  }
-  downloader {"${unix_cli_url}/${unix_cli_version}/hpcloud-${unix_cli_version}.gem":
-            ensure          => present,
-            path            => "/var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
-            md5             => $unix_cli_md5,
-            owner           => 'puppet',
-            group           => 'puppet',
-            mode            => 755,
-            replace         => false,
-            provider        => url,
-            require         => File['/var/lib/forj']
-  } ->
-  exec { "gem1.8 install /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem":
-          path    => ['/bin', '/usr/bin'],
-          command => "gem1.8 install --include-dependencies --no-rdoc --no-ri /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
-          require => Package['fog'],
-          unless  => "gem1.8 list |grep '${unix_cli_name}\s(${unix_cli_version})'",
   }
 
 }

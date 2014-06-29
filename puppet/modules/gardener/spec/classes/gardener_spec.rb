@@ -21,7 +21,7 @@ describe 'gardener', :default => true do
     it { should contain_class('gardener::requirements') }
     it { should compile }
   end
-  
+
   context 'has packages requirements' do
 
     it { should contain_package('mime-types').with(
@@ -60,7 +60,7 @@ describe 'gardener', :default => true do
       )}
     it { should contain_package('hpcloud').with(
           {
-            'ensure'   => '2.0.6',
+            'ensure'   => '2.0.8',
           }
         )}
   end

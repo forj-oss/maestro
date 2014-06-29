@@ -36,9 +36,6 @@ define gardener::dns_zone_manage (
     email           => $email,
     ttl             => $ttl,
     provider        => zone,
-    require         => [
-                        Class['gardener::requirements'],
-                        Class['gardener::params'],
-                        ],
+    require         => Class['gardener::requirements'],
   }
 }

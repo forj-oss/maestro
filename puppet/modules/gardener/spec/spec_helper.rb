@@ -31,7 +31,7 @@ fixture_path = File.expand_path(File.join(__FILE__, '..', 'fixtures'))
 # build paths
 
 RSpec.configure do |c|
-  c.module_path = get_module_path
+  c.module_path  = get_module_path
   puts "[configure/puppet_apply] using modulepath : #{c.module_path}"
   c.manifest_dir = File.join(fixture_path, 'manifests')
   puts "[configure/puppet_apply] using manifest_dir : #{c.manifest_dir}"
