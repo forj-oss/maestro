@@ -38,7 +38,7 @@ then # TODO: Support to receive a different layout then default one.
 # TODO: remove after we're done debuggin:
    find /etc/puppet/hieradata
 
-   if [ "${TEST_BOX[$BLUEPRINT]}" = "" ]
+   if [ "${TEST_BOX_REPOS[$BLUEPRINT]}" = "" ]
    then
       /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
    else
