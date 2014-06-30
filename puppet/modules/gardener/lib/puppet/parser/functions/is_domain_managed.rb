@@ -50,24 +50,24 @@ returns : true/false
                       or 
                       puppet apply --modulepath=\$PUPPET_MODULES -e 'include gardener::requirements'
                       returning false and skipping."
-        return :undefined
+        return false
       end
 
       unless Puppet.features.pinas?
         Puppet.warning "Pinas common libraries unavailable, skip for this run."
-        return :undefined
+        return false
       end
 
       # check for FOG_RC
       unless Puppet.features.fog_credentials?
         Puppet.warning "fog_credentials unavailable, skip for this run."
-        return :undefined
+        return false
       end
 
       @loader = ::Pinas::DNS::Provider::Loader
       unless @loader.get_provider != nil
         Puppet.warning "Pinas fog configuration missing."
-        return :undefined
+        return false
       end
 
       if (args.size != 1) then
@@ -83,7 +83,7 @@ returns : true/false
         return pinasdns.zone_exist?(@domain)
       rescue Exception => e
         Puppet.warning "unable to check if domain is manged."
-        return :undefined
+        return false
       end
     end
 end

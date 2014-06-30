@@ -43,7 +43,7 @@ To configure the fog provider a the following file must be present:
   compute_public_ip_lookup( 'pinasnode1' )
 
 returns : '15.X.X.X'
-
+          undef or '' when exception
 When a compute resource is not found, the return value is ''
 
     EOS
@@ -54,36 +54,36 @@ When a compute resource is not found, the return value is ''
                        puppet agent --tags 'gardener::requirements'
                        or 
                        puppet apply --modulepath=\$PUPPET_MODULES -e 'include gardener::requirements'
-                       returning false and skipping."
-         return false
+                       returning nil and skipping."
+         return :undefined
        end
 
        unless Puppet.features.pinas?
          Puppet.warning "Pinas common libraries unavailable, skip for this run."
-         return false
+         return :undefined
        end
 
        # check for FOG_RC
        unless Puppet.features.fog_credentials?
          Puppet.warning "fog_credentials unavailable, skip for this run."
-         return nil
+         return :undefined
        end
 
        @loader = ::Pinas::Compute::Provider::Loader
        unless @loader.get_provider != nil
          Puppet.warning "Pinas fog configuration missing."
-         return false
+         return :undefined
        end
 
        if (args.size != 1) then
           raise(Puppet::ParseError, "compute_public_ip_lookup: Wrong number of arguments "+
             "given #{args.size} for 1")
        end
-       
+
        @compute_name = args[0]
 
        @compute_service = ::Pinas::Compute::Provider::Compute
-       
+
        begin
         Puppet.debug("checking if compute node exist ( #{@compute_name} ) exists.")
         pinascompute = @compute_service.instance(@loader.get_compute)
