@@ -32,10 +32,11 @@ class gardener::server_up (
   require gardener::params
   include gardener::requirements
   # see pinas.rb server_name
+  $udata     = $gardener::params::template_userdata
   $full_host = "<% if server_id == \'\' %><%= server_name %>.${::domain}<%else%><%= server_host %>.${::domain}<%end%>"
   gardener::gen_userdata{'template':
                           domain            => $instance_domain,
-                          userdata          => $gardener::params::template_userdata,
+                          userdata          => $udata,
                           t_full_q_hostname => $full_host,
                           t_site            => '<%= server_name %>',
                           http_proxy        => '<%= ENV[\'http_proxy\'] %>',
@@ -52,6 +53,7 @@ class gardener::server_up (
     provider        => $gardener::params::cloud_provider,
     require         => [
                         Class['gardener::requirements'],
+                        Class['gardener::params'],
                         Gardener::Gen_userdata['template']
                         ],
     delay           => $server_delay,
