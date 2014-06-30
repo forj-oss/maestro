@@ -14,10 +14,6 @@
 #
 node /^review.*/ inherits default {
 
-  ::sysadmin_config::setup { 'setup gerrit ports':
-      iptables_public_tcp_ports  => [80, 443, 8139, 8140, 29418, 8080],
-      sysadmins                  => $sysadmins,
-  } ->
   ::sysadmin_config::swap { '512':}
 }
 
@@ -25,32 +21,14 @@ node /^review.*/ inherits default {
 # we need a utilities server until we fix puppet master bug that prevents server restart, so we can consolidate
 node /^util.*/ inherits default {
 
-  #TODO: we need to fix the iptables class because currently the class is only executed once, and it will never overwrite again the rules even if they changed.
-  $zuul_ip = read_json('zuul','tool_url',$::json_config_location,true)
-  if $zuul_ip != '' and $zuul_ip != '#'
-  {
-    $statsd_hosts = [$zuul_ip]
-    $rules = regsubst ($statsd_hosts, '^(.*)$', '-m udp -p udp -s \1 --dport 8125 -j ACCEPT')
-    ::sysadmin_config::setup { 'setup util node ports':
-    iptables_public_tcp_ports => [22, 80, 443, 8080, 8081, 8125, 2003],
-    iptables_rules4           => $rules,
-    sysadmins                 => $sysadmins,
-    }
-  }
+  ::sysadmin_config::swap { '512':}
 }
 
 #
 # this is the jenkins/zuul server
 node /^ci.*/ inherits default {
 
-  #$iptables_rules = regsubst ($gearman_workers, '^(.*)$', '-m state --state NEW -m tcp -p tcp --dport 4730 -s \1 -j ACCEPT')
-  #$iptables_rule = regsubst ($zmq_event_receivers, '^(.*)$', '-m state --state NEW -m tcp -p tcp --dport 8888 -s \1 -j ACCEPT')
-  ::sysadmin_config::setup { 'setup jenkins, zuul and gearman ports':
-    iptables_public_tcp_ports   => [80, 443, 8080, 4730, 29418, 8139, 8140],
-    # iptables_rules6           => $iptables_rules,
-    # iptables_rules4           => $iptables_rules,
-    sysadmins                   => $sysadmins,
-  }
+  ::sysadmin_config::swap { '512':}
 }
 
 node /^wiki.*/ inherits default {

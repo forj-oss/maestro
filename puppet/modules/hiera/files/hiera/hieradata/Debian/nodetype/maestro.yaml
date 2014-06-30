@@ -25,6 +25,7 @@ classes:
   - maestro::params
   - maestro::node_vhost_lookup
   - gardener
+  - sysadmin_config::manage_servers
 
 # swap location and default config
 sysadmin_config::swap::swap_file: '/mnt/swapfile'
@@ -101,3 +102,14 @@ maestro::app::setup::revision: '%{::gitbranch}'
 maestro::ui::setup::revision: '%{::gitbranch}'
 
 salt::salt_master: "%{::erosite}.%{::erodomain}"
+
+# setup server (iptables, rsyslog, tcpdump, ssh)
+sysadmin_config::manage_servers::iptables_public_tcp_ports:
+  - 80
+  - 443
+  - 3000
+  - 4505
+  - 4506
+  - 8080
+  - 8139
+  - 8140

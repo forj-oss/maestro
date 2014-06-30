@@ -44,9 +44,5 @@ node /^maestro.*/ inherits default {
   # moved up sysadmin config due to integration of dashboard and maestro components
   # main app for this server, the controller ui for cdk
   notify{ 'maestro ui box execution': } ->
-  ::sysadmin_config::setup { 'setup puppetmaster and dashboard ports':
-      iptables_public_tcp_ports => [4505, 4506, 8139, 8140, 80, 443, 3000, 8080],
-      sysadmins                 => $sysadmins,
-  } ->
   ::sysadmin_config::swap { '1024':}
 }
