@@ -48,17 +48,24 @@ module Puppet
         debug("#{uri.host} #{uri.port} #{proxy_uri.host} #{proxy_uri.port}") if proxy_uri != nil
         debug("#{uri.host} #{uri.port}") if proxy_uri == nil
         http = (proxy_uri != nil) ? Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port) : Net::HTTP.new(uri.host, uri.port)
+        save_timeout = http.read_timeout
         http.read_timeout = timeout # provide a short timeout for facter
         if uri.scheme == "https"
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
-        http.start {
-          http.request_get(uri.path) {|res|
-            debug("res code = #{res.code}")
-            data = res.body if res.code == code
+        begin
+          http.start {
+            http.request_get(uri.path) {|res|
+              debug("res code = #{res.code}")
+              data = res.body if res.code == code
+            }
           }
-        }
+        rescue Timeout::Error => detail
+          http.read_timeout = save_timeout  # reset the timeout that it was before
+          raise(Timeout::Error, detail)
+        end
+        http.read_timeout = save_timeout
         return data
       end
       def open_jsonurl(url, code = '200', use_proxy = true, timeout = 5)
