@@ -32,10 +32,11 @@ class gardener::tests::gen_userdata (
       network_name       => 'private',
       template_userdata  => $fspec_userdata,
   }
+  $udata     = $gardener::params::template_userdata
   $full_host = "<% if server_id == \'\' %><%= server_name %>.${::domain}<%else%><%= server_host %>.${::domain}<%end%>"
   gardener::gen_userdata{'template':
                           domain            => $instance_domain,
-                          userdata          => $gardener::params::template_userdata,
+                          userdata          => $udata,
                           t_full_q_hostname => $full_host,
                           t_site            => '<%= server_name %>',
                           http_proxy        => '<%= ENV[\'http_proxy\'] %>',

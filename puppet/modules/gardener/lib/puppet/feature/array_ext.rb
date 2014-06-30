@@ -22,7 +22,7 @@ Puppet.features.add(:array_ext) do
           if spliter == nil or spliter == ''
             self.each { |o| hsh[o] = spliter}
           else
-            self.each { |o| hsh[o.split(spliter)[0]] = o.split(spliter)[1] if o.include? spliter }
+            self.each { |o| hsh[o.split(spliter,2)[0]] = o.split(spliter,2)[1] if o.include? spliter }
           end
         rescue Exception => e
            Puppet.err "problem converting Array to_hash"

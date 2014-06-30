@@ -19,6 +19,10 @@ describe 'to_hash', :default => true do
     should run.with_params('foo').and_return({})
   end
 
+  it 'should change ["a=1","b=<%= server_name %>","c=3"] to { \"a\" : \"1\", \"b\" : \"<%= server_name%>\", \"c\" : \"3\" }' do
+     should run.with_params(["a=1","b=<%= server_name%>","c=3"]).and_return({"a" => "1","b" => "<%= server_name%>","c" => "3"})
+  end
+
   it 'should change ["a=1","b=2"] to { \"a\" : \"1\", \"b\" : \"2\" }' do
    should run.with_params(["a=1","b=2"]).and_return({"a" => "1","b" => "2"})
   end

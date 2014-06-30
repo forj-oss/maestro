@@ -100,8 +100,7 @@ EOF
 
 #TODO: delete once we have new metadata from params
 #_METADATA="{\"cdkdomain\": \"${_INSTANCE_DOMAIN}\", \"cdksite\": \"${_SITE}\", \"eroip\": \"${_PUPPET_MASTER_IP}\", \"erodomain\": \"${_INSTANCE_DOMAIN}\", \"erosite\": \"${_PUPPET_MASTER}\", \"kitopsip\": \"${_PUPPET_MASTER_PRIV_IP}\"}"
-_METADATA="<%= @metadata %>"
-echo "${_METADATA}" > /meta.js
+echo '<%= @metadata %>' > /meta.js
 
 set +x
 echo "################# BOOTHOOK End ##########################"

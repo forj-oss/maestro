@@ -69,8 +69,18 @@ module Puppet
           }
         Puppet.debug "setup default options = >" + JSON.pretty_generate(options)
         # 2. setup the meta data/user data for the server, for boot hooks
-        options[:metadata] = meta_to_hash(ERB.new(template[:meta_data]).result(binding)) if template.has_key?(:meta_data)
-        options[:user_data] = ERB.new(File.read(template[:user_data])).result(binding)   if template.has_key?(:user_data)
+        begin
+          options[:metadata] = meta_to_hash(ERB.new(template[:meta_data]).result(binding)) if template.has_key?(:meta_data)
+        rescue Exception => e
+           Puppet.crit "servers.create in running erb for :metadata, Error: #{e}"
+           raise Puppet::Error, "Error : #{e}"
+        end
+        begin
+          options[:user_data] = ERB.new(File.read(template[:user_data])).result(binding)   if template.has_key?(:user_data)
+        rescue Exception => e
+           Puppet.crit "servers.create in running erb for :user_data, Error: #{e}"
+           raise Puppet::Error, "Error : #{e}"
+        end
         Puppet.debug "added metadata and user_data"
         Puppet.debug "has network_name key ? #{template.has_key?(:network_name)}"
         Puppet.debug "network class => #{network.class}"
