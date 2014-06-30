@@ -19,7 +19,6 @@
 #
 ---
 classes:
-  - hiera::data
   - maestro
   - salt
   - maestro::backup::configure_box
