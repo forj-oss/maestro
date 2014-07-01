@@ -27,6 +27,7 @@ import os
 import subprocess
 import distutils.spawn
 import string,datetime,time
+import tempfile
 
 # Defining defaults
 
@@ -85,7 +86,11 @@ def load_bp(bp_element):
 def cmd_call(tool,aCMD):
   try:
     logging.debug('Running : '+string.join(aCMD,' '))
-    iCode=subprocess.call(aCMD)
+    # Returns /tmp on ubuntu
+    sys_tmp = tempfile.gettempdir()
+    log_file = os.path.join(sys_tmp,tool+".log")
+    f = open(log_file, "wb")
+    iCode=subprocess.call(aCMD, stdout=f)
   except OSError,e:
     logging.error('%s: "%s" fails with return code: %d (%s)',tool,string.join(aCMD,' '),iCode,e.message) 
 
