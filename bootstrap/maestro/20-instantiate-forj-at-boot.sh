@@ -65,6 +65,8 @@ then # TODO: Support to receive a different layout then default one.
    service apache2 restart
    service puppet-dashboard-workers restart
 # re run manifest to get the latest changes from new facters
+   export FACTERLIB="/var/lib/puppet/lib/facter"
+   export PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"
    puppet agent --debug --verbose $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
 fi
 
