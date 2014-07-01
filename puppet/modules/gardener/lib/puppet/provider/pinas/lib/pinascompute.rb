@@ -181,7 +181,7 @@ module Puppet
             if ip != nil
               begin
                 new_ip = @compute.associate_address(server.id, ip)
-                Puppet.notice "#{server_name} assigned ip => #{new_ip}"
+                Puppet.notice "#{server_name} assigned ip => #{ip}"
               rescue Exception => e
                   Puppet.err e
                   raise Puppet::Error, "associate_address Error : #{e}"
@@ -205,7 +205,7 @@ module Puppet
           return address.ip if address.instance_id == nil
         end
         #if no free address generate new address
-        Puppet.debug "generate a free address"
+        Puppet.debug "no free address available, create a new one."
         ext_net = nil
         begin
           ext_net = get_first_external_network
@@ -238,10 +238,11 @@ module Puppet
            Puppet.warning "unable to get a valid external network"
         end
 
-        Puppet.debug "no free address available, create a new one."
+        Puppet.debug "use new floating ip address: #{response}"
         new_ip = nil
         unless response.nil?
-          new_ip = response.body['floating_ip']['ip']
+          #  this was failing : new_ip = response.body['floating_ip']['ip']
+          new_ip = response.body['floatingip']['floating_ip_address']
           Puppet.debug "allocated a new address => #{new_ip}"
         end
         return new_ip

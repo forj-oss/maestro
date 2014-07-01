@@ -25,12 +25,12 @@ module Pinas
           
           do_threaded = pinas.to_bool(@resource[:do_parallel].to_s)
           delay = @resource[:delay]
-          sleep(delay.to_i) if delay != nil and delay.to_i > 0
           if do_threaded
             thread_creates = []
             @resource[:nodes].each do |server|
               thread_creates << Thread.new do
                 begin
+                  sleep(delay.to_i) if delay != nil and delay.to_i > 0  # delay when threaded
                   server_name = get_servername(server)
                   server_found = pinas.server_exist?(server_name)
                   pinas.server_create(server_name, @resource[:server_template]) if !server_found
