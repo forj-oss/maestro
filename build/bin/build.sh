@@ -92,6 +92,9 @@ Boot data needed:
 - FORJ_HPC_NET or FORJ_HPC_NETID : HPCloud Image name or Image ID to use for boot.
 - FORJ_BASE_IMG                  : HPCloud image ID to use for boot.
 - FORJ_FLAVOR                    : HPCloud flavor ID to use for boot.
+- FORJ_SECURITY_GROUP            : HPCloud security group to use. By default, it uses 'default'. 
+- FORJ_KEYPAIR                   : HPCloud keypair to use. By default, it uses 'nova' as the name of the keypair.
+- FORJ_HPC_NOVA_KEYPUB           : defines the public key file to import if the keypait(FORJ_KEYPAIR) is inexistent in HPCloud.
 - BOOTSTRAP_DIR                  : Superseed default <BoxName> bootscripts. See Box bootstrap section for details.
                            
 
@@ -372,6 +375,17 @@ Info "$CONFIG loaded."
 # Checking hpcloud configuration
 HPC_Check
 
+# Default required variables if not set from the config build file.
+if [ "$FORJ_SECURITY_GROUP" = "" ]
+then
+   FORJ_SECURITY_GROUP='default'
+fi
+if [ "$FORJ_KEYPAIR" = "" ]
+then
+   FORJ_KEYPAIR='nova'
+fi
+
+
 # Check if FORJ_HPC is defined. If not, then the user HAVE to review the configuration file and update it as needed.
 
 if [ "$FORJ_HPC" = "" ]
@@ -477,7 +491,7 @@ $ hpcloud servers:remove $BUILD_ID -a $FORJ_HPC
       echo "There is no Public IP associated from '$PRIVIP'."
    else
       echo "This server has a public IP address '${PUBIP}'. You can access it directly with:
-$ ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem"
+$ ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/${FORJ_KEYPAIR}.pem"
    fi
    exit 3
 fi
@@ -518,18 +532,18 @@ fi
 
 printf " keypairs"
 # Checking the nova key existence.
-if [ "$(hpcloud keypairs nova -a $FORJ_HPC | grep 'no keypairs')" != "" ]
+if [ "$(hpcloud keypairs ${FORJ_KEYPAIR} -a $FORJ_HPC | grep 'no keypairs')" != "" ]
 then
   if [ "$FORJ_HPC_NOVA_KEYPUB" != "" ] && [ -r "$FORJ_HPC_NOVA_KEYPUB" ]
   then
-     hpcloud keypairs:import nova "$(cat $FORJ_HPC_NOVA_KEYPUB)" -a $FORJ_HPC
+     hpcloud keypairs:import ${FORJ_KEYPAIR} "$(cat $FORJ_HPC_NOVA_KEYPUB)" -a $FORJ_HPC
   else
      echo
-     Error 3 "nova public key was not set, and FORJ_HPC_NOVA_KEYPUB ('$FORJ_HPC_NOVA_KEYPUB') is not valid or readable. Please do it yourself:
+     Error 3 "${FORJ_KEYPAIR} public key was not set, and FORJ_HPC_NOVA_KEYPUB ('$FORJ_HPC_NOVA_KEYPUB') is not valid or readable. Please do it yourself:
 you can use an equivalent command to import it. You will need to provide the real PATH to your public key.
 
 Ex: 
-$ hpcloud keypairs:import nova \"\$(cat nova-USWest-AZ3.pub )\" -a $FORJ_HPC"
+$ hpcloud keypairs:import ${FORJ_KEYPAIR} \"\$(cat nova-USWest-AZ3.pub )\" -a $FORJ_HPC"
   fi
 fi
 
@@ -562,9 +576,9 @@ trap "Error 1 'Ctrl-C keystroke by user. Build killed.'" SIGINT
 # Creating the instance. Use metadata/userdata from ../../bootstrap/eroPlus
 if [ "$HPC_DETECTED" != 12.12 ] && [ $FORJ_HPC_NETID != "" ]
 then
-   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k nova -n $FORJ_HPC_NETID -a $FORJ_HPC $HPCLOUD_PAR
+   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -n $FORJ_HPC_NETID -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR
 else
-   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k nova -a $FORJ_HPC $HPCLOUD_PAR
+   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR
 fi
 
 if [ $? -ne 0 ]
@@ -700,7 +714,7 @@ NOTE: The build process will continuously query to get a new IP. So, if you can 
            echo "Now, as soon as the server respond to the ssh port, you will be able to get a tail of the build with:
 while [ 1 = 1 ]
 do
-  ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem tail -f /var/log/cloud-init.log
+  ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/${FORJ_KEYPAIR}.pem tail -f /var/log/cloud-init.log
   sleep 5
 done"
         fi
@@ -722,7 +736,7 @@ done"
            echo "Now, as soon as the server respond to the ssh port, you will be able to get a tail of the build with:
 while [ 1 = 1 ]
 do
-  ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem tail -f /var/log/cloud-init.log
+  ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/${FORJ_KEYPAIR}.pem tail -f /var/log/cloud-init.log
   sleep 5
 done"
         fi
@@ -753,14 +767,14 @@ printf "\r%s[J\n" "$BUILD_STATUS ($PUBIP)"
 
 if [ "$DEBUG" = "True" ]
 then
-   echo "The server is built. You can connect using 'ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem'.
+   echo "The server is built. You can connect using 'ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/${FORJ_KEYPAIR}.pem'.
 To remove the server, use 'hpcloud servers:remove $BUILD_ID -a $FORJ_HPC'"
    Exit
 fi
 
 Info "$BUILD_ID is ready. Checking build status."
 
-ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/nova.pem "sudo shutdown -h 0"
+ssh ubuntu@$PUBIP -o StrictHostKeyChecking=no -i ~/.hpcloud/keypairs/${FORJ_KEYPAIR}.pem "sudo shutdown -h 0"
 sleep 10
 
 
