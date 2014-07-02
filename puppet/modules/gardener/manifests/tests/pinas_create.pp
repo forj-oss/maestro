@@ -25,7 +25,7 @@ class gardener::tests::pinas_create (
 
   $userdata = '/tmp/mime.txt'
 #  $metadata = "erosite=${::hostname},erodomain=${::domain}"
-  $ec2_tmp1  = '<% if defined?(@ec2_public_ipv4) %><%= @ec2_public_ipv4 %>'
+  $ec2_tmp1  = '<% if defined?(@helion_public_ipv4) %><%= @helion_public_ipv4 %>'
   $ipa_tmp2  = '<% elsif defined?(@ipaddress)%><%= @ipaddress %>'
   $fqdn_tmp3 = '<% else %><%= @fqdn %><% end %>'
   $getiptemplate = "${ec2_tmp1}${ipa_tmp2}${fqdn_tmp3}"

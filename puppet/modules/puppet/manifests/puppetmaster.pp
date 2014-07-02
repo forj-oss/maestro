@@ -23,9 +23,32 @@ class puppet::puppetmaster
   $vhost_template    = hiera('puppet::puppetmaster::vhost_template','puppet/puppetmaster.vhost.erb'),
   $certname          = hiera('puppet::puppetmaster::certname', $::fqdn),
   $config_root       = hiera('puppet::config_home', '/opt/config'),
+  $disable_ec2       = hiera('puppet::disable_ec2', true),  # This is specific to puppet 2.7, on
+                                                            # some environments ec2 isn't available.
+                                                            # and it will crash your puppet.  You can
+                                                            # disable this by removing ec2.rb
+                                                            # a copy is placed in ec2.rb.disable.
   $puppetmaster_port = '8140', # TODO: need to test if changing the port really works, if so we should hiera it.
 ) {
 
+  if $disable_ec2 == true
+  {
+    notice('disabling ec2.rb')
+    exec { 'disable ec2 metadata':
+        path    => ['/bin', '/usr/bin'],
+        command => '/bin/mv /usr/lib/ruby/vendor_ruby/facter/ec2.rb /usr/lib/ruby/vendor_ruby/facter/ec2.rb.disabled',
+        creates => '/usr/lib/ruby/vendor_ruby/facter/ec2.rb.disabled',
+        onlyif  => 'test -f /usr/lib/ruby/vendor_ruby/facter/ec2.rb',
+    }
+  } else {
+    notice('enableing ec2.rb')
+    exec { 'disable ec2 metadata':
+        path    => ['/bin', '/usr/bin'],
+        command => '/bin/mv /usr/lib/ruby/vendor_ruby/facter/ec2.rb.disabled /usr/lib/ruby/vendor_ruby/facter/ec2.rb',
+        creates => '/usr/lib/ruby/vendor_ruby/facter/ec2.rb',
+        onlyif  => 'test -f /usr/lib/ruby/vendor_ruby/facter/ec2.rb.disabled',
+    }
+  }
   if ($::osfamily == 'Debian') {
     $puppet_lib_dir = '/var/lib/puppet'
     $puppet_ssl_dir = "${puppet_lib_dir}/ssl"

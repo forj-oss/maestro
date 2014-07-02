@@ -17,12 +17,8 @@
 Facter.add("puppet_url") do
  confine :kernel => "Linux"
  setcode do
-   if File.exist? "/usr/share/puppet-dashboard/public/robots.txt"
-     if ! Facter.value("ec2_public_ipv4").nil?
-        http_name = Facter.value("ec2_public_ipv4")
-     else
-        http_name = Facter.value("ipaddress")
-     end
+   if File.exist? "/usr/share/puppet-dashboard/public/robots.txt" and ! Facter.value("helion_public_ipv4").nil?
+     http_name = Facter.value("helion_public_ipv4")
      Facter::Util::Resolution.exec("echo http://#{http_name}:$(egrep -lir \"puppet-dashboard\" /etc/apache2/sites-enabled/*.conf|xargs -i grep '<VirtualHost.*>' {}|awk -F'[<|>]' '{printf $2}'|awk -F':' '{printf $2}')")
    else
      Facter::Util::Resolution.exec("echo")

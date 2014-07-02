@@ -18,12 +18,8 @@ Facter.add("graphite_config") do
  confine :kernel => "Linux"
  setcode do
    #the string to look for and the path should change depending on the system to discover
-   if File.exist? "/etc/statsd/config.js"
-     if ! Facter.value("ec2_public_ipv4").nil?
-       http_name = Facter.value("ec2_public_ipv4")
-     else
-       http_name = Facter.value("ipaddress")
-     end
+   if File.exist? "/etc/statsd/config.js" and ! Facter.value("helion_public_ipv4").nil?
+     http_name = Facter.value("helion_public_ipv4")
      Facter::Util::Resolution.exec("echo http://#{http_name}:$(egrep -lir \"graphite\" /etc/apache2/sites-enabled/*|xargs -i grep '<VirtualHost.*>' {}|awk -F'[<|>]' '{printf $2}'|awk -F':' '{printf $2}')/account/login")
    else
      Facter::Util::Resolution.exec("echo")

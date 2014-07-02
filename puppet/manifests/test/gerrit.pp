@@ -33,7 +33,8 @@ $mysql_root_password = 'changeme'
 
   $override_vhost = true
   # this configuration should be different if we are registered with a dns
-  # name.  For now we use ipv4, otherwise we would use fqdn
+  # name.
+  include maestro::node_vhost_lookup
 
   # system config
   if str2bool($::vagrant_guest) == true {
@@ -48,7 +49,7 @@ $mysql_root_password = 'changeme'
 
     $def_container_heaplimit = '900m'
     if str2bool($override_vhost) == true {
-      $gerrit_server = inline_template('<% if defined?(@ec2_public_ipv4) %><%= @ec2_public_ipv4 %><% elsif defined?(@ipaddress_eth0)%><%= @ipaddress_eth0 %><% else %><%= @fqdn %><% end %>')
+      $gerrit_server     = $::maestro::node_vhost_lookup::vname
       $gerrit_vhost      = $gerrit_server
       $gerrit_server_url = "https://${gerrit_server}/"
     } else {

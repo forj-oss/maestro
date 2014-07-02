@@ -17,11 +17,9 @@
 Facter.add("status_url") do
  confine :kernel => "Linux"
  setcode do
-   if File.exist? "/srv/static/status/index.html"
-     if ! Facter.value("ec2_public_ipv4").nil?
-      http_name = Facter.value("ec2_public_ipv4")
-      Facter::Util::Resolution.exec("echo http://#{http_name}:$(egrep -lir \"status\" /etc/apache2/sites-enabled/*.conf|xargs -i grep '<VirtualHost.*>' {}|awk -F'[<|>]' '{printf $2}'|awk -F':' '{printf $2}')/zuul")
-     end
+   if File.exist? "/srv/static/status/index.html" and ! Facter.value("helion_public_ipv4").nil?
+     http_name = Facter.value("helion_public_ipv4")
+     Facter::Util::Resolution.exec("echo http://#{http_name}:$(egrep -lir \"status\" /etc/apache2/sites-enabled/*.conf|xargs -i grep '<VirtualHost.*>' {}|awk -F'[<|>]' '{printf $2}'|awk -F':' '{printf $2}')/zuul")
    else
      Facter::Util::Resolution.exec("echo")
    end
