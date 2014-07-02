@@ -53,7 +53,7 @@ BOOTHOOK=$BIN_PATH/build-tools/boothook.sh
 
 MIME_SCRIPT=$BIN_PATH/build-tools/write-mime-multipart.py
 
-TEST_BOX_SCRIPT="../tools/bin/test-box.sh"
+TEST_BOX_SCRIPT="$(cd ../tools/bin/; pwd)/test-box.sh"
 
 declare -A META
 declare -A TEST_BOX
