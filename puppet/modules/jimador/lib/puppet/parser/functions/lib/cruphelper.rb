@@ -113,8 +113,8 @@ module Puppet
     # add the node if it doesn't exist
     def add_node
       return if @node_name == nil
-      unless node_exist?
-        tool_hash = Hash[@tool_properties.zip @tool_values]
+      unless node_exist?        
+        tool_hash = Hash[*@tool_properties.zip(@tool_values).flatten]
         new_node = {
           "node_name" => @node_name,
           "tools"     => [
@@ -127,8 +127,8 @@ module Puppet
 
     def add_tool
       return if @tool_name == nil
-      tools = get_tools
-      tool_hash = Hash[@tool_properties.zip @tool_values]
+      tools = get_tools      
+      tool_hash = Hash[*@tool_properties.zip(@tool_values).flatten]
       if tool_exist?
         tools.each_with_index do |tool, i|
           tools[i] = tool_hash if tool["name"] == @tool_name  # update
