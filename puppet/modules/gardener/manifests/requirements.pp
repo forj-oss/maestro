@@ -65,6 +65,10 @@ class gardener::requirements(
 "
   }
   $package_data = parseyaml("
+  dos2unix:
+    ensure: 'latest'
+  libxslt-dev:
+    ensure: 'latest'
   make:
     ensure: 'latest'
     require: 'Package[libxslt-dev]'
@@ -72,6 +76,10 @@ class gardener::requirements(
     ensure: '1.25.1'
     provider: 'gem18'
     require: 'Package[make]'
+  fog:
+    ensure: '1.19.0'
+    provider: 'gem18'
+    require: 'Package[mime-types]'
   excon:
     ensure: '0.31.0'
     provider: 'gem18'
@@ -84,20 +92,10 @@ class gardener::requirements(
     ensure: '1.5.11'
     provider: 'gem18'
     require: 'Package[json]'
-  fog:
-    ensure: '1.19.0'
-    provider: 'gem18'
-    require: 'Package[nokogiri]'
-  dos2unix:
-    ensure: 'latest'
-  libxslt-dev:
-    ensure: 'latest'
 ${hpcloud_package}
 ")
   $packages = keys($package_data)
-
-  gardener::requirements_package { $packages:
+  packages::versioned { $packages:
       data => $package_data,
   }
-
 }
