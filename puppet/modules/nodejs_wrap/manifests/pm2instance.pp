@@ -60,7 +60,7 @@ define nodejs_wrap::pm2instance(
                 ensure  => directory,
                 owner   => $user,
                 group   => $user,
-                mode    => '0775',
+                mode    => '0755',
                 recurse => true,
               }
               # handle the defaults
