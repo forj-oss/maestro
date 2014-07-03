@@ -88,3 +88,27 @@ EOF
     DEBIAN_FRONTEND=noninteractive apt-get --option 'Dpkg::Options::=--force-confold' \
         --assume-yes install -y --force-yes puppet git rubygems
 fi
+
+# disable ec2 facters on openstack clouds
+# on openstack clouds we have determined that bugs in puppet 2.7 and 
+# network issues connecting to ec2 meta server service is cause hard puppet failures.
+# we use well known macaddress comparision to determin if this is an openstack cloud.
+# this is same method being used by facter 1.7.5
+# This can be re-evaluated in puppet 3.4 implementation
+# we can re-enable this through hiera configuration via puppetmaster.pp
+# set the configuration to puppet::disable_ec2=false or export EC2_DISABLE=false for this script.
+if [ $(ifconfig -a|egrep '(?:ether|HWaddr) ((\w{1,2}:){5,}\w{1,2})'|grep eth0 | awk '{print $5}'|egrep '^(02|[fF][aA]):16:3[eE]') ] ; then
+  if [ -z "${EC2_DISABLE}" ] ; then
+    export EC2_DISABLE=true
+    echo "found openstack cloud, disable ec2 facters"
+    echo "use hiera config puppet::disable_ec2=false to re-enable"
+  fi
+fi
+if [ "${EC2_DISABLE}" = "true" ] ; then
+  if [ -f /var/lib/gems/1.8/gems/facter-1.7.6/lib/facter/ec2.rb ] ; then
+    mv /var/lib/gems/1.8/gems/facter-1.7.6/lib/facter/ec2.rb /var/lib/gems/1.8/gems/facter-1.7.6/lib/facter/ec2.rb.disable
+  fi
+  if [ -f /usr/lib/ruby/vendor_ruby/facter/ec2.rb ] ; then
+    mv /usr/lib/ruby/vendor_ruby/facter/ec2.rb /usr/lib/ruby/vendor_ruby/facter/ec2.rb.disable
+  fi
+fi
