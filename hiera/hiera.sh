@@ -19,6 +19,10 @@
 #Install hiera using gems.
 gem install --include-dependencies --no-rdoc --no-ri hiera
 
+#TODO we only need one of the below installations, but as puppet is having issues we need to install hiera twice.
+#Install hiera-puppet on systems without native packages.
+ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
+
 #Install hiera-puppet using puppet, this can be also installed with command but it was not created with the correct permissions.
 puppet resource package hiera-puppet ensure=installed
 
