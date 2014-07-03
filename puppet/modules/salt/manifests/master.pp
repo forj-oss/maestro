@@ -155,6 +155,37 @@ class salt::master (
     ]
   }
 
+  file { '/var/run/salt' :
+    ensure    => directory,
+    owner     => 'salt',
+    group     => 'salt',
+    mode      => '0755',
+    require   => [
+      Package['salt-master'],
+      User['salt'],
+    ],
+  }
+
+  file { '/var/run/salt/master' :
+    ensure    => directory,
+    owner     => 'salt',
+    group     => 'salt',
+    mode      => '0755',
+    require   => [
+      File['/var/run/salt']
+    ],
+  }
+
+  file { '/var/run/salt/minion' :
+    ensure    => directory,
+    owner     => 'salt',
+    group     => 'salt',
+    mode      => '0755',
+    require   => [
+      File['/var/run/salt']
+    ],
+  }
+
   service { 'salt-master':
     ensure    => running,
     enable    => true,

@@ -365,8 +365,7 @@ file_roots:
 #####     Salt Reactor settings     #####
 #########################################
 # Execute this scripts from jenkins when the tags are found
-reactor:
-<% if @salt_reactor_jobs != '' and (@salt_reactor_jobs.is_a?(Hash) or @salt_reactor_jobs.is_a?(Array)) %>
+reactor:<% if @salt_reactor_jobs != '' and (@salt_reactor_jobs.is_a?(Hash) or @salt_reactor_jobs.is_a?(Array)) %>
 <%   @salt_reactor_jobs.each do |node_name| -%>
 <%= "  - '#{node_name}':"%>
 <%= "    - /srv/reactor/puppet_apply_#{node_name}.sls" %>
