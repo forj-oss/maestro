@@ -29,7 +29,7 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
-  var openid = require('openid');
+  var openid = require('openid-request');
   var crypto = require('crypto');
   var check_grav = require('check-grav/check-grav');
   var blueprint_utils = require('blueprint/blueprint');
@@ -63,7 +63,7 @@ module.exports = {
   auth: function(req, res){
     kit_ops.get_opt('openid_url', function(open_err, identifier){
       if(open_err){
-        res.view('500', { layout: null, errors: [ open_err.message ]});
+        res.view('500', { layout: null, errors: [ 'Unable to authenticate with the provider: '+open_err ]});
       }else{
         var openid_url = identifier.option_value;
         if(openid_url === undefined){

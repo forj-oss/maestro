@@ -66,8 +66,8 @@ class maestro::requirements(
     ensure: '3.5.1'
     provider: 'npm'
     require: 'Class[nodejs]'
-  openid:
-    ensure: '0.5.5'
+  openid-request:
+    ensure: '0.1.4'
     provider: 'npm'
     require: 'Class[nodejs]'
 ")
