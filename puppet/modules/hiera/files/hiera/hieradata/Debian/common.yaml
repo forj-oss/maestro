@@ -19,6 +19,8 @@
 classes:
   - jimador::manage
 
+maestro::backup::box_backup_server: '%{::eroip}'
+
 packages::install:
   - 'build-essential'
   - 'apt-transport-https'
