@@ -15,6 +15,8 @@
 require 'rubygems'
 require 'puppetlabs_spec_helper/module_spec_helper'
 require 'spec_utilities'
+require 'hiera'
+
 include ::SpecUtilities::Puppet
 include ::SpecUtilities::Exec
 def is_dns_enabled?
@@ -37,7 +39,7 @@ RSpec.configure do |c|
   c.manifest_dir = File.join(fixture_path, 'manifests')
   puts "[configure/puppet_apply] using manifest_dir : #{c.manifest_dir}"
   c.config       = "/etc/puppet/puppet.conf"
-  c.hiera_config = "/etc/puppet/hiera.yaml"
+  c.hiera_config = 'spec/fixtures/hiera/hiera.yaml'
 end
 
 RSpec.configure do |c|
@@ -52,4 +54,6 @@ RSpec.configure do |c|
   c.filter_run :default => true
   c.filter_run :dns => is_dns_enabled?
 end
+
+
 

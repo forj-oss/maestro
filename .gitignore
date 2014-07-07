@@ -1,6 +1,5 @@
 # remove node_modules .bin files
 .bin/
-fixtures/
 *.pyc
 Gemfile.lock
 .vagrant
