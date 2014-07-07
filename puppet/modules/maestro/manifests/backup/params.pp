@@ -21,7 +21,7 @@ class maestro::backup::params (
   $box_backup_path     = hiera('maestro::backup::box_backup_path'       , '/usr/lib/forj'),
   $box_conf_folder     = hiera('maestro::backup::box_backup_etc_path'   , '/etc/forj'),
   $box_backup_user     = hiera('maestro::backup::box_backup_user'       , 'root'),
-  $box_backup_server   = hiera('maestro::backup::box_backup_server'     , ''),
+  $box_backup_server   = hiera('maestro::backup::box_backup_server'     , $::eroip),
   $box_db_user         = hiera('maestro::backup::box_db_user'           , ''),
   $box_db_password     = hiera('maestro::backup::box_db_password'       , ''),
 ) {

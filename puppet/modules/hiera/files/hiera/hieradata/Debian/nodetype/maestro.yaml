@@ -87,7 +87,7 @@ maestro::ssh_user_keys:
 #maestro::backup::box_backup_path:        '/usr/lib/forj'
 #maestro::backup::box_backup_etc_path:    '/etc/forj'
 #maestro::backup::box_backup_user: 'root'
-maestro::backup::box_backup_server: "%{::eroip}"
+#maestro::backup::box_backup_server: '%{::eroip}'
 
 maestro::instance_domain: '%{::erodomain}'
 maestro::image_name: '%{::image_name}'
