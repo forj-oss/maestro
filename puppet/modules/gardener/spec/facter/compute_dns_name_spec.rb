@@ -11,12 +11,24 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
----
-meta_location: 'spec/fixtures/meta.js'
-test_ipaddress: '10.0.0.233'
-forjsite_id: 'dontdelete'
-forjdomain: 'spec.cdkdev.org'
-test_server_id: 'a1eb5fbf-0d2c-4fbd-b343-082dbb9405b3'
-test_public_ip: '15.125.98.67'
-test_server_name: 'spec.dontdelete'
-test_dns_name: 'spec.cdkdev.org'
+#
+
+require 'spec_helper'
+
+
+describe 'compute_dns_name', :default=> true do
+    # setup hiera
+    hiera = Hiera.new(:config => 'spec/fixtures/hiera/hiera.yaml')
+    ipaddress = hiera.lookup('test_ipaddress', nil, nil)
+    dns_name = hiera.lookup('test_dns_name', nil, nil)
+    before do
+      Facter.fact(:ipaddress).stubs(:value).returns(ipaddress)  # setting this to any value so we can test lookup
+      ENV['FACTER_DEBUG'] = 'true'
+    end
+
+    it "should find public_ip" do
+      puts Facter.fact(:compute_dns_name).value
+      Facter.fact(:compute_dns_name).value.should == dns_name
+    end
+
+end

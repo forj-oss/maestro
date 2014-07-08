@@ -11,12 +11,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
----
-meta_location: 'spec/fixtures/meta.js'
-test_ipaddress: '10.0.0.233'
-forjsite_id: 'dontdelete'
-forjdomain: 'spec.cdkdev.org'
-test_server_id: 'a1eb5fbf-0d2c-4fbd-b343-082dbb9405b3'
-test_public_ip: '15.125.98.67'
-test_server_name: 'spec.dontdelete'
-test_dns_name: 'spec.cdkdev.org'
+#
+require 'spec_helper'
+
+describe 'joinpath', :default => true do
+  context 'with private kernel facter' do
+    let(:facts) { {:kernel => 'Linux'} }
+    it 'should join path for two files with / when platform is Linux' do
+       should run.with_params("/opt/config","foo").and_return("/opt/config/foo")
+    end
+  end
+end

@@ -11,8 +11,10 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-require 'rspec-puppet'
+require 'rubygems'
+require 'puppetlabs_spec_helper/module_spec_helper'
 require 'spec_utilities'
+require 'hiera'
 include ::SpecUtilities::Puppet
 include ::SpecUtilities::Exec
 
@@ -26,7 +28,7 @@ RSpec.configure do |c|
   c.manifest_dir = File.join(fixture_path, 'manifests')
   puts "[configure/puppet_apply] using manifest_dir : #{c.manifest_dir}"
   c.config       = "/etc/puppet/puppet.conf"
-  c.hiera_config = "/etc/puppet/hiera.yaml"
+  c.hiera_config = 'spec/fixtures/hiera/hiera.yaml'
 end
 
 RSpec.configure do |c|

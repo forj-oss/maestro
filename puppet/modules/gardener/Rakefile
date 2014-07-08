@@ -80,7 +80,7 @@ namespace :gardener do
   desc "Setup default _spec test"
   RSpec::Core::RakeTask.new(:spec_standalone) do |t|
     t.rspec_opts = ['--color']
-    t.pattern = 'spec/{classes,defines,unit,functions,hosts}/**/*_spec.rb'
+    t.pattern = 'spec/{facter,classes,defines,unit,functions,hosts}/**/*_spec.rb'
   end
   RSpec::Core::RakeTask.new(:spec_standalone) do |t|
     t.pattern = 'spec/*/is_domain_managed_test.rb'

@@ -11,12 +11,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
----
-meta_location: 'spec/fixtures/meta.js'
-test_ipaddress: '10.0.0.233'
-forjsite_id: 'dontdelete'
-forjdomain: 'spec.cdkdev.org'
-test_server_id: 'a1eb5fbf-0d2c-4fbd-b343-082dbb9405b3'
-test_public_ip: '15.125.98.67'
-test_server_name: 'spec.dontdelete'
-test_dns_name: 'spec.cdkdev.org'
+#
+require 'spec_helper'
+
+describe 'file_master', :default => true do
+  it 'should read a file from master and return the contents' do
+    should run.with_params("spec/fixtures/master.dat").and_return("testdata")
+  end
+  it 'should return nil when file not found' do
+    should run.with_params("foo").and_return(nil)
+  end
+end

@@ -14,14 +14,19 @@
 #   limitations under the License.
 #
 
-
-
-# this really isn't doing much other than making sure our code compiles
 require 'spec_helper'
-describe "apply show kitops_endpoint", :apply => true do
-  context 'with puppet apply' do
-    it "has notice message for kitops_endpoint." do
-      apply_matchoutput("notice($::kitops_endpoint)", /warning: Could not load fact file.*/).should be(false)
+
+describe 'kitops_endpoint', :default=> true do
+    # setup hiera
+    hiera = Hiera.new(:config => 'spec/fixtures/hiera/hiera.yaml')
+    ipaddress = hiera.lookup('maestro_ipaddress', nil, nil)
+    before do
+      Facter.fact(:kitops_endpoint).stubs(:value).returns(ipaddress)  # setting this to any value so we can test lookup
+      ENV['FACTER_DEBUG'] = 'true'
     end
-  end
+
+    it "finds endpoint url with value #{ipaddress}" do
+      Facter.fact(:kitops_endpoint).value.should == ipaddress
+    end
+
 end

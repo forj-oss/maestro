@@ -32,5 +32,6 @@ PuppetLint.configuration.send('disable_class_parameter_defaults')
 PuppetLint.configuration.send('disable_class_inherits_from_params_class')
 
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = 'spec/*/*_spec.rb'
+  t.rspec_opts = ['--color']
+  t.pattern = 'spec/{facter,classes,defines,unit,functions,hosts}/**/*_spec.rb'
 end

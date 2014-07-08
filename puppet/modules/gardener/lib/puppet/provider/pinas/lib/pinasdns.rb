@@ -30,7 +30,7 @@ module Puppet
         @@pinasdns.dnsh = comm[:dnsh] if comm.has_key?(:dnsh)
         return @@pinasdns
       end
-  
+
       # to keep our routines simple, we encrypt it also   (needs to be tested... :D)
       def initialize(comm)
         Puppet.debug("creating new object Puppet::PinasDNS")
@@ -38,7 +38,23 @@ module Puppet
         @dnss = comm[:dnss]
         @dnsh = comm[:dnsh]
       end
-      
+
+      # lookup a dns name by ip, if we find a mapped ip, give us the name.
+      #
+      # @params string [String] the ip address to find the record for
+      # @return string [String] the dns name mapping the ip address
+      def reverse_name_lookup(ip, type = :A)
+        # look for all the zones
+        type = type.to_sym if type.class != Symbol
+        dns_name = String.new
+        @dns.domains.each do |zone|
+          @dns.domains.get(zone.id).records.each do | record |
+            dns_name = record.name if record.data == ip and record.type.to_sym == type
+          end
+        end
+        return dns_name
+      end
+
       # create a dns record
       def create_record(fqdn, type, ipdata)
         unless @dnss.is_valid?

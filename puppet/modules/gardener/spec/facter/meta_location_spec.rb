@@ -24,9 +24,9 @@ describe 'meta_location', :default=> true do
   forjsite_id = hiera.lookup('forjsite_id', nil, nil)
   forjdomain  = hiera.lookup('forjdomain',nil, nil)
   
+
   before do
     require 'json'
-    File.delete(meta_location) if File.exist?(meta_location)
     meta_data = {
       "erodomain" => forjdomain,
       "eroip" => ipaddress,
@@ -35,38 +35,48 @@ describe 'meta_location', :default=> true do
       "cdkdomain" => forjdomain,
       "erosite" => "maestro.#{forjsite_id}.#{forjdomain}"
     }
-    File.open(meta_location,"w") do |f|
-      f.write(meta_data.to_json)
+    if !File.exist?(meta_location)
+      File.open(meta_location,"w") do |f|
+        f.write(meta_data.to_json)
+      end
     end
+    Facter.fact(:erodomain).stubs(:value).returns(meta_data["erodomain"])
+    Facter.fact(:eroip).stubs(:value).returns(meta_data["eroip"])
+    Facter.fact(:kitopsip).stubs(:value).returns(meta_data["kitopsip"])
+    Facter.fact(:cdksite).stubs(:value).returns(meta_data["cdksite"])
+    Facter.fact(:cdkdomain).stubs(:value).returns(meta_data["cdkdomain"])
+    Facter.fact(:erosite).stubs(:value).returns(meta_data["erosite"])
+    Facter.fact(:meta_location).stubs(:value).returns(meta_location)
+
     Facter.fact(:ipaddress).stubs(:value).returns(ipaddress)  # setting this to any value so we can test lookup
   end
 
-  it "finds a facter meta_location" do
+  it "finds facter meta_location value #{meta_location}" do
     puts Facter.fact(:meta_location).value
     meta_loc = Facter.fact(:meta_location).value.should == meta_location
   end
 
-  it "finds a facter erodomain" do
+  it "finds facter erodomain value #{forjdomain}" do
     puts Facter.fact(:erodomain).value
     meta_loc = Facter.fact(:erodomain).value.should == forjdomain
   end
 
-  it "finds a facter eroip" do
+  it "finds facter eroip value #{ipaddress}" do
     puts Facter.fact(:eroip).value
     meta_loc = Facter.fact(:eroip).value.should == ipaddress
   end
 
-  it "finds a facter kitopsip" do
+  it "finds facter kitopsip value #{ipaddress}" do
     puts Facter.fact(:kitopsip).value
     meta_loc = Facter.fact(:kitopsip).value.should == ipaddress
   end
 
-  it "find a facter cdksite" do
+  it "find facter cdksite value #{forjsite_id}" do
     puts Facter.fact(:cdksite).value
     meta_loc = Facter.fact(:cdksite).value.should == forjsite_id
   end
 
-  it "finds a facter cdkdomain" do
+  it "finds facter cdkdomain value #{forjdomain}" do
     puts Facter.fact(:cdkdomain).value
     meta_loc = Facter.fact(:cdkdomain).value.should == forjdomain
   end

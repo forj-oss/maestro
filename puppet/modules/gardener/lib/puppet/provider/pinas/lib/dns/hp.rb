@@ -43,13 +43,17 @@ module Puppet
     
     # return a dns service object based on the zone name
     # we use this to get records and manage records
-    def get_dnss(name_or_id)
+    def get_dnss(name_or_id = nil)
       @connection = ::HP::Cloud::Connection.instance  # note, Dnss relies on @connection being defined to use.
-      dnss = ::HP::Cloud::Dnss.new.get(name_or_id)
-      if dnss.is_valid? == false
-        raise "Puppet::PinasDNSHP::get_dnss #{name_or_id} is not valid. #{dnss.cstatus}"
+      dns = self.get_dns # setup the local account first
+      if name_or_id == nil
+        dnss = ::HP::Cloud::Dnss.new
+      else
+        dnss = ::HP::Cloud::Dnss.new.get(name_or_id)
+        if dnss.is_valid? == false
+          raise "Puppet::PinasDNSHP::get_dnss #{name_or_id} is not valid. #{dnss.cstatus}"
+        end
       end
-      dns = self.get_dns
       # setup a helper to manage zone records
       dnshelper = HP::Cloud::DnsHelper.new(HP::Cloud::Connection.instance)
       return {:dns => dns[:dns], :dnss => dnss, :dnsh => dnshelper }

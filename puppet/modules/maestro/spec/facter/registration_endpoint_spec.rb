@@ -42,12 +42,24 @@
 #  end
 #end
 
-# this really isn't doing much other than making sure our code compiles
 require 'spec_helper'
-describe "apply show registration_endpoint", :apply => true do
-  context 'with puppet apply' do
-    it "has notice message for registration_endpoint." do
-      apply_matchoutput("notice($::registration_endpoint)", /warning: Could not load fact file.*/).should be(false)
+
+
+describe 'registration_endpoint', :default=> true do
+    # setup hiera
+    hiera = Hiera.new(:config => 'spec/fixtures/hiera/hiera.yaml')
+    branchdev = hiera.lookup('gitbranch_dev', nil, nil)
+    regurldev = hiera.lookup('regbranch_dev',nil,nil)
+
+    context 'with gitbranch master' do
+      let(:facts) { {:gitbranch => branchdev} }
+
+      before do
+        ENV['FACTER_DEBUG'] = 'true'
+      end
+
+      it "finds endpoint url with value #{branchdev}" do
+        Facter.fact(:registration_endpoint).value.should == regurldev
+      end
     end
-  end
 end

@@ -166,7 +166,24 @@ module Puppet
         end
         return private_ip
       end
-      
+
+      # get the server id by private ip
+      #
+      # @params string [String] the private ip
+      # @return string [String] the server id
+      def get_server_id_by_private_ip(private_ip)
+        @compute.servers.each do |server|
+          server.addresses.each do |address|
+            if (address.include? 'private' and address.length == 2)
+              if address[1].length >= 1
+                return server.id if address[1][0].addr == private_ip
+              end
+            end
+          end
+        end
+        return String.new
+      end
+
       # assign floating IP address to server
       # TODO: consider moving to network class.
       # only assign an ip if the server does not have two addresses yet.

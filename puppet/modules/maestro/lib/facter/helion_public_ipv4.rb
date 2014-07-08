@@ -24,23 +24,28 @@ require 'json'       if Puppet.features.json?
 
 include ::Puppet::ForjCommon if Puppet.features.forj_common?
 include ::Puppet::Forj if Puppet.features.net_helper?
-
+include ::Puppet::Forj::Facter if Puppet.features.factercache?
 #
 # define facter
 #
 Facter.add('helion_public_ipv4') do
   setcode do
-    begin
-      public_ipv4_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
-      utilurl = UtilURI.new
-      ipv4 = utilurl.openurl(public_ipv4_url, code = '200', use_proxy = false, timeout = 15)
-    rescue Timeout::Error => detail
-      debug("Error in contacting #{public_ipv4_url}: #{detail}")
-      ipv4 = String.new
-    rescue Exception => e
-      debug("other exception, unable to get data from connection, #{e}")
-      ipv4 = String.new
+    def public_ipv4
+      begin
+        public_ipv4_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+        utilurl = UtilURI.new
+        ipv4 = utilurl.openurl(public_ipv4_url, code = '200', use_proxy = false, timeout = 15)
+      rescue Timeout::Error => detail
+        debug("Error in contacting #{public_ipv4_url}: #{detail}")
+        ipv4 = String.new
+      rescue Exception => e
+        debug("other exception, unable to get data from connection, #{e}")
+        ipv4 = String.new
+      end
+      ipv4
     end
-    ipv4
+    res = (!Puppet.features.factercache?) ? public_ipv4 : Cache.instance().cache("helion_public_ipv4") do
+      public_ipv4
+    end
   end
 end
