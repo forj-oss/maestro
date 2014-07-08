@@ -41,7 +41,7 @@ class maestro::backup::configure_box (
       key         => '1C4CBDCDCD2EFD2A',
       key_server  => 'keys.gnupg.net',
     }
-    package { 'percona-xtrabackup':
+    package { 'percona-xtrabackup-21':
       ensure  => present,
       require => [ Apt::Source['ubuntu'], Apt::Source['percona'] ],
     }->
