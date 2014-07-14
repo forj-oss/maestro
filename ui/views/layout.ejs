@@ -5,7 +5,8 @@
 
     <!-- Viewport mobile tag for sensible mobile support -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
+    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
     <!--STYLES-->
     <link rel="stylesheet" href="/linker/styles/bootstrap-theme.css">
     <link rel="stylesheet" href="/linker/styles/bootstrap.css">
@@ -94,18 +95,42 @@
         if( $(this).children('div.user-options').length === 0 ){
           $('.preview').remove();
           $(this).append("<div class='user-options preview'><div id='viewport'></div></div>");
-          $('div.user-options').children('#viewport').load('../home/user_options').delay(500);
+          $(this).children('div.user-options').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
+          $('div.user-options').children('#viewport').append("<span class='loading-span'>Loading...</span>");
+          $('div.user-options').children('#viewport').load('../home/user_options', function(response, status, xhr){
+            if (status == 'error') {
+              $('.loading-span').fadeOut(300, function(){
+                $(this).text('Unable to load the user panel.');
+              }).fadeIn(300);
+            }else{
+              $(this).html(response);
+            }
+          });
         }else{
-          $(this).children('div.user-options').remove();
+          $(this).children('div.user-options').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function(){
+            $('div.user-options').remove();
+          });
         }
       });
       $('.help').click(function(){
         if( $(this).children('div.help-docs').length === 0 ){
           $('.preview').remove();
           $(this).append("<div class='help-docs preview'><div id='viewport'></div></div>");
-          $('div.help-docs').children('#viewport').load('../docs/index').delay(500);
+          $(this).children('div.help-docs').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
+          $('div.help-docs').children('#viewport').append("<span class='loading-span'>Loading...</span>");
+          $('div.help-docs').children('#viewport').load('../docs/index', function(response, status, xhr){
+            if (status == 'error') {
+              $('.loading-span').fadeOut(300, function(){
+                $(this).text('Unable to load help section.');
+              }).fadeIn(300);
+            }else{
+              $(this).html(response);
+            }
+          });
         }else{
-          $(this).children('div.help-docs').remove();
+          $(this).children('div.help-docs').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function(){
+            $('div.help-docs').remove();
+          });
         }
       });
     });

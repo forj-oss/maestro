@@ -1,12 +1,10 @@
 
   <%if(guest){%>
     <h3 class="user-options-title">Anonymous</h3>
-      <p style="margin: 5px 0 5px;font-size: 13px;">
+      <p style="margin: 0;padding-top: 10px;font-size: 13px;">
         Sign in to get advanced privileges
       </p>
-    <div style="padding: 10px;background-color: #1d4e70;font-size: 13px;display: inline-block; position: absolute; bottom: 25px;">
-      <a href="../auth/sign_in" style="color: #FFFFFF; text-decoration: none;">Sign In</a>
-    </div>
+      <a class="sign-in" href="../auth/sign_in">Sign In</a>
   <% }else{ %>
     <h3 class="user-options-title" style="margin-bottom: 7px;">Welcome
       <%if(req.session.is_admin){ %>
@@ -14,8 +12,7 @@
       <% }else{ %>
         User
       <% } %>
-    </h3><span><%=req.session.email%></span>
-    <div style="padding: 10px;background-color: #1d4e70;font-size: 13px;display: inline-block; position: absolute; bottom: 25px;left: 22px;">
-      <a href="../auth/sign_out" style="color: #FFFFFF; text-decoration: none;">Sign Out</a>
-    </div>
+    </h3>
+    <p style="margin: 0;padding-top: 5px;font-size: 13px;"><%=req.session.email%></p>
+    <a class="sign-out" href="../auth/sign_out">Sign Out</a>
   <% } %>
