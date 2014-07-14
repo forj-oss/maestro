@@ -42,6 +42,7 @@ puppet::puppetmaster::certname: "%{::erosite}.%{::erodomain}"
 # configure site keys
 jimador::site:
   maestro_url: "http://%{::maestro::node_vhost_lookup::vname}"
+  global_manage_projects: "admin"
 # TODO: To move somewhere else. Those data should be attached to the forj instance. Not maestro.
 #  shortname: "&quot;&agrave; la Openstack&quot;"
 # setup documentation links for maestro, we only need to do this on maestro node
