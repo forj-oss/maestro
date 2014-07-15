@@ -8,7 +8,7 @@
       <% if(tools !== undefined && (tools instanceof Array)){ %>
         <% tools.forEach(function(tool){ %>
           <%if(tool.visible!=='true'?false:true){ %>
-          <li>
+          <li style="display: none; padding-top: 15px;">
             <% if(tool.status == 'online') { %>
             	<div class="tool-ops" style="width: 80px;float: right;">
                 <% if(req.session.is_admin){ %>
@@ -101,7 +101,7 @@
           <% } %>
           <% if(req.session.kit_registered.registered == false && req.session.kit_registered.error == null){ %>
             <div class="col-md-12">
-              <div class="row" style="text-align: left; color: #797979;font-size: 13px; font-family: 'Open Sans Regular', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !important;">
+              <div class="row" style="text-align: center; color: #797979;font-size: 13px; font-family: 'Open Sans', sans-serif;">
                 <span>Register your forge to extend the trial period to 30 days. I will use '<%=req.session.email%>' as email. Enter your name below in addition:</span>
               </div>
               <div class="row" style="padding-left: 20px;padding-top: 15px;">
@@ -191,6 +191,13 @@
 <script src="../js/grid.js"></script>
 <script>
   $(document).ready(function(){
+    //FadeIn tools on secuence
+    var _delay= 0;
+    $('#og-grid > li').delay(400).each(function() {
+      $(this).delay(_delay).animate({'opacity':'show', 'paddingTop': 0});
+      _delay += 170;
+    });
+    
     $('.ops-workload').click(function(){
       $('.modal').modal('show');
     });
