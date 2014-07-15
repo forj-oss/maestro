@@ -16,24 +16,35 @@
 # create all maestro instances
 class maestro::orchestrator::setupallservers(
     $environment     = 'production',
-    $nodes           = ['review'],
+    $nodes           = undef,
     $instance        = undef,
     $instance_domain = $domain,
-    $ssh_gen_keys    = ['jenkins'],
+    $ssh_gen_keys    = undef,
     $extra_metadata  = '',
 )
 {
   debug('setting up all the servers')
 
-  # we need an interger based serial number we can start our certificates with.
+  # we need an integer based serial number we can start our certificates with.
   # fixing (Error code: sec_error_reused_issuer_and_serial)
   # this allwos for 10k servers per kit before colliding, lets hope large
   # serial numbers hold up
   debug("using instance ${instance}")
   if $instance == undef
   {
-    fail('we need an instance id to setup servers.  unable to continue.')
+    fail('we need an instance id to setup servers, unable to continue.')
   }
+
+  if $nodes == undef
+  {
+    fail('nodes is required, unable to continue.')
+  }
+
+  if $ssh_gen_keys == undef
+  {
+    fail('we need ssh_gen_keys, unable to continue.')
+  }
+
   $instance_serial_start = inline_template('<% i = @instance.to_i(36) + 10000  %><%= i.to_s.hex.to_s.length.even? ? i.to_s.hex.to_s : \'0\' + i.to_s.hex.to_s %>')
   debug("instance_serial_start = ${instance_serial_start}")
 
