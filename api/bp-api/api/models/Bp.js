@@ -56,6 +56,9 @@ module.exports = {
     },
     blueprint_name: {
       type: 'text'
+    },
+    global_manage_projects: {
+      type: 'text'
     }
   }
 

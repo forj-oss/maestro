@@ -42,45 +42,58 @@ module.exports = {
    *    `/project/create`
    */
   create: function (req, res) {
-    maestro_exec.createProject(req.body.project_name, function(data){
-     res.json(data);
-    });
+    if(req.session.project_visibility){
+      maestro_exec.createProject(req.body.project_name, function(data){
+       res.json(data);
+      });
+    }else{
+      res.view('403', { layout: null });
+    }
   },
   index: function(req, res){
-    res.view({ layout: null });
+    if(req.session.project_visibility){
+      res.view({ layout: null });
+    }else{
+      res.view('403', { layout: null });
+    }
   },
   new: function(req, res){
-    blueprint_utils.get_blueprint_id(function(err){
-      console.error('Unable to get the instance_id of the kit: '+err.message);
-      res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
-    }, function(result){
-        if(result === undefined){
-          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
-        }else{
-          
-          try{
-            result = JSON.parse(result);
-          }catch(e){
-            result = new Error('Unable to parse malformed JSON');
-          }
-          
-          if(result instanceof Error){
-            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+    if(req.session.project_visibility){
+      blueprint_utils.get_blueprint_id(function(err){
+        console.error('Unable to get the instance_id of the kit: '+err.message);
+        res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+      }, function(result){
+          if(result === undefined){
+            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
           }else{
-            blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
-              console.error('Unable to retrieve the list of tools:'+err.message);
-              callback(err, tools);
-            }, function(res_tools){
-              tools = JSON.parse(res_tools);
-              tools.forEach(function(tool) {
-                if(tool.name=='gerrit'){
-                  res.view({ layout: null, gerrit_url: tool.tool_url });
-                }
-              });
-            })
+            
+            try{
+              result = JSON.parse(result);
+            }catch(e){
+              result = new Error('Unable to parse malformed JSON');
+            }
+            
+            if(result instanceof Error){
+              sails.log.debug('Unable to get the instance_id of the kit: '+result.message);
+              res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
+            }else{
+              blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
+                console.error('Unable to retrieve the list of tools:'+err.message);
+                callback(err, tools);
+              }, function(res_tools){
+                tools = JSON.parse(res_tools);
+                tools.forEach(function(tool) {
+                  if(tool.name=='gerrit'){
+                    res.view({ layout: null, gerrit_url: tool.tool_url });
+                  }
+                });
+              })
+            }
           }
-        }
-    });
+      });
+    }else{
+      res.view('403', { layout: null });
+    }
   },
   /**
    * Overrides for the settings in `config/controllers.js`

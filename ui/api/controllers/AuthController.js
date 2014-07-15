@@ -131,6 +131,7 @@ module.exports = {
                         }else{
                           //True or false
                           req.session.is_admin = result_ia;
+                          req.session.project_visibility = projectsVisibility(req.session.is_admin, req.session.authenticated, req.session.global_manage_projects);
                           res.redirect('/', 301);
                         }
                       });
@@ -227,4 +228,23 @@ function getRelyingParty(callback){
         })
       }
     });
+}
+function projectsVisibility(is_admin, is_authenticated, global_manage_projects){
+  var anonymous = 'anonymous';
+  var authenticated = 'authenticated';
+  if(is_admin){
+    return true;
+  }else{
+    if(global_manage_projects !== null){
+      if(global_manage_projects === anonymous){
+        return true
+      } else if(global_manage_projects === authenticated && is_authenticated === true){
+        return true;
+      }else{
+        return false;
+      }
+    }else{
+      return false;
+    }
+  }
 }

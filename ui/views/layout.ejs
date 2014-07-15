@@ -62,7 +62,7 @@
         <div id="navcontainer">
           <ul id="navlist">
             <li id="li-home" class="active"><a href="#">Home</a></li>
-            <% if(req.session.projects && req.session.is_admin){ %>
+            <% if(req.session.projects && req.session.project_visibility){ %>
             <li id="li-projects"><a href="#">Projects</a></li>
             <% } %>
             <% if(req.session.users && req.session.is_admin){ %>
