@@ -204,7 +204,7 @@
     -moz-animation-timing-function: linear;
 }
 
-@-webkit-keyframes pulse {    
+@-webkit-keyframes pulse {
     0 {
         -webkit-transform: scale(1);
         transform: scale(1);
@@ -221,7 +221,7 @@
     }
 }
 
-@-moz-keyframes pulse {    
+@-moz-keyframes pulse {
     0 {
         -moz-transform: scale(1);
         transform: scale(1);
@@ -256,9 +256,9 @@
     padding-bottom: 2em;
     overflow-y: hidden;
     overflow: visible;
-    overflow-x: auto; 
+    overflow-x: auto;
     }
-#tbody * html pre { 
+#tbody * html pre {
     padding-bottom: 2em;
     overflow: visible;
     overflow-x: auto;
@@ -487,7 +487,7 @@ wget --no-check-certificate https://raw.githubusercontent.com/forj/tutorials/mas
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Checkout the tutorial repository</h2>
                     <p>Create a working copy of the Tutorial repository by running the command:</p>
-                    <pre>git clone ssh://demouser@review:29418/tutorials.git</pre>
+                    <pre>git clone ssh://review:29418/tutorials.git</pre>
                     <p>This will download the code locally on the folder you are in so that you can edit it.</p>
                     <p>You actually get all the history and metadata of the code: this is great to work completely disconnected from the remote repository. Here is how to check the log and see details on a specific log entry:</p>
                     <pre>cd  tutorials
@@ -505,7 +505,10 @@ git show 6687e07c859e2d3ff6136a5745d8932fe441a60a</pre>
                     <h2>Configure the repository to work with Gerrit</h2>
                     <p>The Redstone workflow requires code to be reviewed at several stages using Gerrit. Let's prepare to take advantage of Gerrit and commit to the
             <a href="https://review.openstack.org/Documentation/intro-quick.html#_creating_the_review">magic branch</a><br>
+                    <pre>#if you use the bash shell</pre>
                     <pre>git config remote.origin.push refs/heads/*:refs/for/*</pre>
+                    <pre>#or if you use zsh shell</pre>
+                    <pre>git config remote.origin.push 'refs/heads/*:refs/for/*'</pre>
                     <p>Install the commit hook which automatically generates unique Change-Ids in commit messages for Gerrit</p>
                     <pre>wget --no-check-certificate https://<%=gerrit_ip%>/tools/hooks/commit-msg -O .git/hooks/commit-msg</pre>
                     <p>If you are behind a proxy:</p>
@@ -565,7 +568,7 @@ git config user.email "demouser@localhost"</pre>
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Zuul: check pipeline</h2>
                     <p>The change goes through Zuul's <i>check</i> pipeline which verifies automatically any change. If the check fails, the change is down-voted (Jenkins votes with a -1).</p>
-                    <p>Open Zuul interface to see the pipelines and the change as it goes through Zuul: 
+                    <p>Open Zuul interface to see the pipelines and the change as it goes through Zuul:
  <a href="http://<%=zuul_ip%>/" target="_blank">http://<%=zuul_ip%></a></p>
                     <img src="../tuto/img/zuul.1.jpg" alt="">
                     <p>The demo project is configured with a python lint check using <a href="https://flake8.readthedocs.org/en/2.0/">Flake8</a>.</p>
@@ -648,7 +651,7 @@ git config user.email "demouser@localhost"</pre>
                 $(".navbar-fixed-top").removeClass("top-nav-collapse");
             }
         });
-        
+
         //jQuery for page scrolling feature - requires jQuery Easing plugin
         $(function() {
             $('.page-scroll a').bind('click', function(event) {
