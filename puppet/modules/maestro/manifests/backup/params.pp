@@ -15,14 +15,22 @@
 # manage backup parameters
 
 class maestro::backup::params (
-  $backup_user         = hiera('maestro::backup::backup_user'           , 'forj-bck'),
-  $backup_home         = hiera('maestro::backup::backup_home'           , '/home'),
-  $backup_fullpath     = hiera('maestro::backup::backup_fullpath'       , '/mnt/backups'),
-  $box_backup_path     = hiera('maestro::backup::box_backup_path'       , '/usr/lib/forj'),
-  $box_conf_folder     = hiera('maestro::backup::box_backup_etc_path'   , '/etc/forj'),
-  $box_backup_user     = hiera('maestro::backup::box_backup_user'       , 'root'),
-  $box_backup_server   = hiera('maestro::backup::box_backup_server'     , ''),
-  $box_db_user         = hiera('maestro::backup::box_db_user'           , ''),
-  $box_db_password     = hiera('maestro::backup::box_db_password'       , ''),
+  $backup_user            = hiera('maestro::backup::backup_user'           , 'forj-bck'),
+  $backup_home            = hiera('maestro::backup::backup_home'           , '/home'),
+  $backup_fullpath        = hiera('maestro::backup::backup_fullpath'       , '/mnt/backups'),
+  $box_backup_path        = hiera('maestro::backup::box_backup_path'       , '/usr/lib/forj'),
+  $box_conf_folder        = hiera('maestro::backup::box_backup_etc_path'   , '/etc/forj'),
+  $box_backup_user        = hiera('maestro::backup::box_backup_user'       , 'root'),
+  $box_backup_server      = hiera('maestro::backup::box_backup_server'     , ''),
+  $box_db_user            = hiera('maestro::backup::box_db_user'           , ''),
+  $box_db_password        = hiera('maestro::backup::box_db_password'       , ''),
+  $logrotate_name         = hiera('maestro::backup::params::logrotate_name', 'runbck'),
+  $logrotate_path         = hiera('maestro::backup::logrotate_path'        , '/var/log/forj/backup_cron.log'),
+  $logrotate_rotate       = hiera('maestro::backup::logrotate_rotate'      , 2),
+  $logrotate_size         = hiera('maestro::backup::logrotate_size'        , '1G'),
+  $logrotate_create_mode  = hiera('maestro::backup::logrotate_create_mode' , '0644'),
+  $logrotate_create_owner = hiera('maestro::backup::logrotate_create_owner', 'root'),
+  $logrotate_create_group = hiera('maestro::backup::logrotate_create_group', 'root'),
+  $logrotate_rotate_every = hiera('maestro::backup::logrotate_rotate_every', 'monthly'),
 ) {
 }

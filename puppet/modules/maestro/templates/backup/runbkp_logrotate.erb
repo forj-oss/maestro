@@ -1,0 +1,7 @@
+<%= @logrotate_path %> {
+    <%= @logrotate_rotate_every %>
+    size <%= @logrotate_size %>
+    create <%= @logrotate_create_mode %> <%= @logrotate_create_owner %> <%= @logrotate_create_group %>
+    notifempty
+    rotate <%= @logrotate_rotate %>
+}

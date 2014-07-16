@@ -145,7 +145,6 @@ class maestro::backup::configure_box (
       mode    => '0755',
     }
 
-
     file { $log_forj_path :
       ensure  => directory,
       owner   => $maestro::backup::params::box_backup_user,
@@ -162,5 +161,20 @@ class maestro::backup::configure_box (
                           File["${sbin_path}/master_bkp.sh"] ],
     }->
     notify{'Installed box_backup cron job.':}
+
+    #Configuring Logrotate
+    $logrotate_path         = $maestro::backup::params::logrotate_path
+    $logrotate_rotate_every = $maestro::backup::params::logrotate_rotate_every
+    $logrotate_size         = $maestro::backup::params::logrotate_size
+    $logrotate_create_mode  = $maestro::backup::params::logrotate_create_mode
+    $logrotate_create_owner = $maestro::backup::params::logrotate_create_owner
+    $logrotate_create_group = $maestro::backup::params::logrotate_create_group
+    $logrotate_rotate       = $maestro::backup::params::logrotate_rotate
+    file { "/etc/logrotate.d/${$maestro::backup::params::logrotate_name}":
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0444',
+      content => template('maestro/backup/runbkp_logrotate.erb'),
+    }
   }
 }
