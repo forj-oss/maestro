@@ -213,45 +213,57 @@ function pushfunc {     #--- Calls the minion to run
     if [ "$retcode" == "0" ]; then
                 setev
                 echo "- Success: $EVTIME : Restore operation for $appi completed" >> $LOGFILE
+                echo "- Success: $EVTIME : Restore operations for $appi completed OK"
     else
        case $retcode in 
        "1")
               setev
               echo "- Error: $EVTIME : Rsync operation for $appi restore failed, bup repository not set in place" >> $LOGFILE
+              echo "- Error: $EVTIME : Rsync operations for $appi restore failed, bup repository not set in place"
        ;;
        "2")  
               setev
-              echo "- Error: $EVTIME : Backup set folder for $appi not in place, no lrepo available to restore " >> $LOGFILE                
+              echo "- Error: $EVTIME : Backup set folder for $appi not in place, no repo available to restore " >> $LOGFILE
+              echo "- Error: $EVTIME : Backup folder for $appi not in place, no repo available to restore "                
        ;;
        "3")
               setev
               echo "- Error: $EVTIME : Application $appi cannot be stopped to perform the repo restoring  " >> 	$LOGFILE
+              echo "- Error: $EVTIME : Application $appi can't be stopped to perform the repo restoring  "
        ;;
        "4")
               setev
               echo "- Error: $EVTIME : tar operations for bup backup and place on $appi home folder, failed " >> $LOGFILE
+              echo "- Error: $EVTIME : unpack operations for backup and file placing on $appi folder, failed "
        ;;
        "5")
               setev
               echo "- Error: $EVTIME : wrong permissions to set folders for $appi home folder, failed " >> $LOGFILE
+              echo "- Error: $EVTIME : folder not set for $appi restore, wrong permissions to set folders "
        ;;
        "6")   setev
               echo "- Error: $EVTIME : bup $appi repo does not exits, probably wrong pulled by the box " >> $LOGFILE
+              echo "- Error: $EVTIME : bup $appi repo does not exits, probably wrong pulled by the box "
        ;;
        "7")   setev
               echo "- Error: $EVTIME : tar operations for $appi DB backup and place on mysql folder, failed " >> $LOGFILE
+              echo "- Error: $EVTIME : tar operations for $appi DB backup and place on mysql folder, failed "
        ;;
        "8")   setev
               echo "- Error: $EVTIME : innobackupex operations, failed for $appi DB restoring " >> $LOGFILE
+              echo "- Error: $EVTIME : innobackupex operations, failed for $appi DB restoring "
        ;;
        "9")   setev
               echo "- Error: $EVTIME : Starting, failed for $appi After restoring " >> $LOGFILE
+              echo "- Error: $EVTIME : Starting, $appi failed  After restoring "
        ;;       
        "10")  setev
               echo "- Error: $EVTIME : Starting, failed for MySQL server After restoring " >> $LOGFILE
+              echo "- Error: $EVTIME : Starting, MySQL server failed After restoring "
        ;;
        "11")  setev
-              echo "- Error: $EVTIME : SSH, Wron configurations in the box " >> $LOGFILE
+              echo "- Error: $EVTIME : SSH, Wrong configurations in the box " >> $LOGFILE
+              echo "- Error: $EVTIME : SSH, Wrong configurations in the box $hdes cant pull files and folders "
        ;;
        esac
     fi

@@ -22,6 +22,7 @@ class maestro::backup::params (
   $box_conf_folder        = hiera('maestro::backup::box_backup_etc_path'   , '/etc/forj'),
   $box_backup_user        = hiera('maestro::backup::box_backup_user'       , 'root'),
   $box_backup_server      = hiera('maestro::backup::box_backup_server'     , ''),
+  $box_db_tool            = hiera('maestro::backup::box_db_tool'           , ''),
   $box_db_user            = hiera('maestro::backup::box_db_user'           , ''),
   $box_db_password        = hiera('maestro::backup::box_db_password'       , ''),
   $logrotate_name         = hiera('maestro::backup::params::logrotate_name', 'runbck'),

@@ -18,6 +18,7 @@ class maestro::backup::set_app_backup(
   $app_folder  = hiera('maestro::backup::set_app_backup::app_folder', ''   ),
   $bkp_name    = hiera('maestro::backup::set_app_backup::bkp_name'  , ''   ),
   $use_db      = hiera('maestro::backup::configure_box::uses_db'    , false),
+  $db_tool     = hiera('maestro::backup::box_db_tool'               , ''),
   $db_user     = hiera('maestro::backup::box_db_user'               , ''),
   $db_password = hiera('maestro::backup::box_db_password'           , ''),
 ) {
