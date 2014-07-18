@@ -27,6 +27,7 @@
 
 class maestro::app::tool_status(
   $directory = hiera('maestro::tool_status::directory','/usr/lib/forj'),
+  $source    = hiera('maestro::tool_status::source','puppet:///modules/maestro/tool_status/maestro/toolstatus.sh'),
   $user      = hiera('maestro::tool_status::user','puppet'),
   $group     = hiera('maestro::tool_status::group','puppet'),
   $mode      = hiera('maestro::tool_status::mode','0555'),
@@ -50,7 +51,7 @@ class maestro::app::tool_status(
       owner   => $user,
       group   => $group,
       mode    => $mode,
-      source  => 'puppet:///modules/maestro/tools_status/toolstatus.sh',
+      source  => $source,
       replace => true,
       require => File[$directory],
     }
