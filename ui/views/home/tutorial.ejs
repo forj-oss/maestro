@@ -354,7 +354,8 @@
 <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
-<div id="tbody" style="z-index: 0;" data-spy="scroll" data-target=".navbar-custom">
+
+<div id="tbody" data-spy="scroll" data-target=".navbar-custom">
     <nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header page-scroll">
@@ -505,9 +506,6 @@ git show 6687e07c859e2d3ff6136a5745d8932fe441a60a</pre>
                     <h2>Configure the repository to work with Gerrit</h2>
                     <p>The Redstone workflow requires code to be reviewed at several stages using Gerrit. Let's prepare to take advantage of Gerrit and commit to the
             <a href="https://review.openstack.org/Documentation/intro-quick.html#_creating_the_review">magic branch</a><br>
-                    <pre>#if you use the bash shell</pre>
-                    <pre>git config remote.origin.push refs/heads/*:refs/for/*</pre>
-                    <pre>#or if you use zsh shell</pre>
                     <pre>git config remote.origin.push 'refs/heads/*:refs/for/*'</pre>
                     <p>Install the commit hook which automatically generates unique Change-Ids in commit messages for Gerrit</p>
                     <pre>wget --no-check-certificate https://<%=gerrit_ip%>/tools/hooks/commit-msg -O .git/hooks/commit-msg</pre>
