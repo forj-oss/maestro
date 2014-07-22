@@ -55,3 +55,5 @@ INSERT IGNORE INTO kit_options VALUES (7,'bugzilla_defect_url','http://bugs.exam
 INSERT IGNORE INTO kit_options VALUES (8,'openid_provider','<%= @auth_provider %>',NULL,'default openid provider');
 INSERT IGNORE INTO kit_options VALUES (9,'openid_url','<%= @openidssourl %>',NULL,'default openid provider url');
 INSERT IGNORE INTO kit_options VALUES (10,'show_welcome_notification','false',NULL,'Used to show the FORJ welcome message');
+INSERT IGNORE INTO kit_options VALUES (11,'keystone_identity','https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/',NULL,'default keystone identity url');
+INSERT IGNORE INTO kit_options VALUES (12,'keystone_compute','https://region-a.geo-1.compute.hpcloudsvc.com/v2/',NULL,'default keystone compute url');
