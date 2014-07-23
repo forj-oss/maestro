@@ -36,7 +36,7 @@
         }else{
           $('#div_result').fadeIn(500,function(){
             $('#project_result').css('color', '#D6332C');
-            $('#project_result').text('Project creation failed.');
+            $('#project_result').text('Project creation failed: ' + msg);
           }).fadeIn(500);
           $('#create_project').on(doPost);
           $('#create_project').css('background-color', '#1d4e70');
