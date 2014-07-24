@@ -89,7 +89,7 @@ HPCloud services to configure:
 - FORJ_HPC_REPORTING      : HPCloud Reporting service to use.
 
 Boot data needed:
-- FORJ_HPC_NET or FORJ_HPC_NETID : HPCloud Image name or Image ID to use for boot.
+- FORJ_HPC_NET or FORJ_HPC_NETID : HPCloud network name or network ID to use for boot.
 - FORJ_BASE_IMG                  : HPCloud image ID to use for boot.
 - FORJ_FLAVOR                    : HPCloud flavor ID to use for boot.
 - FORJ_SECURITY_GROUP            : HPCloud security group to use. By default, it uses 'default'. 
