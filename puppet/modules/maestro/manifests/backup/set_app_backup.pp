@@ -1,4 +1,4 @@
-# Class: maestro::backup::set_app_backup
+# Define: maestro::backup::set_app_backup
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,43 +13,37 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-class maestro::backup::set_app_backup(
-  $app_name    = hiera('maestro::backup::set_app_backup::app_name'  , ''   ),
-  $app_folder  = hiera('maestro::backup::set_app_backup::app_folder', ''   ),
-  $bkp_name    = hiera('maestro::backup::set_app_backup::bkp_name'  , ''   ),
-  $use_db      = hiera('maestro::backup::configure_box::uses_db'    , false),
-  $db_tool     = hiera('maestro::backup::box_db_tool'               , ''),
-  $db_user     = hiera('maestro::backup::box_db_user'               , ''),
-  $db_password = hiera('maestro::backup::box_db_password'           , ''),
+define maestro::backup::set_app_backup(
+  $applications
 ) {
+  $app_name           = $name
+  $app_location       = $applications[$name]['app_location']
+  $db_backup_tool     = $applications[$name]['db_backup_tool']
+  $db_name            = $applications[$name]['db_name']
+  $db_user            = $applications[$name]['db_user']
+  $db_password        = $applications[$name]['db_password']
 
   include maestro::backup::params
 
-  $ssh_name=$maestro::backup::params::backup_user
+  $ssh_config_name=$maestro::backup::params::backup_user
 
-  if ($app_name   == undef or $app_name   == '' or
-      $app_folder == undef or $app_folder == '' or
-      $bkp_name   == undef or $bkp_name   == '' ) {
-    notify{"ERROR, one more parameters are empty,
-            can't proceed with ${app_name} backup configuration.":}
-  }
-  else  {
-    if ($use_db      == true and
-        ( $db_user     == undef or $app_folder == '' or
-          $db_password == undef                        )) {
-      notify{'ERROR, uses database, but no user and password is configured':}
+  if ($db_name  != '')
+  {
+    if ($db_user == undef or $db_user == '' )
+    {
+      fail("ERROR, db user name for ${name} application is required.")
     }
-    else {
-
-      $conf_fullpath = "${maestro::backup::params::box_conf_folder}/conf.d"
-      file { "${conf_fullpath}/bkp_${app_name}.conf":
-        ensure  => file,
-        mode    => '0400',
-        content => template('maestro/backup/config.erb'),
-        require => File[$conf_fullpath],
-      }->
-      notify{"Installed backup config file: bkp_${app_name}.conf":}
+    if ($db_password == undef or  $db_password == '')
+    {
+      fail("ERROR, db user password for ${name} application is required.")
     }
   }
+  $conf_fullpath = "${maestro::backup::params::box_conf_folder}/conf.d"
+  file { "${conf_fullpath}/bkp_${app_name}.conf":
+    ensure  => file,
+    mode    => '0400',
+    content => template('maestro/backup/config.erb'),
+    require => File[$conf_fullpath],
+  }->
+  notify{"Installed backup config file: bup_${app_name}.conf":}
 }
-

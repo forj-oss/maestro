@@ -13,10 +13,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-# This script will run 'runbkp' for each configuration files found for backup.
+# This script will run 'runbkp.sh' for each configuration files found for backup.
 # We address the need to start 1 backup even if there is several application to back up on one host.
 
-BKP_CONF=/etc/forj/*.conf
+# Variable not used
+#BKP_CONF=/etc/forj/*.conf
 
 function Help
 {
@@ -54,13 +55,13 @@ do
          BKP_CONF_FILES="$1"
       fi
       shift
-      while [ $# -ne 0 ] && [ "$(echo "p$1" | grep "^p--")" != "" ]
+      while [ $# -ne 0 ] && [ "$(echo "p$1" | grep "p--")" == "" ]
       do
          if [ ! -r "$1" ]
          then
             echo "$1 is not readable. File ignored."
          else
-            BKP_CONFMATCH="$BKP_CONF_FILES $1"
+            BKP_CONF_FILES="$BKP_CONF_FILES $1"
          fi
          shift
       done
@@ -105,7 +106,7 @@ fi
 # Main configuration loop
 for CONF_FILE in $BKP_CONF_FILES
 do
-   write_log "Starting '$SCRIPT $SCRIPT_OPTS $CONF_FILE'"
-   eval "$SCRIPT $SCRIPT_OPTS $CONF_FILE"
-   write_log "'$SCRIPT $SCRIPT_OPTS $CONF_FILE' ended with return code: $?"
+   write_log "Starting '$SCRIPT $CONF_FILE $SCRIPT_OPTS'"
+   eval "$SCRIPT $CONF_FILE $SCRIPT_OPTS"
+   write_log "'$SCRIPT $CONF_FILE $SCRIPT_OPTS' ended with return code: $?"
 done

@@ -17,468 +17,368 @@
 #
 
 #--- Variables sets by call of restoreraid master to perfom the restore
-appname="$1"                 #--- Application name; sets the name for the restore folder
-sourfold="$2"                #--- Indicates the remote path of the folder to be restored
-evtime=""                    #--- mobile set of time event 
-bupapprepo=""                #--- Contains the bup app repository path.
-ensapp=""                    #--- Contains an status value that shows app availability in the system
-apphome=""                   #--- contains the App home folder
+# --- Variables values get by parameter defined when the script is invoqued --- #
+SC_MODE="$1"                                                                            #--- Will define if the repos will be pulled from a remotely source or locally  ie -p or -l 
+APP_NAME="$2"                                                                           #--- Application name; sets the name for the restore folder
+BKP_CONTENT="$3"                                                                        #--- Indicates the path of the repo source to be restored (could be local or remote)
+WEEK_NUM=$( echo "$BKP_CONTENT" | awk 'BEGIN { FS="/" } { print $NF } ' )               #--- Returns 2014-30
+BKP_APP_DIR=""                                                                          #--- Contains the bup app repository path.
+BKP_LOG_DIR=""                                                                          #--- Contains the logs repository path.
+IS_SERVICE=""                                                                           #--- Contains status value that shows app availability in the system
+APP_LOCATION=""                                                                         #--- contains the App home folder
+BKP_INFO=""                                                                             #--- directs the path to file where important data about the bkp is contained
+
 #--- Harcoded Variables
-RESTBASEPATH="/mnt/restore"
-APPRESTFOLD="$RESTBASEPATH/$appname"
-LOGFILE="$RESTBASEPATH/$appname_restore.log"
-RESTFILOG=$RESTBASEPATH/$appname"_restfiles.log"
-DBDATADIR=$(grep datadir /etc/mysql/my.cnf | cut -d"=" -f2 | cut -d" " -f2)
-SSHCNFNAM="forj-bck"         #--- name of ssh configuration located on ~/.ssh/config file
-RRLOGFOLD="/mnt/backups/restorelogs/"                #--- Remote folder for the restore logs
+REST_BASE_DIR="/mnt/restore"
+REST_APP_DIR="$REST_BASE_DIR/$APP_NAME"                                            #---where the pulled repo will be placed
+LOG_FILE="${REST_BASE_DIR}/${APP_NAME}_restore.log"
+REST_FILES_LOG="${REST_BASE_DIR}/${APP_NAME}_restfiles.log"
+DB_DATA_DIR=$(grep datadir /etc/mysql/my.cnf | cut -d"=" -f2 | cut -d" " -f2)
+SSH_CONFIG_HOST="forj-bck"                                                         #--- name of ssh configuration located on ~/.ssh/config file
+REMOTE_LOG_DIR="/mnt/backups/restorelogs/"                                              #--- Remote folder for the restore logs
+SQL_PARAMS=""                                                                      #--- Could be retrieved from a env var
 #------------------------------------------------------------------------------------------------------------------
 
-function setev() {  #--- sets on time the timestamp 
-  evtime="$(date +%d/%m-%k:%M:%S)"
-  tag=$1
-  msg=$2
-  if [ -z $tag ]; then
-          evtime="$(date +%d/%m-%k:%M:%S)"
-  else
-          evtime="$(date +%d/%m-%k:%M:%S)"
-          case $tag in
-          "Warning")
-                echo "  - $tag : $evtime : $msg" >> $LOGFILE
-          ;;
-          "Error")
-                echo "  - $tag : $evtime : $msg" >> $LOGFILE
-          ;;
-          "Operations")
-                echo "  - $tag : $evtime : $msg" >> $LOGFILE
-          ;;
-          "Success")
-                echo "  - $tag : $evtime : $msg" >> $LOGFILE
-          ;;
-          "Info")
-                echo "  - $tag : $evtime : $msg" >> $LOGFILE
-          ;;
-          esac
-  fi      
+function message(){
+  local logtime="$(date '+%Y-%m-%d_%H-%M-%S')"
+  local msg=$1
+  [ -n "$msg" ] && echo "${logtime}: ${msg}"
+  [ -f "$LOG_FILE" ] && echo "${logtime}: ${msg}" >> $LOG_FILE
 }
 
-function pushlogs () { #--- send the log files to the central backup station "maestro"
+function pushlogs () { #--- send the log files to the central backup storage instance "maestro"
    flval=$1
-   setev
-   echo "  - Operations : $evtime : Sending log operation files to Remote central instance  $apphome  " >> $LOGFILE
+   message "  - Operations : Sending log operation files to Remote central instance  $APP_LOCATION  "
    case $flval in
    "error")
-         scp  $LOGFILE $SSHCNFNAM:$RRLOGFOLD
+         scp $LOG_FILE $SSH_CONFIG_HOST:$REMOTE_LOG_DIR
    ;;
    "success")
-         scp  $LOGFILE $SSHCNFNAM:$RRLOGFOLD
-         scp  $RESTFILOG $SSHCNFNAM:$RRLOGFOLD
+         scp $LOG_FILE $SSH_CONFIG_HOST:$REMOTE_LOG_DIR
+         scp $REST_FILES_LOG $SSH_CONFIG_HOST:$REMOTE_LOG_DIR
    ;;
    esac
 }
 
-function ssh_cnf_chk{ #--- set check of the ssh configurations
-   ssh -t $SSHCNFNAM 'exit'
+function ssh_cnf_chk { #--- set check of the ssh configurations
+   ssh -t $SSH_CONFIG_HOST 'exit'
    if [ $? -eq 0 ]; then
-   	      setev
-   	      echo "  - Success : $evtime : SSH configurations are correct and working OK  " >> $LOGFILE
+          message "  - Success : SSH configurations are correct and working OK  "
    else
-          setev
-          echo "  - Error   : $evtime : SSH Configurations wrong or not set, verifi your setting in ~/.ssh/config ">> $LOGFILE
-          pushlogs "error
+          message "  - Error   : SSH Configurations wrong or not set, verifi your setting in ~/.ssh/config "
+          pushlogs "error"
           exit 11  #--- ssh error
    fi
 }
 
 function pullfunc { #--- will receive parameters and do the pull of an specific folder to perform the restore
-   if [ -d $RESTBASEPATH ]; then
-            setev
-            echo "  - Operations : $evtime : Begin pull remote folder by  " >> $LOGFILE
-            rsync -avz $SSHCNFNAM:$sourfold $APPRESTFOLD >> $LOGFILE 2>&1
-            if [ $? -eq 0 ]; then
-                   setev
-                   echo "  - Success : $evtime : Folder synchronized with local $APPRESTFOLD created OK  " >> $LOGFILE
-            else
-                   setev
-                   echo "  - Error   : $evtime : rsync operation fails, see log file errors ">> $LOGFILE
-                   pushlogs "error
-                   exit 1  #--- rsync error
-	        fi
+   if [ ! -d $REST_BASE_DIR ]; then
+            message "  - Operations : Local Folder $REST_BASE_DIR created"
+            mkdir -p  $REST_BASE_DIR
+   fi
+   if [ -d $REST_APP_DIR ]; then
+            rm -rf  ${REST_APP_DIR}/*
+            message "  - Operations : Removing old data from ${REST_APP_DIR}"
+   fi
+   rsync -avz $SSH_CONFIG_HOST:$BKP_CONTENT $REST_APP_DIR
+   if [ $? -eq 0 ]; then
+           message "  - Success : Folder synchronized with local $REST_APP_DIR created OK"
    else
-            setev
-            echo "  - Operations : $evtime : Local Folder $RESTBASEPATH created  " >> $LOGFILE
-            mkdir -p  $RESTBASEPATH
-            setev
-            echo "  - Operations : $evtime : Begin pull remote folder by  " >> $LOGFILE
-            rsync -avz $SSHCNFNAM:$sourfold $APPRESTFOLD >> $LOGFILE 2>&1
-            if [ $? -eq 0 ]; then
-                   setev
-                   echo "  - Success : $evtime : Folder synchronized with local $APPRESTFOLD created OK  " >> $LOGFILE
-            else
-                   setev
-                   echo "  - Error   : $evtime : rsync operation fails, see log file errors ">> $LOGFILE
-                   pushlogs "error"
-                   exit 1  #--- rsync error
-	        fi
+           message "  - Error   : rsync operation fails, see log file errors "
+           pushlogs "error"
+           exit 1  #--- rsync error
    fi
 }
 
-function getbkinffill { #--- Get back (the beatles Song... :) get the names of bkp and the path for the repo set
-   wktransf="$(ls $APPRESTFOLD)"
-   if [ -n "wktransf" ]; then
-            bupapprepo=$(find $APPRESTFOLD -type d -path "*$wktransf/$appname" -type d)
-            bkpname=$(bup -d $bupapprepo ls | cut -d"/" -f1)                #--- gets the bup backup name from the repository
-   else
-            echo "  - Error : $evtime : by some error I see no folder set of bup backup " >> $LOGFILE
+function getbkinffill { #--- get and fills the names of bkp and the path for the repo set
+   BKP_APP_DIR="$(ls -d $REST_APP_DIR/$WEEK_NUM)/bup_repo"
+   BKP_LOG_DIR="$(ls -d $REST_APP_DIR/$WEEK_NUM)/logs"
+   if [ -d "$BKP_LOG_DIR" ]; then
+            BKP_INFO=$( ls -t $BKP_LOG_DIR/info_*.yaml | head -1 )  #--- sets the path of the backup file info
+            if [ -f "$BKP_INFO" ]; then
+                    message "- Success: Data of backup $APP_NAME is available "
+            else
+                    message "- Error: Data of backup $APP_NAME isn't pulled complete, check the backup process "
+                    exit 12 #--- posibly something happened during the backup and the set of files are not complete
+            fi          
+            BUP_NAME="$(bup -d "${BKP_APP_DIR}" ls | cut -d"/" -f1)"                #--- gets the bup backup name from the repository
+   else   
+            message "  - Error : $BKP_APP_DIR folder does not exists"
             pushlogs "error"
             exit 2  #--- not listed folder for backup set
    fi
 }
 
-function get_home {  #---gets "path" and sets $apphome variable
-   case $appname in
-   "jenkins")
-        apphome=$(cat /etc/default/jenkins | grep JENKINS_HOME | cut -d"=" -f2)
-   ;; 
-   "gerrit")
-        apphome="/home/gerrit2"
-   ;;
-   esac
-} 
-###########---------- Block of mv folders  ------------#############################################################################################
- 
-function mvsqlfold {  #--- move the old mysql folder and creates a new one
-   if [ -d $DBDATADIR ]; then 
-          setev
-          echo "  - Operations : $evtime : MYSQL app home folder will be moved to $DBDATADIR.old " >> $LOGFILE
-          mv -f $DBDATADIR "$DBDATADIR.old"
+function get_home {  #---gets "path" and sets $APP_LOCATION variable
+   message "  - Operations : Retrieving path for the application from the bup repository "
+   APP_LOCATION=$( cat $BKP_INFO | awk ' BEGIN { FS=":" } /^source_folder/ {print $2}' | sed -e 's/^ "//'  -e 's/"$//') #--- will get the home from bup repo 
+}
+
+function mvsqlfoldcp {  #--- Copy the current contents of mysql folder and leaves the one unaltered
+   if [ -d "$DB_DATA_DIR" ]; then 
+          message "  - Operations : MYSQL app home folder will be copied to $DB_DATA_DIR.old "
+          cp -Rfp $DB_DATA_DIR "${DB_DATA_DIR}.old"
           if [ $? -eq 0 ]; then
-          	     echo "  - Success : $evtime : MYSQL old app home folder is now moved to $DBDATADIR.old " >> $LOGFILE
-          	     echo "  - Operations : $evtime : New MYSQL app home folder will be created: $DBDATADIR " >> $LOGFILE
-                 mkdir -p $DBDATADIR
-                 if [ $? -eq 0 ];then
-                     setev
-                     echo "  - Success : $evtime : MYSQL app home new folder created " >> $LOGFILE
-                     chown -R mysql:mysql $DBDATADIR 
-                     setev
-                     echo "  - Operations : $evtime : MYSQL app home permissions set to \"mysql\" user " >> $LOGFILE
-                 fi    
+                 message "  - Success : we have copied MYSQL current home folder to $DB_DATA_DIR.old "
+                 message "  - Operations : Original MYSQL app home preserved it path at: $DB_DATA_DIR "
           else
-                 echo "  - Error : $evtime : MYSQL app not created, by some error; maybe permissions or path are not correct, please verify " >> $LOGFILE
+                 message "  - Error : MYSQL copy folder not created, by some error; maybe permissions or path are not correct, please verify "
+                 exit 5 #--- wrong permissions to set folders
           fi
    else
-          setev
-          echo "  - Info : $evtime : MYSQL app home folder not present, please read mysql manuals " >> $LOGFILE
-          mkdir -p  $DBDATADIR              #--- default is "/var/lib/mysql"
-          chown -R mysql:mysql $DBDATADIR
-          setev
-          echo "  - Info : $evtime : MYSQL app home folder was created and permissions set, but service isn't installed yet " >> $LOGFILE
+          message "  - Info : MYSQL app home folder not present, please read mysql manuals "
+          mkdir -p  $DB_DATA_DIR              #--- default is "/var/lib/mysql"
+          chown -R mysql:mysql $DB_DATA_DIR
+          message "  - Info : MYSQL app home folder was created and permissions set, but service isn't installed yet "
    fi
 }
 
 function mvappfold { #--- set a copy of the app home dir and replace an empty app home folder
-   get_home
-   if [ -d "$apphome" ]; then           
-           owner=$( stat -c %U $apphome )       #--- looks into 
-           mv $apphome  $apphome".old"
-           mkdir -p $apphome
-           chown -R $owner:$owner $apphome
+   get_home  #--- invoques the function that obtain from repo which is the home for
+   message "  - Operations : Checking $APP_LOCATION folder availability"
+   if [ -d "$APP_LOCATION" ]; then
+           message "  - Success : $APP_LOCATION folder availability OK"
+           OWNER=$( stat -c %U $APP_LOCATION )
+           GROUP=$( stat -c %G $APP_LOCATION )
+           if [ -d "${APP_LOCATION}.old" ]; then
+                  rm -rf "${APP_LOCATION}.old"
+           fi 
+           mv -f $APP_LOCATION  "${APP_LOCATION}.old"
            if [ $? -eq 0 ]; then
-                  setev
-                  echo "  - Success : $evtime : Folder for app $apphome created OK  " >> $LOGFILE
-                  echo "  - Success : $evtime : Owner for Folder for app $apphome set to $owner  OK  " >> $LOGFILE
+                  mkdir -p $APP_LOCATION
+                  chown -R $OWNER:$GROUP $APP_LOCATION
+                  message "  - Success : Folder set for  $APP_LOCATION created OK"
+                  message "  - Success : Owner for Folder for app $APP_LOCATION set to ${OWNER}:${GROUP}  OK"
+           else
+                  message "  - Error : Folder $APP_LOCATION could not be overwritten; please check your User permissions"
+                  pushlogs "error"
+                  exit 5  #--- wrong permissions to set folders
            fi
    else
-           setev
-           echo "  - Error : $evtime : seems like folder $apphome isn't available to move " >> $LOGFILE
-           setev
-           echo "  - Operations : $evtime : Anyhow I'll create a new $apphome folder  " >> $LOGFILE
-           mkdir -p $apphome
-           if [ $? -eq 0]; then 
-           	      setev
-           	      echo "  - Success : $evtime : Folder for app $apphome created OK  " >> $LOGFILE
-           	      setev
-           	      echo "  - Operations : $evtime : Set permissions for new $apphome folder " >> $LOGFILE           	   
-                  owner==$( bup -d $bupapprepo join $bkpname |tar -tf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f1  )
-                  if [ -n "$( getent passwd $owner )" ]; then 
-                         chown -R $owner:$owner $apphome
-                         setev
-                  	     echo "- Success: $evtime user exists, setting permissions to new $apphome folder " >> $LOGFILE
+           message "  - Info : seems like folder $APP_LOCATION isn't available to move "
+           message "  - Operations : Anyhow I'll create a new $APP_LOCATION folder  "
+           mkdir -p $APP_LOCATION
+           if [ $? -eq 0 ]; then
+                  message "  - Success : Folder for $APP_LOCATION backup created OK  "
+                  message "  - Operations : Setting permissions for new $APP_LOCATION folder "                 
+                  OWNER=$( bup -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f1  )
+                  GROUP=$( bup -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f2  )                 
+                  message "  - Operations : Checking User existance in the system "
+                  if [ -n "$( getent passwd $OWNER )" ]; then 
+                         chown -R $OWNER:$GROUP $APP_LOCATION
+                         message "- Success: user exists, setting permissions to new $APP_LOCATION folder "
                   else 
-                         setev
-                         echo "- Info: $evtime User not exists, to preserve permissions $owner will be created" >> $LOGFILE                         
-                         useradd -p $( mkpasswd -s $owner ) -s /bin/bash -d /home/$owner -m $owner                
+                         message "- Info: User not exists, to preserve permissions $OWNER will be created"                         
+                         useradd -p $( mkpasswd -s $OWNER ) -s /bin/bash -d /home/$OWNER -m $OWNER 
                          if [ $? -eq 0 ]; then
-                         	    setev
-                  	            echo "- Success: $evtime user exists, setting permissions to new $apphome folder " >> $LOGFILE
-                         	    chown -R $owner:$owner $apphome
-                         	    setev
-           	                    echo "  - Operations : $evtime : Set permissions for new $apphome folder " >> $LOGFILE
+                                if [ -z "$( egrep -i "^${GROUP}" /etc/group )" ]; then
+                                        groupadd $GROUP
+                                fi
+                                message "- Success: user exists, setting permissions to new $APP_LOCATION folder "
+                                chown -R $OWNER:$GROUP $APP_LOCATION
+                                message "  - Operations : Set permissions for new $APP_LOCATION folder "
+                                message "  - Info : User created for backup is : $OWNER "
+                                message "  - Info : Passwd created for backup user is : $OWNER "
+                         else
+                                message "  - Error : User $OWNER for $APP_LOCATION backup could not be created; please check your User permissions  "
+                                pushlogs "error"
+                                exit 5  #--- wrong permissions to set folders
                          fi
                   fi
            else
-                  setev
-           	      echo "  - Error : $evtime : Folder for app $apphome not set; please check your User permissions  " >> $LOGFILE
-           	      pushlogs "error"
-           	      exit 5  #--- wrong permissions to set folders
+                  message "  - Error : Folder for app $APP_LOCATION not set; please check your User permissions  "
+                  pushlogs "error"
+                  exit 5  #--- wrong permissions to set folders
            fi             
    fi
 }
 
-##############--------------- Block of Restoring Functions   ---------------##########################################################################
- 
-function inno_restore {     #--- restores the mysql Databases "#-- Innobackupex --#
-   setev
-   echo "  - Operations : $evtime : Unpacking DB files of set new $( ls -dS $bupapprepo/bkphist/DB*/* | sed -n '1p') " >> $LOGFILE
-   echo "  - Operations : $evtime : DB set of files of to be restored ---: " >> $RESTFILOG
-   tar -xvzf $( ls -dS $bupapprepo/bkphist/DB*/* | sed -n '1p') -C / >> $RESTFILOG 2>&1  #--- where tar.gz DB-bkps for this set reside.
-   if [ $? -eq 0 ]; then 
-   	      setev
-          echo "- Success : $evtime DB folder unpacked, Performing innobackupex \"copy-back\" Operations:  " >> $LOGFILE
-          dbdirunzip=$(find /mnt -mtime -1 -type f -name "ibdata1" -exec dirname {} \;)
-          innobackupex --copy-back $dbdirunzip >> $LOGFILE 2>&1
-                 
+function mydumppush () {    #--- restores the mysql Databases "#-- Mysqldump --#
+   message "  - Operations : checking the dump file for mysqldump restore "
+   SQL_FILE=$( ls -dS /tmp/sql_db/${APP_NAME}.sql | sed -n '1p')
+   if [ -f "$SQL_FILE" ]; then
+          message "  - Success : dump file for mysqldump restore $SQL_FILE is available "
+          message "  - Operations : checking the dump file for mysqldump restore $SQL_FILE "
+          SQL_PARAMS="-u $(cat /etc/forj/conf.d/bkp_${APP_NAME}.conf |sed -n '/db_user/p' | cut -d':' -f2) -p$(cat /etc/forj/conf.d/bkp_${APP_NAME}.conf |sed -n '/db_pwd/p' | cut -d':' -f2 ) "
+          mysql $SQL_PARAMS < $SQL_FILE
           if [ $? -eq 0 ]; then
-                 chown -R mysql:mysql /var/lib/mysql               # --- DBtarset=  TODO use this variable for a set (array of backups tu choose
-                 setev
-                 echo "- Success : $evtime DB folder Permissions set on: /var/lib/mysql for mysql user and group.  " >> $LOGFILE
+                  message "  - Success : mysqldump restore concludes Succesfully "
           else
-                 setev
-                 echo "- Error : $evtime : Innobackup copy-back operations Failed " >> $LOGFILE
-                 pushlogs "error"
-                 exit 8 #--- innobackup restore failed
+                  message "  - Error : mysqldump restore process failed please verify your file or permissions "
+                  pushlogs "error"
+                  exit 8 #--- mysqldump restore failed
           fi
    else
-          setev
-          echo "- Error : $evtime : DB Folder unsuccesfully unpacked " >> $LOGFILE
+          message "  - Error : dump file for mysqldump file not available "
+          message "- Error : mysqldump copy-back operations Failed "
           pushlogs "error"
-          exit 7 #--- tar operations error for DB folder
+          exit 8 #--- mysqldump restore failed
    fi
 }
 
 function bupjoin { #--- Depends on getbkname function to be accomplished first
-   if [ -d "$bupapprepo" ];then
-          setev
-          echo "  - Operations : $evtime : start the Restoring of files and folders in $apphome  " >> $LOGFILE
-                              # - bup -d $bupapprepo join $bkpname | tar -tf -   #--- join operation by bup (list contents)
-          echo "  - Operations : $evtime : List of restored files and folders in $apphome :  " >> $RESTFILOG
-          bup -d $bupapprepo join $bkpname | tar  xvpf - -C / -v >$RESTFILOG  2>&1           #--- join operation by bup restore files
-          if [ $? -eq 0 ]; then
-                 setev
-                 echo "  - Success : $evtime : Restoring files in $apphome finish, restore process continues ..." >> $LOGFILE
-                 echo "  - Info    : $evtime : the list of restored files can be seen at $RESTFILOG "
-          else
-                 echo "  - Error : $evtime : Restoring files not concluded well, check your Filesystem permissions or space " >> $LOGFILE
-                 pushlogs "error"
-                 exit 4 #--- untar bup backup and place on app home fails
-          fi
+      message "  - Operations : start the Restoring of files and folders in $APP_LOCATION  "
+      if [ -n "$BUP_NAME" ]; then
+                  echo "  - Operations : List of restored files and folders in $APP_LOCATION :  " >> $REST_FILES_LOG
+                  bup -d $BKP_APP_DIR join $BUP_NAME | tar  xvpPf - -C / -v >$REST_FILES_LOG  2>&1           #--- join operation by bup restore files
+                  if [ $? -eq 0 ]; then
+                         message "  - Success : Restoring files in $APP_LOCATION finish, restore process continues ..."
+                         message "  - Info    : the list of restored files can be seen at $REST_FILES_LOG "
+                  fi
+      fi
+}
+
+function validate_service { #--- Ensures an app is in place
+   message "  - Check : Validating $APP_NAME Application is present "
+   message "  - Running : Validating $APP_NAME Application or Filesystem Backup. "
+   service $APP_NAME status
+   if [ $? -eq 0 ]; then
+         message "  - Check : $APP_NAME Successfully present "
+         IS_SERVICE="0"  #--- "0" applications exists; "1" not available in the system
    else
-          setev
-          echo ". _______________________________________________________________ ."
-          echo "  - Error : $evtime : by some error I got not set bupapprepo, variable its empty" >> $LOGFILE
-          pushlogs "error"
-          exit 6 #--- weird error where the bup repo is no set or created
+         message "  - Check : $APP_NAME Not present or its a Filesystem backup"
+         IS_SERVICE="1"  #--- "0" applications exists; "1" not available in the system
    fi
 }
 
-
-############------------ block of services functions ------------###################################################################################
-
-function ensrapp { #--- Ensures an app is in place
-   puppet resource service $appname
-   if [ $? -eq 0 ]; then
-         echo "  - Check : $evtime : $appname Successfully present " >> $LOGFILE
-         ensapp="0"  #--- "0" applications exists; "1" not available in the system
-   else
-         echo "  - Check : $evtime : $appname Not present " >> $LOGFILE
-         ensapp="1"  #--- "0" applications exists; "1" not available in the system
-   fi
+function get_app_status () {
+    APP_STATUS=$( puppet resource service $APP_NAME | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
 }
 
 function appstop () { #--- Stops a service from puppet resorce command
-   ensrapp
-   if [ "$ensapp" = "0" ]; then
-           srvstat=$( puppet resource service $appname | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
-                   #--- $(service $appname status | grep -iwo "stop\|not running\|running")
-           case $srvstat in
+   validate_service
+   if [ "$IS_SERVICE" = "0" ]; then
+           get_app_status
+           case $APP_STATUS in
            "running")
-                      #---service $appname stop
-                 puppet resource service $appname ensure=stopped
-                 srvstat=$( puppet resource service $appname | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
-                 if [ "$srvstat" = "stopped" ]; then
-                          setev
-                          echo "  - Success : $evtime : $appname Service status is \"stop\"" >> $LOGFILE
+                 service $APP_NAME stop
+                 get_app_status
+                 if [ "$APP_STATUS" = "stopped" ]; then
+                          message "  - Success : $APP_NAME Service status is \"stop\""
                  else 
-                          setev
-                          echo "  - Error : $evtime : $appname stop signal no finish status is \"Unknow\"" >> $LOGFILE
+                          message "  - Error : $APP_NAME stop signal no finish status is \"Unknow\""
                           pushlogs "error"
                           exit 3    # send the status that will be interpreted as error in
                  fi
            ;;
            "stopped")
-                 setev
-                 echo "  - Success : $evtime : $appname server status is \"stop\"" >> $LOGFILE
+                 message "  - Success : $APP_NAME server status is already \"stopped\""
            ;;
            esac
    else
-           setev
-           echo "  - Error : $evtime : $appname Service not stopped cause isn't installed here" >> $LOGFILE
+           message "  - Info : $APP_NAME Is not a Service, not present or Filesystem Backup"
    fi
 }
 
 function appstart () { #--- Stops a service from puppet resorce command 
-    srvstat=$( puppet resource service $appname | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
-                   #--- $(service $appname status | grep -iwo "stop\|not running\|running")
-    case $srvstat in
+    get_app_status
+    case $APP_STATUS in
     "running")          # --- weird and barely imposible status but anyway I left as it is.
-            #---service $appname start
-            puppet resource service $appname ensure=running
-            srvstat=$( puppet resource service $appname | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
-            if [ "$srvstat" = "running" ]; then
-                          rstfls=$( bup -d $bupapprepo join $bkpname | tar -tf - | wc -l )
-                          setev
-                          echo "  - Success : $evtime : $appname Service status is \"running\"" >> $LOGFILE
-                          echo "  - Success : $evtime : $appname Restore process concluded succesfully applications \"running\"" >> $LOGFILE
-                          echo "  - Info    : $evtime : $appname Total files restored: $rstfls " >> $LOGFILE 
-                          
+            #---service $APP_NAME start
+            service $APP_NAME restart
+            get_app_status
+            if [ "$APP_STATUS" = "running" ]; then
+                          rstfls=$( bup -d $BKP_APP_DIR join $BUP_NAME | tar -tf - | wc -l )
+                          message "  - Success : $APP_NAME Service status is \"running\""
+                          message "  - Success : $APP_NAME Restore process concluded succesfully applications \"running\""
+                          message "  - Info    : $APP_NAME Total files restored: $rstfls " 
                           pushlogs "success"
             else 
-                          setev
-                          echo "  - Error : $evtime : $appname Running signal not successful status is \"Unknow\"" >> $LOGFILE
+                          message "  - Error : $APP_NAME Running signal not successful status is \"Unknow\""
                           pushlogs "error"
                           exit 9    # send the status that will be interpreted as error in start
             fi
     ;;
     "stopped")
-            puppet resource service $appname ensure=running
-            srvstat=$( puppet resource service $appname | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
-            if [ "$srvstat" = "running" ]; then
-                           setev
-                           echo "  - Success : $evtime : $appname server status is \"running\"" >> $LOGFILE
-                           if [ "$appname" = "gerrit" ]; then
-                                          setev
-                                          echo "  - Operations : $evtime : Running Puppet Agent to apply configurations to $appname :   " >> $LOGFILE
-                                          puppet agent -t >> $LOGFILE 2>&1
-                                          setev
-                                          echo "  - Operations : $evtime : Restarting $appname to push configurations   " >> $LOGFILE
-                                          service $appname restart
-                                          #/home/gerrit2/review_site/bin/gerrit.sh restart >> $LOGFILE 2>&1 
-                                          if [ $? -eq 0 ]; then 
-                                                 setev
-                                                 echo "  - Success : $evtime : $appname server restarted and \" It's running\"" >> $LOGFILE
-                                                 echo "  - Success : $evtime : $appname Restore process concluded succesfully applications \"running\"" >> $LOGFILE
-                                                 pushlogs "success"
-                                          else
-                                                 setev
-                                                 echo "  - Error : $evtime : $appname Running signal not successful started" >> $LOGFILE
-                                          fi
-                           else
-                                          setev
-                                          echo "  - Operations : $evtime : Running Puppet Agent to apply configurations to $appname   " >> $LOGFILE
-                                          puppet agent -t >> $LOGFILE 2>&1    #TODO  ===== set cases to restart different applications.
-                           fi
+            service $APP_NAME start
+            get_app_status
+            if [ "$APP_STATUS" = "running" ]; then
+                           message "  - Success : $APP_NAME server status is \"running\""
+                           message "  - Operations : Running Puppet Agent to apply configurations to $APP_NAME   "
+                           puppet agent -t 2>&1    #TODO  ===== set cases to restart different applications.
             else 
-                           setev
-                           echo "  - Error : $evtime : $appname Running signal not successful status is \"Unknow\"" >> $LOGFILE
+                           message "  - Error : $APP_NAME Running signal not successful status is \"Unknow\""
                            pushlogs "error"
-                           exit 9    # send the status that will be interpreted as error in start               
+                           exit 9    # send the status that will be interpreted as error in start
             fi            
     ;;
     esac   
 }
 
-
-#--- grep datadir /etc/mysql/my.cnf         #dbbkstore=ls -dS $bupapprepo/bkphist/DB* | sed -n '1p'
-
-
 function mysqldstop (){ #--- reviews and stop if necessary mysql service
-                                                             #---sqlstat=$(/usr/sbin/service mysql status | grep -iwo "stop\|running")
-   srvstat=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d","     -f1 | cut -d"'" -f2 )
-   if [ -n "$srvstat" ]; then
-       case $srvstat in
+   get_app_status
+   if [ -n "$APP_STATUS" ]; then
+       case $APP_STATUS in
        "running")
              puppet resource service mysql ensure=stopped              #--- /usr/sbin/service mysql stop
-             srvstat=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d","     -f1 | cut -d"'" -f2 )
-             if [ "$srvstat" = "stopped" ]; then
-                   setev
-                   echo "  - Success : $evtime : MySQL server status is \"stop\"" >> $LOGFILE
+             get_app_status
+             if [ "$APP_STATUS" = "stopped" ]; then
+                   message "  - Success : MySQL server status is \"stop\""
              else 
-                   setev
-                   echo "  - Error : $evtime : MySQL stop signal no finish status is \"Unknow\"" >> $LOGFILE
+                   message "  - Error : MySQL stop signal no finish status is \"Unknow\""
              fi
        ;;
        "stopped")
-             setev
-             echo "  - Success : $evtime : MySQL server status is \"stop\"" >> $LOGFILE
+             message "  - Success : MySQL server status is \"stop\""
        ;;
        esac
    else
-       setev
-       echo "  - Error : $evtime : MySQL server no installed here" >> $LOGFILE     #-- TODO see what to do in this case to fulfill the task
+       message "  - Error : MySQL server no installed here"     #-- TODO see what to do in this case to fulfill the task
    fi
 }  
 
 function mysqldstart(){ #--- reviews and stop if necessary mysql service
-                                                             #---sqlstat=$(/usr/sbin/service mysql status | grep -iwo "stop\|running")
-   srvstat=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d","     -f1 | cut -d"'" -f2 )
-   if [ -n "$srvstat" ]; then
-       case $srvstat in
-       "running")  #--- same story, this validation is almost impossible to happen but I left as it is
-             service mysqld restart
-             puppet resource service mysql ensure=running              #--- /usr/sbin/service mysql stop
-             srvstat=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d","     -f1 | cut -d"'" -f2 )
-             if [ "$srvstat" = "running" ]; then
-                   setev
-                   echo "  - Success : $evtime : MySQL server status is \"running\"" >> $LOGFILE
+   APP_STATUS=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
+   if [ -z "$APP_STATUS" ]; then
+           message "  - Error : MySQL server no installed here"     #-- TODO see what to do in this case to fulfill the task
+           exit 10
+   fi
+   if [ $APP_STATUS = "stopped" ]; then
+             service mysql start
+             APP_STATUS=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
+             if [ "$APP_STATUS" = "running" ]; then
+                   message "  - Success : MySQL server status is \"running\""
              else 
-                   setev
-                   echo "  - Error : $evtime : MySQL start not succed, status is \"Unknow\"" >> $LOGFILE
-                   pushlogs "error"
-                   exit 10
-             fi
-       ;;
-       "stopped")
-             puppet resource service mysql ensure=running
-             srvstat=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d","     -f1 | cut -d"'" -f2 )
-             if [ "$srvstat" = "running" ]; then
-                   setev
-                   echo "  - Success : $evtime : MySQL server status is \"running\"" >> $LOGFILE
-             else 
-                   setev
-                   echo "  - Error : $evtime : MySQL running signal not success, status is \"Unknow\"" >> $LOGFILE
+                   message "  - Error : MySQL running signal not success, status is Unknow"
                    pushlogs "error"
                    exit 10
              fi    
-       ;;
-       esac
-   else
-       setev
-       echo "  - Error : $evtime : MySQL server no installed here" >> $LOGFILE     #-- TODO see what to do in this case to fulfill the task
    fi
 }  
 
-
-
-############------------ Invoque control functions ------------###################################################################################
-
 function startservices { #--- start services for a refered application
-   case $appname in
-   "gerrit")
-         inno_restore
-         mysqldstart 
-         appstart
-   ;;
-   *)
-         appstart
-   ;;
+   case $dbtool in
+         "mysqldump")
+                  mysqldstart
+                  mydumppush
+         ;;
+         "innobackupex")
+                  #inno_restore
+                  #mysqldstart
+         ;;
    esac
+   if [ $IS_SERVICE = "0" ]; then
+      appstart
+   fi
+   if [ -d "$APP_LOCATION" ]; then  
+         restfiles=$( ls -lR $APP_LOCATION | wc -l )
+         message "- Success: restored files-folders: $restfiles "
+   fi 
+   message "- Info: Restored process concluded OK"
+   pushlogs "success"              #--- send the the logs to the remote central backup storage instance (maestro)
 }
-
 
 function stopservices { #--- take care of the services used per application
-   case $appname in
-   "gerrit")
-         mysqldstop 
+   message "- Running: Performing Operations on the services implied on the restore of $APP_NAME "
+   dbtool=$( cat $BKP_INFO | awk ' BEGIN { FS=":" } /^db_backup_tool/ {print $2}' | sed -e 's/^ "//'  -e 's/"$//' )
+   message "- Info: DB backup tool used for $APP_NAME is $dbtool..."
+   case $dbtool in
+   "mysqldump")
          appstop
+   ;;
+   "innobackupex")
+         #mysqldstop
+         #appstop
    ;;
    *)
          appstop
@@ -486,22 +386,61 @@ function stopservices { #--- take care of the services used per application
    esac
 }
 
-function setfolders () { #--- will set the folders
-   case $appname in
-   "gerrit")
-     mvsqlfold 
-     mvappfold
+function setfolders () { #--- will set the folders (new for restored, old to preserve current files)
+
+   case $dbtool in
+   "innobackupex")
+          # mvsqlfold 
    ;;
-   *)
-     mvappfold
+   "mysqldump")
+          mvsqlfoldcp
+   ;;
    esac
+   mvappfold
 }
 
+function setlocals { #--- will work for local repo restore, setting values to point local and avoid a remote pull
+   message "- Running: Validating local directory provided as repo  for $APP_NAME "
+   message "- Running: Validating local dir $BKP_CONTENT repo "
+   if [ -d "$BKP_CONTENT" ];then
+           message "- Running: Validating bup dir $BKP_CONTENT repo "
+           message "- Running: Validating bup repo "
+           BKP_APP_DIR=$BKP_CONTENT                                            #--- points the repo as folder to next operations performed
+           BKP_INFO=$( ls "${BKP_APP_DIR}/bkphist/${APP_NAME}_backup.info" )       #--- sets the path of the backup file info
+           if [ -f "$BKP_INFO" ]; then
+                  message "- Success: Data of backup $APP_NAME is available "
+           else
+                  message "- Error: Data of backup $APP_NAME isn't pulled complete, check the backup process "
+                  exit 12
+           fi
+           bup -d $BKP_CONTENT ls -a
+           if [ $? -eq 0 ]; then
+                  message "- Success: Validations to local repo $APP_NAME OK "
+                  message "- Success: Bup local repo $APP_NAME OK "                  
+                  BUP_NAME=$(bup -d $BKP_APP_DIR ls | cut -d"/" -f1)                   #--- gets the bup backup name from the repository
+           fi
+   else
+           message "- Error: Validation to local repo not succed, not valid path"
+           message "- Error: Error 6, bup repository not set in place"
+           message "- Error: Not valid path, please verify your setup"
+           exit 6    #---Directory repository not set in place
+   fi
+}
+ 
 function setenvironment () {
-   pullfunc           #-- get the files and folders
-   getbkinffill       #-- set the variables to perform the operations
-   stopservices    #--- stop service specifically needed to perform the restore.
-   setfolders 
+   case $SC_MODE in
+   "-p")
+      pullfunc           #-- get the files and folders using RSYNC
+      getbkinffill       #-- set the variables to perform the operations
+      stopservices       #--- stop service specifically needed to perform the restore.
+      setfolders
+   ;;
+   "-l")
+      setlocals
+      stopservices
+      setfolders
+   ;;
+   esac 
 }
    
 function setrestore () { #-- finalize the operation
@@ -509,21 +448,11 @@ function setrestore () { #-- finalize the operation
    startservices
 }
 
-	
-#service mysql start
-#service gerrit start
-
-# gerrit.config : IP Address incorrect.
-# mysql> delete from account_external_ids where account_id=3 and email_address='clarsonneur@gmail.com';
-# Query OK, 1 row affected (0.00 sec)
-
-# mysql> update account_external_ids set account_id=3 where account_id=5 and email_address='clarsonneur@gmail.com';
-
 function main (){ #--- control and centralice the actions performed by this script
-    setev
-    echo "- Running: $evtime : Performing restore for $appname " >> $LOGFILE
+    message "- Running: Performing restore for $APP_NAME "
+    message "- Running: Performing restore for $APP_NAME "
     setenvironment     #-- do the necessarily movent before the restore                
     setrestore                                                             
 }
-#------
+
 main 

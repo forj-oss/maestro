@@ -16,10 +16,12 @@
 class maestro::backup::configure_box (
   $uses_db = hiera('maestro::backup::configure_box::uses_db', false),
 ){
-  if defined( Class['maestro::backup::backup_server'] ) {
+  if defined( Class['maestro::backup::backup_server'] )
+  {
     notify {'This is maestro, backup::configure_box skipped.':}
   }
-  else {
+  else
+  {
     notify {'Not maestro, backup::configure_box configured.':}
     include maestro::backup::params
     include bup
@@ -34,18 +36,18 @@ class maestro::backup::configure_box (
       repos       => 'main',
       include_src => false,
     }
-    apt::source { 'percona':
-      location    => 'http://repo.percona.com/apt',
-      repos       => 'main',
-      include_src => true,
-      key         => '1C4CBDCDCD2EFD2A',
-      key_server  => 'keys.gnupg.net',
-    }
-    package { 'percona-xtrabackup-21':
-      ensure  => present,
-      require => [ Apt::Source['ubuntu'], Apt::Source['percona'] ],
-    }->
-    notify {'xtrabackup installed.':}
+#    apt::source { 'percona':
+#      location    => 'http://repo.percona.com/apt',
+#      repos       => 'main',
+#      include_src => true,
+#      key         => '1C4CBDCDCD2EFD2A',
+#      key_server  => 'keys.gnupg.net',
+#    }
+#    package { 'percona-xtrabackup-21':
+#      ensure  => present,
+#      require => [ Apt::Source['ubuntu'], Apt::Source['percona'] ],
+#    }->
+#    notify {'xtrabackup installed.':}
 
     if !defined(File[$maestro::backup::params::box_backup_path])
     {
@@ -63,9 +65,9 @@ class maestro::backup::configure_box (
       require => File [$maestro::backup::params::box_backup_path],
     }
 
-    file { "${maestro::backup::params::box_backup_path}/sbin/runbkp":
+    file { "${maestro::backup::params::box_backup_path}/sbin/runbkp.sh":
       ensure  => present,
-      source  => 'puppet:///modules/maestro/backup/runbkp',
+      source  => 'puppet:///modules/maestro/backup/runbkp.sh',
       mode    => '0544',
       require => File["${maestro::backup::params::box_backup_path}/sbin"],
     }
@@ -82,33 +84,47 @@ class maestro::backup::configure_box (
       require => File["${maestro::backup::params::box_backup_path}/sbin"],
     }
 
-    if $uses_db == 'yes' {
+    if $uses_db == 'yes'
+    {
       #Database configuration file
-      $db_user     = $maestro::backup::params::box_db_user
-      $db_password = $maestro::backup::params::box_db_password
-      $mysql_backup_init = template('maestro/backup/mysql_init.erb')
-      $mysql_backup_check= "select count(*) from mysql.user where user='${db_user}'"
-      exec { 'backup_mysql_init':
-        path    => '/bin:/usr/bin',
-        command => "mysql -e \"${mysql_backup_init}\" --verbose",
-        onlyif  => "test $(mysql -N -B -e \"${mysql_backup_check}\") -eq 0",
-      }->
+      $db_tool  = hiera('maestro::backup::box_db_tool')
+      if $db_tool  == 'mysqldump'
+      {
+        $db_user     = ''
+        $db_password = ''
+      }
+      if $db_tool     == 'innobackupex'
+      {
+        $db_user = $maestro::backup::params::box_db_user
+        $db_password = $maestro::backup::params::box_db_password
+        $mysql_backup_init = template('maestro/backup/mysql_init.erb')
+        $mysql_backup_check= "select count(*) from mysql.user where user='${db_user}'"
+        exec { 'backup_mysql_init':
+              path    => '/bin:/usr/bin',
+              command => "mysql -e \"${mysql_backup_init}\" --verbose",
+              onlyif  => "test $(mysql -N -B -e \"${mysql_backup_check}\") -eq 0",
+            }
+      }
       notify {'db backup configured.':}
     }
-    else {
+    else
+    {
       notify {'NO db backup configured on this box.':}
     }
 
-    if $maestro::backup::params::box_backup_user == 'root' {
+    if $maestro::backup::params::box_backup_user == 'root'
+    {
       $home = '/root'
     }
-    else {
+    else
+    {
       $home = "/home/${maestro::backup::params::box_backup_user}"
     }
 
     $ca_certs_db = '/opt/config/cacerts'
     $private_key = cacerts_getkey( join( [ $ca_certs_db, '/ssh_keys/', $maestro::backup::params::backup_user]))
-    if $private_key != undef and $private_key != '' {
+    if $private_key != undef and $private_key != ''
+    {
       file { "${home}/.ssh/${maestro::backup::params::backup_user}":
         ensure  => file,
         owner   => 'root',
@@ -116,14 +132,15 @@ class maestro::backup::configure_box (
         content => $private_key,
       }
       cacerts::add_ssh_host { $maestro::backup::params::backup_user :
-        host_address  => $maestro::backup::params::box_backup_server,
+        host_address  => $maestro::backup::params::maestro_backup_server,
         host_user     => $maestro::backup::params::backup_user,
         local_user    => $maestro::backup::params::box_backup_user,
         keyfile_name  => $maestro::backup::params::backup_user,
       }->
       notify {"${maestro::backup::params::backup_user} ssh configuration added.":}
     }
-    else {
+    else
+    {
       notify {'WARNING, backup user private key was not found.':}
     }
 
@@ -154,9 +171,9 @@ class maestro::backup::configure_box (
       user          => $maestro::backup::params::box_backup_user,
       hour          => '00',
       minute        => '20',
-      command       => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
+      command       => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp.sh --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
       environment   => [  'PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"'],
-      require       => [  File["${sbin_path}/runbkp"],
+      require       => [  File["${sbin_path}/runbkp.sh"],
                           File[$confd_path],
                           File["${sbin_path}/master_bkp.sh"] ],
     }->

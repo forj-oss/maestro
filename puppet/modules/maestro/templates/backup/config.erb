@@ -1,11 +1,12 @@
-<%# backup config file template- the order of lines is not important while the structure remains 
-   [field_name]:(value> #--[comments]%>
-config_ap:<%= @app_name %>
-srcfolder:<%= @app_folder %>
-bkpbsname:<%= @bkp_name %>
-sshcnfnam:<%= @ssh_name %>
+# backup config file template- the order of lines is not important while the structure remains [field_name]:(value> #--[comments]
+# NOTE: DO NOT use spaces beetwen property:value
+app_name:<%= @app_name %>
+app_location:<%= @app_location %>
+bkp_name:bkp_<%= @app_name %>
+ssh_config_host:<%= @ssh_config_name %>
 
-DBsvr:<%= @use_db %>
-DBbkptool:<%= @db_tool %>
-dbuser:<%= @db_user %>
-dbspwd:<%= @db_password %>
+db_bkp_enabled:<% if @db_name != '' %>true<% end %>
+db_bkp_tool:<%= @db_backup_tool %>
+db_name:<%= @db_name %>
+db_user:<%= @db_user %>
+db_pwd:<%= @db_password %>
