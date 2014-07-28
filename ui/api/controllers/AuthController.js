@@ -29,11 +29,13 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
-  var openid = require('openid-request');
+ 
   var crypto = require('crypto');
+  var openid = require('openid-request');
+  var kit_ops = require('kit-ops/kit-ops');
   var check_grav = require('check-grav/check-grav');
   var blueprint_utils = require('blueprint/blueprint');
-  var kit_ops = require('kit-ops/kit-ops');
+  
 module.exports = {
   /**
    * Overrides for the settings in `config/controllers.js`
@@ -48,7 +50,9 @@ module.exports = {
   },
   sign_in: function(req, res){
     var message = req.param('message');
-    res.view({ layout: 'login_layout', message: message });
+    findElement(sails.config.env.plugins.auth, 'default', true, function(auth_plugin){
+      res.view({ default_auth: auth_plugin.name, layout: 'login_layout', message: message });
+    });
   },
   sign_out: function(req, res){
     req.session.destroy();
@@ -60,192 +64,113 @@ module.exports = {
   first_admin: function(req, res){
     res.view({ layout: 'login_layout' });
   },
-  auth: function(req, res){
-    kit_ops.get_opt('openid_url', function(open_err, identifier){
-      if(open_err){
-        res.view('500', { layout: null, errors: [ 'Unable to authenticate with the provider: '+open_err ]});
-      }else{
-        var openid_url = identifier.option_value;
-        if(openid_url === undefined){
-          res.view('500', { layout: null, errors: [ 'We could not retrieve the openid provider' ]});
-        }else{
-          getRelyingParty(function(err, relyingParty){
-            if(err){
-              res.view('500', { layout: null, errors: [ err.message ]});
-            }else{
-              relyingParty.authenticate(openid_url, false, function(error, authUrl)
-              {
-                if (error)
-                {
-                  res.writeHead(200);
-                  res.end('Authentication failed: ' + error.message);
-                }
-                else if (!authUrl)
-                {
-                  res.writeHead(200);
-                  res.end('Authentication failed');
-                }
-                else
-                {
-                  res.writeHead(302, { Location: authUrl });
-                  res.end();
-                }
-              });
-            }
-          });
-        }
-      }
-    });
-  },
-  verify: function(req, res){
-    getRelyingParty(function(err, relyingParty){
-      if(err){
-		console.error('Failed to autenticate:'+err.message);
-        res.view('500', { layout: null, errors: [ 'Failed to autenticate:'+err.message ]});
-      }else{
-        relyingParty.verifyAssertion(req, function(error, result)
-        {
+  authenticate: function(req, res){
+    var module = req.param('module');
+    findElement(sails.config.env.plugins.auth, 'name', module, function(auth_plugin){
+    //Check if the plugin exist
+    if(auth_plugin !== undefined){
+      
+      var auth_module = require(auth_plugin.path);
+      //Check if our plugin has an authentication method
+      if(auth_module.authenticate !== undefined){
+        
+        //We pass the entire req (request) object to our plugin and the plugin will grab everything that he needs like headers, body, params to make the authentication happen
+        auth_module.authenticate(req, function(error, redirect, authenticated){
+        
           if(error){
-            console.error(error.message);
-            res.view({ layout: null, errors: [ error.message ]}, '500');
+          
+            //If we got an error we send the error to the user
+            res.send(error, 500);
+          
           }else{
-            req.session.authenticated = result.authenticated;
-            req.session.email = result.email;
-            req.session.gravatar_hash = crypto.createHash('md5').update(result.email).digest('hex');
-            req.session.claimedIdentifier = result.claimedIdentifier;
-            if(req.session.authenticated === true){
-              check_grav.gravatar_exist(req.session.gravatar_hash, function(has_grav){
-                req.session.has_gravatar = has_grav;
-                kit_ops.kit_has_admin(function(err_ka, result_ka){
-                  if(err_ka){
-                    //Supress the error and send the user to index?
-                    console.error('Unable to check if the kit had an admin already: '+err_ka.message);
-                    res.redirect('/', 301);
-                  }else{
-                    if(result_ka){
-                      //Yes
-                      kit_ops.is_admin(req.session.email, function(err_ia, result_ia){
-                        if(err_ia){
-                          //Supress the error and send the user to index?
-                          console.error('Unable to check is an admin: '+err_ia.message);
-                          res.redirect('/', 301);
-                        }else{
-                          //True or false
-                          req.session.is_admin = result_ia;
-                          req.session.project_visibility = projectsVisibility(req.session.is_admin, req.session.authenticated, req.session.global_manage_projects);
-                          res.redirect('/', 301);
-                        }
-                      });
-                    }else{
-                    //No
-                      kit_ops.create_kit_admin(req.session.email, function(err_ca, result_ca){
-                        if(err_ca){
-                          //Supress the error and send the user to index?
-                          console.error('Unable to create the kit admin: '+err_ca.message);
-                          res.redirect('/', 301);
-                        }else{
-                          //True or false
-                          req.session.is_admin = result_ca;
-                          res.redirect('/', 301);
-                        }
-                      });
-                    }
-                  }
-                });
-              });
+            if(authenticated === true){
+            
+              //User gets authenticated
+              res.send(200);
+            
+            }else if(redirect !== null){
+            
+              //We redirect the user outside of Maestro (OAuth, OpenID style)
+              req.session.auth_method = module;
+              res.writeHead(302, { Location: redirect });
+              res.end();
+            
             }else{
-              console.error('Unable to authenticate the user');
-              res.redirect('/', 301);
+            
+              //If we land here that means that the authentication is false and we don't need to redirect the user so we send an Unauthorized HTTP Code (401)
+              res.send(401);
+            
             }
           }
+          
         });
-      }
-    });
-  }
-  
-};
-function getRelyingParty(callback){
-    var extensions = [new openid.UserInterface(),
-                  new openid.SimpleRegistration(
-                      {
-                        "nickname" : true,
-                        "email" : true,
-                        "fullname" : true,
-                        "dob" : true,
-                        "gender" : true,
-                        "postcode" : true,
-                        "country" : true,
-                        "language" : true,
-                        "timezone" : true
-                      }),
-                  new openid.AttributeExchange(
-                      {
-                        "http://axschema.org/contact/email": "required",
-                        "http://axschema.org/namePerson/friendly": "required",
-                        "http://axschema.org/namePerson": "required"
-                      }),
-                  new openid.PAPE(
-                      {
-                        "max_auth_age": 24 * 60 * 60, // one day
-                        "preferred_auth_policies" : "none" //no auth method preferred.
-                      })];
-    blueprint_utils.get_blueprint_id(function(err){
-      callback('Unable to get the instance id'+err.message, null);
-    }, function(result){
-      var id;
-      try{
-        id = JSON.parse(result).id;
-      }catch(e){
-        id = new Error(e.message);
-      }
-      if(id instanceof Error){
-        console.log('Failed to parse the get_blueprint_id result into the instance id');
-        callback(id.message, null);
+       
       }else{
-        blueprint_utils.get_blueprint_section(id, 'maestro_url', function(err_url){
-          //Suppress the error and log the exception
-          console.log('Unable to retrieve maestro_url:'+err_url.message);
-          callback('Unable to retrieve maestro_url:'+err_url.message, null);
-        }, function(maestro_url){
-          
-          try{
-            maestro_url = JSON.parse(maestro_url);
-          }catch(e){
-            maestro_url = new Error(e.message);
-          }
-          
-          if(maestro_url instanceof Error){
-            console.log('Failed to parse the get_blueprint_section result into the maestro_url');
-            callback(maestro_url.message, null);
-          }else{
-            var relyingParty = new openid.RelyingParty(
-              maestro_url+'/auth/verify', // Verification URL (yours)
-              null, // Realm (optional, specifies realm for OpenID authentication)
-              false, // Use stateless verification
-              false, // Strict mode
-              extensions); // List of extensions to enable and include
-            callback(null, relyingParty);
-          }
-        })
-      }
-    });
-}
-function projectsVisibility(is_admin, is_authenticated, global_manage_projects){
-  var anonymous = 'anonymous';
-  var authenticated = 'authenticated';
-  if(is_admin){
-    return true;
-  }else{
-    if(global_manage_projects !== null){
-      if(global_manage_projects === anonymous){
-        return true
-      } else if(global_manage_projects === authenticated && is_authenticated === true){
-        return true;
-      }else{
-        return false;
+        res.send('Auth module does not have an authentication method', 409);
       }
     }else{
-      return false;
+      res.send('Auth module '+module+', does not exist.', 404);
     }
+   });
+  },
+  verify: function(req, res){
+    var module = req.session.auth_method;
+    findElement(sails.config.env.plugins.auth, 'name', module, function(auth_plugin){
+    //Check if the plugin exist
+    if(auth_plugin !== undefined){
+      
+      var auth_module = require(auth_plugin.path);
+      //Check if our plugin has an authentication method
+      if(auth_module.verify !== undefined){
+        
+        //We pass the entire req (request) object to our plugin and the plugin will grab everything that he needs like headers, body, params to make the authentication happen
+        auth_module.verify(req, function(error, result){
+          if(error){
+            
+            console.log('[Auth Verify] Error trying to verify the user: '+ error);
+            console.log('[Auth Verify] Result: '+ JSON.stringify(result));
+            
+            req.session.project_visibility = result.project_visibility;
+            req.session.authenticated = result.authenticated;
+            req.session.gravatar_hash = result.gravatar_hash;
+            req.session.has_gravatar = result.has_gravatar;
+            req.session.is_admin = result.is_admin;
+            req.session.email = result.email;
+            
+            //Clean the auth_method
+            req.session.auth_method = null;
+
+            res.redirect('/', 301);
+          }else{
+            
+            req.session.project_visibility = result.project_visibility;
+            req.session.authenticated = result.authenticated;
+            req.session.gravatar_hash = result.gravatar_hash;
+            req.session.has_gravatar = result.has_gravatar;
+            req.session.is_admin = result.is_admin;
+            req.session.email = result.email;
+            
+            //Clean the auth_method
+            req.session.auth_method = null;
+            
+            res.redirect('/', 301);
+          }
+        });
+      }else{
+        res.send('Auth module does not have an authentication method', 409);
+      }
+    }else{
+      res.send('Auth module '+module+', does not exist.', 404);
+    }
+   });
   }
+};
+function findElement(array, propName, propValue, callback){
+	var item;
+	array.forEach(function(element){
+		if(element[propName] === propValue){
+			item = element;
+		}
+	});
+	callback(item);
 }
