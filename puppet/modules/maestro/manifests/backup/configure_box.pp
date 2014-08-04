@@ -13,6 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# This puppet file describe what will be installed on a box managed maestro, part of a blueprint instance.
+
 class maestro::backup::configure_box (
   $uses_db = hiera('maestro::backup::configure_box::uses_db', false),
 ){

@@ -13,6 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# This Puppet file describe what will be configured on Maestro for the backup system.
+
 class maestro::backup::backup_server (
 )
 {
@@ -42,36 +44,41 @@ class maestro::backup::backup_server (
   }
 
   #Install monitoring script
-  file { "${home}/corebkpadm":
+
+  file { "${maestro::backup::params::box_backup_path}/sbin":
+    ensure  => directory,
+    require => File [$maestro::backup::params::box_backup_path],
+  }
+
+  # Backup status management:
+  file { "${maestro::backup::params::box_backup_path}/sbin/backup-status.py":
     ensure  => present,
     owner   => $::maestro::backup::params::backup_user,
-    source  => 'puppet:///modules/maestro/backup/corebkpadm',
+    source  => 'puppet:///modules/maestro/backup/backup-status.py',
     mode    => '0544',
     require => File[$home],
   }
+  # Ensure old corebkpadm is removed from the system.
+  file { "${home}/corebkpadm":
+    ensure  => absent,
+  }
+
   cron { 'box_backupstatus':
     user    => $::maestro::backup::params::backup_user,
     hour    => '03',
     minute  => '30',
-    command => "${home}/corebkpadm",
-    require => File["${home}/corebkpadm"],
+    command => "${maestro::backup::params::box_backup_path}/sbin/backup-status.py",
+    require => File["${maestro::backup::params::box_backup_path}/sbin/backup-status.py"],
   }->
   notify{'Installed backup status script.':}
 
-  #Install restoreraid.sh script
-    file { "${maestro::backup::params::box_backup_path}/restore" :
-      ensure  => directory,
-      owner   => $maestro::backup::params::box_backup_user,
-      mode    => '0755',
-      require => File [$maestro::backup::params::box_backup_path],
-    }
-
-    file { "${maestro::backup::params::box_backup_path}/restore/restoreraid.sh":
-      ensure  => present,
-      source  => 'puppet:///modules/maestro/backup/restoreraid.sh',
-      mode    => '0555',
-      require => File["${maestro::backup::params::box_backup_path}/restore"],
-    }
+  # Restore script :
+  file { "${maestro::backup::params::box_backup_path}/sbin/restoreraid.sh":
+    ensure  => present,
+    source  => 'puppet:///modules/maestro/backup/restoreraid.sh',
+    mode    => '0555',
+    require => File["${maestro::backup::params::box_backup_path}/sbin"],
+  }
 
 
   ## Set connection Keys
