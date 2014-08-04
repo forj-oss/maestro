@@ -33,22 +33,29 @@ module Downloader
        return proxy_uri
     end
 
-    # open a url and return the data
-    def openurl(url)
-      data = nil
-      uri = URI.parse(url)
-      proxy_uri = self.getproxyuri
+    # fetch url and redirect 
+    def GET(uri, proxy_uri, maxredirects = 10)
+      raise ArgumentError.new("Max number of redirects reached.") if maxredirects <=0
       http = (proxy_uri != nil) ? Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port) : Net::HTTP.new(uri.host, uri.port)
       if uri.scheme.downcase == "https"
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
-      http.start {
-        http.request_get(uri.path) {|res|
-          data = res.body
-        }
-      }
-      return data
+      response = http.start { |http| http.request_get(uri.path) }
+      case response
+      when Net::HTTPSuccess     then response
+      when Net::HTTPRedirection then GET(URI.parse(response['location']),proxy_uri, maxredirects - 1)
+      else
+        response.error!
+      end
+    end
+
+    # open a url and return the data
+    def openurl(url)
+      data = nil
+      uri = URI.parse(url)
+      proxy_uri = self.getproxyuri
+      return GET(uri,proxy_uri).body
     end
 
     # save data to file

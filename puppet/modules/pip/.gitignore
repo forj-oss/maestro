@@ -1,0 +1,6 @@
+spec/fixtures
+!spec/fixtures/hiera
+!spec/fixtures/hiera/hiera.yaml
+!spec/fixtures/hiera/test.yaml
+!spec/spec_helper.rb
+!spec/spec_utilities.rb

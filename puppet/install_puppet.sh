@@ -16,13 +16,14 @@
 # under the License.
 
 # Install pip using get-pip
-EZ_SETUP_URL=https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-PIP_GET_PIP_URL=https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-
-curl -O $EZ_SETUP_URL || wget $EZ_SETUP_URL
-python ez_setup.py
-curl -O $PIP_GET_PIP_URL || wget $PIP_GET_PIP_URL
-python get-pip.py
+# TODO: remove after this patch is working, puppet bootstraps pip
+#EZ_SETUP_URL=https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+#PIP_GET_PIP_URL=https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+#
+#curl -O $EZ_SETUP_URL || wget $EZ_SETUP_URL
+#python ez_setup.py
+#curl -O $PIP_GET_PIP_URL || wget $PIP_GET_PIP_URL
+#python get-pip.py
 
 # Install puppet version 2.7.x from puppetlabs.
 # The repo and preferences files are also managed by puppet, so be sure

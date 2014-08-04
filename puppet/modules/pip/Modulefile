@@ -1,0 +1,11 @@
+name    'forj-pip'
+version '0.1.0'
+source 'https://review.forj.io'
+author 'Copyright 2012 Hewlett-Packard Development Company, L.P'
+license 'http://www.apache.org/licenses/LICENSE-2.0'
+summary 'provide some puppet tools for managing pip installation'
+description 'We want to install pip with puppet.  This module bootstraps pip and gives some puppet package resources to install pip packages the puppet way.  We also add a downloader resource for puppet.'
+project_page 'https://forj.io'
+
+## Add dependencies, if any:
+# dependency 'username/name', '>= 1.2.0'

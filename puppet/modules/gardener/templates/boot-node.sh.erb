@@ -40,11 +40,13 @@ cat /etc/puppet/puppet.conf | tee -a /tmp/info
 
 # puppet cert list
 
+# pip bootstrap should install this now
 # workaround for pip issues
-[[ ! -f /var/lib/ez_setup.py ]] && wget --no-check-certificate https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O /var/lib/ez_setup.py
-[[ ! -f /var/lib/get-pip.py ]] && wget --no-check-certificate https://raw.github.com/pypa/pip/master/contrib/get-pip.py -O /var/lib/get-pip.py
-python /var/lib/ez_setup.py
-python /var/lib/get-pip.py
+# TODO: remove after works
+#[[ ! -f /var/lib/ez_setup.py ]] && wget --no-check-certificate https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O /var/lib/ez_setup.py
+#[[ ! -f /var/lib/get-pip.py ]] && wget --no-check-certificate https://raw.github.com/pypa/pip/master/contrib/get-pip.py -O /var/lib/get-pip.py
+#python /var/lib/ez_setup.py
+#python /var/lib/get-pip.py
 
 # fix bug with crud failing
 apt-get -q -y install rubygems1.8
