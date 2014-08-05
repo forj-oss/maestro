@@ -29,18 +29,34 @@ function Help()
          $BASE [options] --push-to
          $BASE [options] --report <branch>
          $BASE [options] --remove
-where:
- - configure <Ero IpAddress> : Configure an eroplus to become a testing environment. The IP is the public address of the eroplus to use.
-                               By default, configure will push your current branch code to the remote box. If you need to get the remote code locally and test on it, use --ref remote.
-                         NOTE: If another user has configured the repo to his test, it will warn you, and require your approval.
+There is 2 ways to use test-box:
+1. Working on a test branch, and report updates to any wanted branch when you are done.
+OR
+2. Working on your branch where you have code to test on a remote server.
 
- - restore                   : Restaure master branch on the testing environment. (git checkout master on the remote server)
- - send                      : shortcut to git push (in your workstation) and git pull on the eroPlus box.
- - push-to <Server>          : Will merge all update on your current branch to the server testing branch, and send the update to the remote box (like --send)
- - ssend <commit message>    : Will auto add all files and commit with the message, then will execute standard 'send' command.
- - report                    : Will merge and rebase your code from the current testing branch to any branch you want. Then it will propose to remove your testing branch, like is proposed by 'remove' command.
- - remove                    : Will remove local and remote branch. This is exactly the invert of configure.
-                               !!! Warning !!! You need to merge your code to
+I strongly suggest the second option, easier to manage.
+
+Actions used when ou working on a test branch:
+- --configure <Server> to create your test branch
+- --send or --ssend    to send your commit to the remoe server.
+- --report             to merge your code on another branch, like master.
+- --remove             to remove your test branch.
+
+Actions used when you are working on your development branch, and wanted to test your code, on a server.
+- --push-to <Server>     to send out all current branch commits to the remote server.
+- --remote-from <Server> to remove links to the remote server.
+
+Details:
+ - configure <Server>     : Configure an eroplus to become a testing environment. The IP is the public address of the eroplus to use.
+                            By default, configure will push your current branch code to the remote box. If you need to get the remote code locally and test on it, use --ref remote.
+                            NOTE: If another user has configured the repo to his test, it will warn you, and require your approval.
+ - remove                 : Will remove any configuration built by --configure. You need to be in the testing branch, and your testing code safe to be removed or already merged/rebased.
+ - restore                : Restaure master branch on the testing environment. (git checkout master on the remote server)
+ - send                   : shortcut to git push (in your workstation) and git pull on the eroPlus box.
+ - ssend <commit message> : Will auto add all files and commit with the message, then will execute standard 'send' command.
+ - report                 : Will merge and rebase your code from the current testing branch to any branch you want. Then it will propose to remove your testing branch, like is proposed by 'remove' command.
+ - push-to <Server>       : Will merge all update on your current branch to the server testing branch, and send the update to the remote box (like --send)
+ - remove-from <Server>   : Will remove any configuration built by --push-to to send commits to your remote server.
 
 Options:
  --repo <REPONAME> : Without this option, by default, it will select maestro as repository. You can work with a different one.
@@ -51,18 +67,31 @@ Options:
  --ref remote|local: During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
  --commit <Msg>    : Will commit your code, with a specific <message>
  --commit-all <Msg>: Same as --commit, but the commit will add all tracked updated files to the commit.
- --fixup [Commit]  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
- --squash [Commit] : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+ --fixup <Commit>  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+                     If you set 'last' to <Commit>, test-box will search for the last unfixed commit number.
+ --squash <Commit> : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
 
 This script helps to implement everything to create a test environment connected to a testing local branch.
 It helps you to test some code controlled by git (limit data loss risk, and environment controlled.) on a remote kit."
   exit
 }
 
+#function Error
+#{
+# echo "ERROR! $2"
+# exit $1
+#}
+
+function task_exit
+{
+ Error 1 "Last commands fails. ${1}. Please review and fix it before retrying."
+}
+
 function local_task
 {
  echo "[[1m$USER@$HOSTNAME $(pwd)[0m] $ [1;33m$*[0m"
  eval "$*" 2>&1 | grep -v "Shared connection "
+ return $?
 }
 
 function fix_ero_ip
@@ -80,18 +109,21 @@ function remote_task
 {
  echo "[[1m$REMOTE_USER@$ERO_IP_SHOW ~[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION $*" 2>&1 | grep -v "Shared connection "
+ return $?
 }
 
 function remote_root
 {
  echo "[[1mroot@$ERO_IP_SHOW ~[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION sudo -i \"bash -c \\\"$*\\\"\"" 2>&1 | grep -v "Shared connection "
+ return $?
 }
 
 function remote_root_task
 {
  echo "[[1mroot@$ERO_IP_SHOW $REPO_DIR$REPO[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION sudo -i \"bash -c 'cd $REPO_DIR/$REPO ; $*'\"" 2>&1 | grep -v "Shared connection "
+ return $?
 }
 
 function configure_from_local
@@ -300,10 +332,10 @@ else
    REPO_DIR="/opt/config/production/git/"
 fi
 
-OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to: -- "$@" )
+OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from: -- "$@" )
 if [ $? != 0 ]
 then
-    usage "Invalid options"
+    Help "Invalid options"
 fi
 eval set -- "$OPTS"
 
@@ -359,7 +391,13 @@ do
        then
           do_commit "$1" ""
        else
-          do_commit "$1" "$2"
+          if [ "$2" = "last" ]
+          then
+             COMMITID="$(git log --oneline | grep -v fixup | head -n 1 | awk '{ print $1 }')"
+             do_commit "$1" "$COMMITID"
+          else
+             do_commit "$1" "$2"
+          fi
           shift
        fi
        shift;;
@@ -373,6 +411,11 @@ do
            Help
        fi
        ACTION="REPORT"
+       shift;;
+     "--remove-from")
+       ACTION="REMOVE"
+       REMOVE_BRANCH=testing-${USER}-$2
+       shift
        shift;;
      "--remove")
        ACTION="REMOVE"
@@ -450,9 +493,16 @@ case $ACTION in
      echo "Currently not implemented."
      ;;
     "REMOVE")
+     set -x
+     if [ "$REMOVE_BRANCH" != "" ]
+     then
+        local_task git checkout $REMOVE_BRANCH || task_exit ""
+        CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+     fi
+     set +x
      if [ "$(echo $CUR_BRANCH | grep "^testing-${USER}-.*$")" = "" ]
      then
-        Error 1 "You are not in a known eroplus testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
+        Error 1 "You are not in a known maestro testing branch. Do git checkout to move out to an eroplus testing branch before removing it."
      fi
      ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
      fix_ero_ip
