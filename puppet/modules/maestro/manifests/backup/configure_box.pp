@@ -16,7 +16,6 @@
 # This puppet file describe what will be installed on a box managed maestro, part of a blueprint instance.
 
 class maestro::backup::configure_box (
-  $uses_db = hiera('maestro::backup::configure_box::uses_db', false),
 ){
   if defined( Class['maestro::backup::backup_server'] )
   {
@@ -38,18 +37,6 @@ class maestro::backup::configure_box (
       repos       => 'main',
       include_src => false,
     }
-#    apt::source { 'percona':
-#      location    => 'http://repo.percona.com/apt',
-#      repos       => 'main',
-#      include_src => true,
-#      key         => '1C4CBDCDCD2EFD2A',
-#      key_server  => 'keys.gnupg.net',
-#    }
-#    package { 'percona-xtrabackup-21':
-#      ensure  => present,
-#      require => [ Apt::Source['ubuntu'], Apt::Source['percona'] ],
-#    }->
-#    notify {'xtrabackup installed.':}
 
     if !defined(File[$maestro::backup::params::box_backup_path])
     {
@@ -84,34 +71,6 @@ class maestro::backup::configure_box (
       source  => 'puppet:///modules/maestro/backup/master_bkp.sh',
       mode    => '0544',
       require => File["${maestro::backup::params::box_backup_path}/sbin"],
-    }
-
-    if $uses_db == 'yes'
-    {
-      #Database configuration file
-      $db_tool  = hiera('maestro::backup::box_db_tool')
-      if $db_tool  == 'mysqldump'
-      {
-        $db_user     = ''
-        $db_password = ''
-      }
-      if $db_tool     == 'innobackupex'
-      {
-        $db_user = $maestro::backup::params::box_db_user
-        $db_password = $maestro::backup::params::box_db_password
-        $mysql_backup_init = template('maestro/backup/mysql_init.erb')
-        $mysql_backup_check= "select count(*) from mysql.user where user='${db_user}'"
-        exec { 'backup_mysql_init':
-              path    => '/bin:/usr/bin',
-              command => "mysql -e \"${mysql_backup_init}\" --verbose",
-              onlyif  => "test $(mysql -N -B -e \"${mysql_backup_check}\") -eq 0",
-            }
-      }
-      notify {'db backup configured.':}
-    }
-    else
-    {
-      notify {'NO db backup configured on this box.':}
     }
 
     if $maestro::backup::params::box_backup_user == 'root'
