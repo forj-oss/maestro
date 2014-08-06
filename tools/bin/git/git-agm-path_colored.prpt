@@ -1,0 +1,7 @@
+This prompt has GIT AGM and FULL path colored:
+
+[0;1m(U:5 D:1 I:4) [0;31mUserStory#1305 : move CDK-infra team [0m
+[larsonsh@larsonneur2 [32m~/src/cdk/openstack/[1;33mconfig[0;33m/tools[0m] ([32mstable[0m u=)$ MyCommand
+
+type: export GIT_PS1_SHOWDIRTYSTATE=1 GIT_PS1_SHOWSTASHSTATE=1 GIT_PS1_SHOWUNTRACKEDFILES=1 GIT_PS1_SHOWCOLORHINTS=1 GIT_PS1_SHOWUPSTREAM=verbose
+Type: PROMPT_COMMAND='AGM_check_update;__git_ps1 "\[\e[0;1m\]$(AGM_stats)$(AGM_show "\[\e[0;31m\] " "\[\e[0m\]")\n[\u@\h $(if [ "$AGM_CUR_REPO_NAME" != "" ];then echo "\[\e[0;32m\]$(echo $AGM_CUR_REPO_PATH| sed "s|$AGM_CUR_REPO_NAME||g"|sed "s|$HOME|~|g")\[\e[1;33m\]$AGM_CUR_REPO_NAME/\[\e[0;33m\]$(pwd | sed -e "s|.*$AGM_CUR_REPO_PATH/*||g")" ; else echo "\[\e[1;32m\]\w" ; fi)\[\e[0m\]]" "$ "'

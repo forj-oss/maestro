@@ -1,0 +1,4 @@
+So, if you have or want git prompt, You can set the following simple color prompt:
+
+[[1mlarsonsh@larsonneur2 config[0m] -  [31mUserStory#1305 : move CDK-infra team[0m   (stable u=)$ MyCommand
+Type: PROMPT_COMMAND='AGM_show "[\e[1m\u@\h \W\e[0m] " " - \[\e[0;31m\]" "\[\e[0m\] \$(__git_ps1)$ "'

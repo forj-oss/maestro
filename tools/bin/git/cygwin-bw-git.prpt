@@ -1,0 +1,9 @@
+This is the default cygwin prompt with agm and GIT prompts added.
+To be honest, I do not recommend it on cygwin because Windows do not deal well with small files/processes.
+You can test it, But I suggest you to avoid it for performance consideration.
+
+Note: This prompt like others are working very well under linux.
+
+[32mlarsonsh@larsonneur2 [33m~/src/cdk/CDK-infra/tools/bin[0m - [31mInnovation#6 : AGM fixes. [0m
+[agm *$% u=] $ MyCommand
+Type: PROMPT_COMMAND='AGM_show "\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]" " - \[\e[31m\]" "\[\e[0m\]\n$(__git_ps1 "[%s] ")$ "'

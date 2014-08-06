@@ -1,0 +1,16 @@
+GIT and AGM color prompt:
+
+AGM: [1m(U:1 I:4) [0;31mUserStory#1305 : move CDK-infra team [0m
+[larsonsh@larsonneur2 config] ([32mstable[0m u=)$ MyCommand
+type: AGM_PRPT_FOR_PS1=1
+type: 
+type: # PS1 prompt requires to encapsulate ANSI color code by \[ \] for prompt usage. So, no need to add it in format. Increase Readilibity.
+type: AGM_PRPT_ESC_PS1_COLOR=1
+type: 
+type: # AGM 
+type: AGM_PRPT_FORMAT="AGM: %S%a%s%i\n"
+type: AGM_PRPT_STAT='\e[1;37m(%s)\e[0m'
+type: AGM_PRPT_AGMID='\e[1m - \e[0;31m%s :'
+type: AGM_PRPT_AGMSUB='%s\e[0m'
+type: AGM_PRPT_INFO='\e[1;31m !!! %s !!!\e[0m'
+Type: PROMPT_COMMAND='AGM_check_update;__git_ps1 "$(AGM_show)[\u@\h \W]" "$ "'

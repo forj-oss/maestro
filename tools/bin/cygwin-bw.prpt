@@ -1,0 +1,5 @@
+This is the default cygwin prompt with agm added.
+
+[32mlarsonsh@larsonneur2 [33m~/src/cdk/CDK-infra/tools/bin[0m - [31mInnovation#6 : AGM fixes. [0m
+$ MyCommand
+Type: PROMPT_COMMAND='AGM_show "\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]" " - \[\e[31m\]" "\[\e[0m\]\n$ "'

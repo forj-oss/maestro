@@ -1,0 +1,4 @@
+Simple prompt:
+
+[larsonsh@larsonneur2 config - UserStory#1305 : move CDK-infra team ]$ MyCommand
+Type: PROMPT_COMMAND="AGM_show '[\u@\h \W ' ' - ' ']$ '"
