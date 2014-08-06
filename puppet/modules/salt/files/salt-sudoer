@@ -1,0 +1,2 @@
+#Let the user "puppet" run: sudo -u salt
+puppet ALL = (salt) NOPASSWD:ALL

@@ -206,4 +206,16 @@ class salt::master (
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     logoutput   => true,
   }
+
+  if ! defined(File['/etc/sudoers.d/salt-sudoer'])
+  {
+    file { '/etc/sudoers.d/salt-sudoer':
+      ensure => present,
+      source => 'puppet:///modules/salt/salt-sudoer',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0440',
+    }
+  }
+
 }

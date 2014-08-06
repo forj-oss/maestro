@@ -112,6 +112,7 @@ module.exports = {
             req.session.authenticated = result.authenticated;
             req.session.email = result.email;
             req.session.gravatar_hash = crypto.createHash('md5').update(result.email).digest('hex');
+            req.session.claimedIdentifier = result.claimedIdentifier;
             if(req.session.authenticated === true){
               check_grav.gravatar_exist(req.session.gravatar_hash, function(has_grav){
                 req.session.has_gravatar = has_grav;

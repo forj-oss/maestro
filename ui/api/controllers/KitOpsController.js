@@ -29,8 +29,10 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
- var validator = require('validator');
- var register_module = require('kit-reg/kit-reg');
+var validator = require('validator');
+var register_module = require('kit-reg/kit-reg');
+var maestro_exec = require('maestro-exec/maestro-exec');
+ 
 module.exports = {
     
   
@@ -56,6 +58,7 @@ module.exports = {
   do_register: function(req, res){
     var name = req.param('name');
     var email = req.session.email;
+    var claimedIdentifier = req.session.claimedIdentifier;
     if(email !== undefined){
       if((name !== undefined && name.length > 0) && validator.isEmail(email) === true){
         name = validator.toString(name);
@@ -63,6 +66,16 @@ module.exports = {
           console.error("Kit Registration Failed: "+err.message);
           res.json({ success: 'failed', message: 'Kit Registration Failed'}, 500);
         }, function(result){
+          if (req.session.blueprint_name.toUpperCase() == 'REDSTONE'){ 
+            var minionCmd = "/usr/bin/python /opt/config/production/lib/create_admin.py --username '" + name +  "' --email '" + email + "' --claimed_id '" + claimedIdentifier +  "'";
+            var saltCmd = "sudo -u salt /usr/bin/salt 'review.*' --out=json cmd.retcode \"" + minionCmd +"\"";
+            maestro_exec.execCmd(saltCmd, function (error, stdout, stderr) {
+              if(error){
+                console.error('Gerrit Admin account creation failed: ' + stderr);
+                res.json({ success: 'failed', message: 'Gerrit Admin account creation failed.' }, 409);
+              }
+            });
+          }
           console.info("Kit Registration: "+result.state+", Stacktrace: "+result.stacktrace);
           res.json({ success: result.state, message: result.stacktrace }, 200);
         })
