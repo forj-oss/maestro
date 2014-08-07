@@ -1,8 +1,3 @@
-# ***************************************************************
-
-# ** make_keys module for puppet
-# ***************************************************************
-
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,18 +11,28 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#
 
- module Puppet::Parser::Functions
-  newfunction(:cacerts_getkey, :type => :rvalue) do |args|
-    data = ''
-    begin
-      filename = args[0]
-      data = File.read(filename) if File.exists?(filename)
-    rescue Exception => e
-       Puppet.warning "failed to read key #{file}"
-       Puppet.warning "#{e}"
-    end
-    data
+source 'https://rubygems.org'
+
+group(:development, :test) do
+  if ENV.key?('PUPPET_VERSION')
+    puppetversion = "= #{ENV['PUPPET_VERSION']}"
+  else
+    puppetversion = ['2.7.25']
   end
+  gem 'puppet', puppetversion, :require => false
+  gem 'puppetlabs_spec_helper', '0.5.1'
+  gem 'puppet-lint', '0.3.2'
+  gem 'rake'
+  gem 'ruby-debug'
+  gem 'rspec', "~> 2.10.0", :require => false
 end
+
+
+# HOWTO Install:
+# gem1.8 install bundler --no-rdoc --no-ri
+# bundle install --gemfile Gemfile
+
+# Testing:
+# configure cloud.fog file, see README.md
+# rake spec
