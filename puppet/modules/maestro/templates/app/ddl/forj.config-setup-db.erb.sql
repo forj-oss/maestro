@@ -54,4 +54,4 @@ INSERT IGNORE INTO kit_options VALUES (6,'launchpad_defect_url','https://code.la
 INSERT IGNORE INTO kit_options VALUES (7,'bugzilla_defect_url','http://bugs.example.com/show_bug.cgi?id=$2',NULL,'bugzilla defect url');
 INSERT IGNORE INTO kit_options VALUES (8,'openid_provider','<%= @auth_provider %>',NULL,'default openid provider');
 INSERT IGNORE INTO kit_options VALUES (9,'openid_url','<%= @openidssourl %>',NULL,'default openid provider url');
-INSERT IGNORE INTO kit_options VALUES (10,'show_welcome_notification','true',NULL,'Used to show the FORJ welcome message');
+INSERT IGNORE INTO kit_options VALUES (10,'show_welcome_notification','false',NULL,'Used to show the FORJ welcome message');
