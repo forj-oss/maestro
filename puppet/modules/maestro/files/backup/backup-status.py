@@ -53,7 +53,7 @@ from datetime import date,datetime
 
 ##############################
 def help():
-   print 'backup-status.py [--bck-path MaestroBackupPath]'
+   print 'backup-status.py [--bck-path MaestroBackupPath] [-d|--debug] [-v|--verbose] [--output|-o <file|\'-\'>]'
 
 ##############################
 def find_mount_point(path):
@@ -399,7 +399,7 @@ def main(argv):
 
     if BCK_STATUS_FILE == '-':
        # Permit to show info/Warning/errors/critical on err while status is printed out to standard output.
-       logging.setLevel(20)
+       logging.getLogger().setLevel(20)
 
     if ACTION == 'run':
        build_backup_status(BCK_PATH, BCK_STATUS_FILE)
