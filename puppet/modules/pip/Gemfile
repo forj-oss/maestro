@@ -28,11 +28,7 @@ group(:development, :test) do
   gem 'rspec', "~> 2.10.0", :require => false
 end
 
-`puppet resource package vim ensure=present`
-`puppet resource package git ensure=present`
-`puppet resource package make ensure=present`
-`puppet resource package dos2unix ensure=present`
-gem 'json','~>1.7.5'
+gem 'mocha','0.12.10'
 # HOWTO Install:
 # gem1.8 install bundler --no-rdoc --no-ri
 # bundle install --gemfile Gemfile

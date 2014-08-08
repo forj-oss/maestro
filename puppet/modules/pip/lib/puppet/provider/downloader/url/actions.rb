@@ -21,10 +21,14 @@ module Downloader
       check(@resource[:path])
       data = self.openurl(@resource[:name])
       data_md5 = self.md5(data)
-      return if @resource[:md5] == nil
-      unless data_md5 == @resource[:md5]
-        Puppet.debug "download from #{@resource[:name]} does not match #{@resource[:md5]}"
-        raise Puppet::Error, "download has md5 of #{data_md5}"
+      Puppet.debug "downloaded #{@resource[:name]} with md5 #{data_md5}"
+      if @resource[:md5] != nil
+        unless data_md5 == @resource[:md5]
+          Puppet.debug "download from #{@resource[:name]} does not match #{@resource[:md5]}"
+          raise Puppet::Error, "download has md5 of #{data_md5}"
+        end
+      else
+        Puppet.debug "skipping md5 check."
       end
       options = {}
       options[:group] = @resource[:group] if @resource[:group] != nil

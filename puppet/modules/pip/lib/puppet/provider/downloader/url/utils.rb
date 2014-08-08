@@ -61,10 +61,12 @@ module Downloader
     # save data to file
     def createfile(fspec, data, options = {})
 
+      Puppet.debug "creating file : #{fspec}"
       open(fspec, "wb") do |file|
         file.write(data)
         file.chmod(self.symbolic_mode_to_int(options[:mode])) if options.has_key?(:mode)
       end
+
       Puppet.debug "setting ownership"
       if Puppet.features.root?
         owner = (options.has_key?(:owner) == true) ? options[:owner] : nil 
