@@ -31,7 +31,7 @@ class pip::python2 {
   }
 
   exec { 'install_setuptools2':
-    command   => 'python2 /var/lib/ez_setup.py',
+    command   => 'python2 /var/lib/python-install/ez_setup.py',
     path      => '/bin:/usr/bin',
     subscribe => Downloader[$::pip::params::ez_setup_url],
     creates   => $::pip::params::setuptools_pth,
