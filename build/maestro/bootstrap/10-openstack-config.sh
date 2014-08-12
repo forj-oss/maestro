@@ -22,7 +22,7 @@ export HOME=/root
 # Uses local stable resource instead of internet one. See ubuntu@jenkins.cdkdev.org
 
 cd /opt/config/production/git
-CloneRepo config https://review.forj.io/oo-infra/config $GITBRANCH
+CloneRepo config https://review.forj.io/p/oo-infra/config $GITBRANCH
 cd config
 git config core.autocrlf false
 set +x
