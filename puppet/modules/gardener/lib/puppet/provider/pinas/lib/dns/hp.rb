@@ -31,7 +31,7 @@ module Puppet
             return {:dns => dns_conn, :dnss => nil, :dnsh => nil }
          rescue Exception => e
             Puppet.warning "problem getting Manager::HP::Connection.instance, #{e}"
-            Puppet.crit e.backtrace.join("\n")
+            Puppet.debug e.backtrace.join("\n")
            raise "problem getting Manager::HP::Connection.instance, #{e}"
          #  return {:dns => nil, :dnss => nil, :dnsh => nil }
          end
