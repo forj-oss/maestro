@@ -44,7 +44,7 @@ blueprint:
         uninstall:
           puppet-apply: uninstall
       - src-repo: config
-        git: http://jenkins.cdkdev.org:82/ubuntu/config.git
+        git: https://review.forj.io/oo-infra/config
         puppet-extra-modules: /opt/config/production/git/config/modules
   define:
     kit:
