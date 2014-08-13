@@ -139,15 +139,14 @@
   background: url('/images/notification.png');
   background-repeat: no-repeat;
   cursor: pointer;
-  position: relative;
 }
-.notifications div{
+.notifications .number{
   height: 20px;
   width: 20px;
   text-align: center;
   border-radius: 50%;
   background-color: #cb0000;
-  position: absolute;
+  position: relative;
   top: -9px;
   left: 8px;
   font-family: "Open Sans Regular", "Open Sans Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;

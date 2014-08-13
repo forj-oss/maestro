@@ -44,7 +44,7 @@
         <div class="header-options">
           <ul class="options">
             <% if (req.session.show_welcome_message == true || req.session.show_welcome_message == 'true'){ %>
-               <li><div class="notifications"><div>1</div></div></li>
+               <li><div class="notifications"><div class="number">1</div></div></li>
             <% } %>
             <li><div class="help">?</div></li>
             <span style="clear:both;"></span>
@@ -138,13 +138,25 @@
       });
 
       $('.notifications').click(function(){
-        if( $(this).parent().children('div.notifications-show').length === 0 ){
-          $('.preview').remove();
-          $(this).parent().append("<div  class='notifications-show preview'><div id='viewport'></div></div>");
-          $('div.notifications-show').children('#viewport').load('../notifications/index').delay(500);
-        }else{
-          $(this).parent().children('div.notifications-show').remove();
-        }
+        if( $(this).children('div.notifications-show').length === 0 ){
+           $('.preview').remove();
+           $(this).append("<div class='notifications-show preview'><div id='viewport'></div></div>");
+           $(this).children('div.notifications-show').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
+           $('div.notifications-show').children('#viewport').append("<span class='loading-span'>Loading...</span>");
+           $('div.notifications-show').children('#viewport').load('../notifications/index', function(response, status, xhr){
+             if (status == 'error') {
+               $('.loading-span').fadeOut(300, function(){
+                 $(this).text('Unable to load notification section.');
+               }).fadeIn(300);
+             }else{
+               $(this).html(response);
+             }
+           });
+         }else{
+          $(this).children('div.notifications-show').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function()    {
+             $('div.notifications-show').remove();
+           });
+         }
       });
    });
   </script>
