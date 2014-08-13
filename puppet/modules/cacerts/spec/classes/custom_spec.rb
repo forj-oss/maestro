@@ -11,28 +11,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+#
+require 'spec_helper'
 
-source 'https://rubygems.org'
-
-group(:development, :test) do
-  if ENV.key?('PUPPET_VERSION')
-    puppetversion = "= #{ENV['PUPPET_VERSION']}"
-  else
-    puppetversion = ['2.7.25']
+describe 'cacerts::custom', :default => true do
+  let(:params) { {:ca_pass => 'test', :ca_certs_db => File.expand_path ('spec/fixtures/cacerts' )} }
+  context 'with default values' do
+    it { should compile }
   end
-  gem 'puppet', puppetversion, :require => false
-  gem 'puppetlabs_spec_helper', '0.5.1'
-  gem 'puppet-lint', '0.3.2'
-  gem 'rake'
-  gem 'ruby-debug'
-  gem 'rspec', "~> 2.10.0", :require => false
 end
-gem 'mocha','0.12.10'
 
-# HOWTO Install:
-# gem1.8 install bundler --no-rdoc --no-ri
-# bundle install --gemfile Gemfile
-
-# Testing:
-# configure cloud.fog file, see README.md
-# rake spec

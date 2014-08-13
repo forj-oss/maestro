@@ -1,0 +1,5 @@
+cacerts/custom
+cacerts/custom/*.locked_key
+cacerts/custom/*.key
+manifests
+manifests/*
