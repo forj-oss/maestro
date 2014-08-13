@@ -37,7 +37,7 @@ cd $APP_NAME
 
 if [ ${#META[@]} -gt 0 ]
 then
-   META_DATA="$(echo "${META[@]}" | sed 's/ /,/g')"
+   META_DATA="$( IFS=',' ; echo "${META[*]}")"
    Info "Meta-data set:
 $META_DATA"
    META_JSON="{\"$(echo $META_DATA|sed 's/ *= */":"/g

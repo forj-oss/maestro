@@ -28,5 +28,6 @@ Load_test-box_repos # Loading test-box information for external bootstrapping (d
 _PROXY="$(GetJson /meta-boot.js webproxy)"
 
 apt-get purge -yq python-pip
+apt-get install git -yq
 
 export HOME=/root

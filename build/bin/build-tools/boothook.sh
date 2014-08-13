@@ -60,6 +60,7 @@ then
     if [ -f /config/meta.js ]
     then
       PREFIX=/config
+      echo "Diskdrive: /dev/vdc mounted. /config/meta.js found"
     else
       mount /dev/sr0 /config
       if [ -f  /config/openstack/latest/meta_data.json ]
@@ -67,6 +68,7 @@ then
         _meta_data="$(GetJson /config/openstack/latest/meta_data.json meta)"
         if [ -n "$_meta_data" ]
         then
+          echo "Diskdrive: /dev/sr0 mounted. Extracting from /config/openstack/latest/meta_data.json"
           PREFIX=/
           echo "$_meta_data" > $PREFIX/meta.js
           sed -e "s/u'/\"/g" $PREFIX/meta.js --in-place
@@ -78,7 +80,8 @@ then
 fi
 
 #if metadata does not exist grab it form the Upstream provided data ({metadata-json} is replaced by upstream code (build.sh))
-if [ ! -f $PREFIX/meta.js ] 
+_test_data="$(GetJson $PREFIX/meta.js cdksite)"
+if [ ! -f $PREFIX/meta.js ] || [ "$_test_data" = "" ]
 then
   echo '${metadata-json}' > /meta.js
   echo "WARNING! /meta.js not found. Getting info from user_data"
@@ -86,7 +89,7 @@ fi
 
 #try to validate that the content is OK, as last fallback hardcode the data
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
-if [ "$_test_data" == "" ]
+if [ "$_test_data" = "" ]
 then
   echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "htts://review.for.io/p/forj-oss/maestro","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
   echo "WARNING! $PREFIX/meta.js not found. HARDCODING DATA"

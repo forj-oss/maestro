@@ -279,9 +279,9 @@ while true ; do
             shift;shift;;
         --meta)
             META_NAME="$(echo "$2" | awk -F= '{print $1}' | awk '{ print $1}')"
-            META_VAL="$( echo "$2" | awk -F= '{print $2}' | awk '{ print $1}')"
-            META[$META_NAME]="$META_NAME=$META_VAL"
-            echo "Meta set : $META_NAME"
+            META_VAL="$( echo "$2" | awk -F= '{print $2}')"
+            META[$META_NAME]="$META_NAME='$META_VAL'"
+            echo "Meta set : ${META[$META_NAME]}"
             unset META_NAME META_VAL
             shift;shift;; 
         --meta-data)
