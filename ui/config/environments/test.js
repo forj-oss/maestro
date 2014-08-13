@@ -38,5 +38,12 @@ module.exports.env = {
             port: '8080',
             resource_uri: '/kitops/'
         }
+    },
+    plugins: {
+      auth: [
+        { name: 'keystone', path: '../../plugins/auth/keystone/keystone.js', default: false },
+        { name: 'openid', path: '../../plugins/auth/openid/openid.js', default: true },
+        { name: 'ldap', path: '../../plugins/auth/ldap/ldap.js', default: false }
+     ]
     }
 };
