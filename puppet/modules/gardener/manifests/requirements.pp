@@ -69,9 +69,13 @@ class gardener::requirements(
     ensure: 'latest'
   libxslt-dev:
     ensure: 'latest'
+  libxml2-dev:
+    ensure: 'latest'
   make:
     ensure: 'latest'
-    require: 'Package[libxslt-dev]'
+    require:
+     - 'Package[libxslt-dev]'
+     - 'Package[libxml2-dev]'
   mime-types:
     ensure: '1.25.1'
     provider: 'gem18'
