@@ -63,6 +63,10 @@ packages::install:
   - 'logwatch'
   - 'htop'
   - 'python-psutil'
+  - 'libxslt-dev'
+  - 'libxml2-dev'
+  - 'dos2unix'
+  - 'make'
 
 packages::remove:
   - 'apparmor'
