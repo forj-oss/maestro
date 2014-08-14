@@ -96,6 +96,7 @@ class gardener::requirements(
     require:
      - 'Package[json]'
      - 'Package[libxml2-dev]'
+     - 'Package[libxslt-dev]'
 ${hpcloud_package}
 ")
   $packages = keys($package_data)
