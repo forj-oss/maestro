@@ -71,6 +71,7 @@ module.exports = {
               kit_ops.kit_has_admin(function(err_ka, result_ka){
                 if(err_ka){
                   console.log('Unable to check if the kit has an admin');
+                  callback(null, null);
                 }else{
                   callback(null, result_ka);
                 }
@@ -80,6 +81,7 @@ module.exports = {
               kit_ops.is_admin(result.email, function(err_ia, result_ia){
                 if(err_ia){
                   console.log('Unable to check is an admin: '+err_ia.message);
+                  callback(null, false);
                 }else{
                   callback(null, result_ia);
                 }
@@ -92,12 +94,15 @@ module.exports = {
             if (async_err) {
               console.error(async_err.message)
             }else{
-              if(async_result.kit_has_admin === false && async_result.is_admin === false){
+              if(async_result.kit_has_admin === false){
                 kit_ops.create_kit_admin(async_result.email, function(err_ca, result_ca){
                   if(err_ca){
                     async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
                     callback_verify(null, async_result);
                   }else{
+                    if(result_ca){
+                      async_result.is_admin = true;
+                    }
                     async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
                     callback_verify(null, async_result);
                   }

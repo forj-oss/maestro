@@ -130,12 +130,14 @@ module.exports = {
             console.log('[Auth Verify] Error trying to verify the user: '+ error);
             console.log('[Auth Verify] Result: '+ JSON.stringify(result));
             
-            req.session.project_visibility = result.project_visibility;
-            req.session.authenticated = result.authenticated;
-            req.session.gravatar_hash = result.gravatar_hash;
-            req.session.has_gravatar = result.has_gravatar;
-            req.session.is_admin = result.is_admin;
-            req.session.email = result.email;
+            if(result !== null){
+              req.session.project_visibility = result.project_visibility;
+              req.session.authenticated = result.authenticated;
+              req.session.gravatar_hash = result.gravatar_hash;
+              req.session.has_gravatar = result.has_gravatar;
+              req.session.is_admin = result.is_admin;
+              req.session.email = result.email;
+            }
             
             //Clean the auth_method
             req.session.auth_method = null;
