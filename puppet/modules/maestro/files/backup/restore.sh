@@ -13,12 +13,10 @@
 # limitations under the License.
 
 # restore.sh script, placed in box to perform backup restore of App files.
-# used to run in dependency of restoreraid 
+# used to run in dependency of restoreraid
 #
 
-#--- Variables sets by call of restoreraid master to perfom the restore
-# --- Variables values get by parameter defined when the script is invoqued --- #
-SC_MODE="$1"                                                                            #--- Will define if the repos will be pulled from a remotely source or locally  ie -p or -l 
+SC_MODE="$1"                                                                            #--- Will define if the repos will be pulled from a remotely source or locally  ie -p or -l
 APP_NAME="$2"                                                                           #--- Application name; sets the name for the restore folder
 BKP_CONTENT="$3"                                                                        #--- Indicates the path of the repo source to be restored (could be local or remote)
 WEEK_NUM=$( echo "$BKP_CONTENT" | awk 'BEGIN { FS="/" } { print $NF } ' )               #--- Returns 2014-30
@@ -27,24 +25,56 @@ BKP_LOG_DIR=""                                                                  
 IS_SERVICE=""                                                                           #--- Contains status value that shows app availability in the system
 APP_LOCATION=""                                                                         #--- contains the App home folder
 BKP_INFO=""                                                                             #--- directs the path to file where important data about the bkp is contained
+BUP_CMD=""
+
 
 #--- Harcoded Variables
 REST_BASE_DIR="/mnt/restore"
-REST_APP_DIR="$REST_BASE_DIR/$APP_NAME"                                            #---where the pulled repo will be placed
+REST_APP_DIR="$REST_BASE_DIR/$APP_NAME"                                                 #---where the pulled repo will be placed
 LOG_FILE="${REST_BASE_DIR}/${APP_NAME}_restore.log"
 REST_FILES_LOG="${REST_BASE_DIR}/${APP_NAME}_restfiles.log"
 DB_DATA_DIR=$(grep datadir /etc/mysql/my.cnf | cut -d"=" -f2 | cut -d" " -f2)
-SSH_CONFIG_HOST="forj-bck"                                                         #--- name of ssh configuration located on ~/.ssh/config file
+SSH_CONFIG_HOST="forj-bck"                                                              #--- name of ssh configuration located on ~/.ssh/config file
 REMOTE_LOG_DIR="/mnt/backups/restorelogs/"                                              #--- Remote folder for the restore logs
-SQL_PARAMS=""                                                                      #--- Could be retrieved from a env var
-#------------------------------------------------------------------------------------------------------------------
+SQL_PARAMS=""                                                                           #--- Could be retrieved from a env var
+
+
+#--- Error codes
+
+RSYNC_ERROR=1               # Rsync Error
+BKP_LOG_DIR_DOESNT_EXIST=2  # BKP_LOG_DIR doesnt exist
+SERVICE_STOP_FAILED=3       # Service stop failed
+BUP_NOT_INSTALLED=4         # Bup is not installed
+WRONG_DIR_PERMISSIONS=5     # wrong permissions in a directory
+BKP_CONTENT_DOESNT_EXIST=6  # BKP_CONTENT doesnt exist
+SQL_FILE_DOESNT_EXIST=8     # Sql file doesnt exist
+SERVICE_START_FAILED=9      # App didn't restart succesfully
+MYSQL_NOT_INSTALLED=10      # Error : MySQL server no installed here
+SSH_ERROR=11                # ssh error
+BKP_INFO_DOESNT_EXIST=12    # BKP_INFO doesnt exist
+
 
 function message(){
   local logtime="$(date '+%Y-%m-%d_%H-%M-%S')"
   local msg=$1
-  [ -n "$msg" ] && echo "${logtime}: ${msg}"
-  [ -f "$LOG_FILE" ] && echo "${logtime}: ${msg}" >> $LOG_FILE
+  if [ ! -f $LOG_FILE ]; then
+          touch $LOG_FILE
+          # Make the log readable and writable by the group and others:
+          chmod go+rw $LOGFILE
+  fi
+  if [ -n "$msg" ] ; then
+        echo "${logtime}: ${msg}"
+        echo "${logtime}: ${msg}" >> $LOG_FILE
+  fi
 }
+
+
+function set_bup_cmd(){
+  hash bup 2>/dev/null || { echo >&2 message "Error: bup is not installed.  Aborting."; exit "$BUP_NOT_INSTALLED"; }
+  BUP_CMD=$(which bup)
+
+}
+
 
 function pushlogs () { #--- send the log files to the central backup storage instance "maestro"
    flval=$1
@@ -60,6 +90,7 @@ function pushlogs () { #--- send the log files to the central backup storage ins
    esac
 }
 
+
 function ssh_cnf_chk { #--- set check of the ssh configurations
    ssh -t $SSH_CONFIG_HOST 'exit'
    if [ $? -eq 0 ]; then
@@ -67,9 +98,10 @@ function ssh_cnf_chk { #--- set check of the ssh configurations
    else
           message "  - Error   : SSH Configurations wrong or not set, verifi your setting in ~/.ssh/config "
           pushlogs "error"
-          exit 11  #--- ssh error
+          exit "$SSH_ERROR"  #--- ssh error
    fi
 }
+
 
 function pullfunc { #--- will receive parameters and do the pull of an specific folder to perform the restore
    if [ ! -d $REST_BASE_DIR ]; then
@@ -86,9 +118,10 @@ function pullfunc { #--- will receive parameters and do the pull of an specific 
    else
            message "  - Error   : rsync operation fails, see log file errors "
            pushlogs "error"
-           exit 1  #--- rsync error
+           exit "$RSYNC_ERROR"  #--- rsync error
    fi
 }
+
 
 function getbkinffill { #--- get and fills the names of bkp and the path for the repo set
    BKP_APP_DIR="$(ls -d $REST_APP_DIR/$WEEK_NUM)/bup_repo"
@@ -99,23 +132,25 @@ function getbkinffill { #--- get and fills the names of bkp and the path for the
                     message "- Success: Data of backup $APP_NAME is available "
             else
                     message "- Error: Data of backup $APP_NAME isn't pulled complete, check the backup process "
-                    exit 12 #--- posibly something happened during the backup and the set of files are not complete
-            fi          
-            BUP_NAME="$(bup -d "${BKP_APP_DIR}" ls | cut -d"/" -f1)"                #--- gets the bup backup name from the repository
-   else   
+                    exit "$BKP_INFO_DOESNT_EXIST"  #--- posibly something happened during the backup and the set of files are not complete
+            fi
+            BUP_NAME="$("$BUP_CMD" -d "${BKP_APP_DIR}" ls | cut -d"/" -f1)"                #--- gets the bup backup name from the repository
+   else
             message "  - Error : $BKP_APP_DIR folder does not exists"
             pushlogs "error"
-            exit 2  #--- not listed folder for backup set
+            exit "$BKP_LOG_DIR_DOESNT_EXIST"  #--- not listed folder for backup set
    fi
 }
 
+
 function get_home {  #---gets "path" and sets $APP_LOCATION variable
    message "  - Operations : Retrieving path for the application from the bup repository "
-   APP_LOCATION=$( cat $BKP_INFO | awk ' BEGIN { FS=":" } /^source_folder/ {print $2}' | sed -e 's/^ "//'  -e 's/"$//') #--- will get the home from bup repo 
+   APP_LOCATION=$( cat $BKP_INFO | awk ' BEGIN { FS=":" } /^source_folder/ {print $2}' | sed -e 's/^ "//'  -e 's/"$//') #--- will get the home from bup repo
 }
 
+
 function mvsqlfoldcp {  #--- Copy the current contents of mysql folder and leaves the one unaltered
-   if [ -d "$DB_DATA_DIR" ]; then 
+   if [ -d "$DB_DATA_DIR" ]; then
           message "  - Operations : MYSQL app home folder will be copied to $DB_DATA_DIR.old "
           cp -Rfp $DB_DATA_DIR "${DB_DATA_DIR}.old"
           if [ $? -eq 0 ]; then
@@ -123,7 +158,7 @@ function mvsqlfoldcp {  #--- Copy the current contents of mysql folder and leave
                  message "  - Operations : Original MYSQL app home preserved it path at: $DB_DATA_DIR "
           else
                  message "  - Error : MYSQL copy folder not created, by some error; maybe permissions or path are not correct, please verify "
-                 exit 5 #--- wrong permissions to set folders
+                 exit "$WRONG_DIR_PERMISSIONS" #--- wrong permissions in a directory
           fi
    else
           message "  - Info : MYSQL app home folder not present, please read mysql manuals "
@@ -132,6 +167,7 @@ function mvsqlfoldcp {  #--- Copy the current contents of mysql folder and leave
           message "  - Info : MYSQL app home folder was created and permissions set, but service isn't installed yet "
    fi
 }
+
 
 function mvappfold { #--- set a copy of the app home dir and replace an empty app home folder
    get_home  #--- invoques the function that obtain from repo which is the home for
@@ -142,7 +178,7 @@ function mvappfold { #--- set a copy of the app home dir and replace an empty ap
            GROUP=$( stat -c %G $APP_LOCATION )
            if [ -d "${APP_LOCATION}.old" ]; then
                   rm -rf "${APP_LOCATION}.old"
-           fi 
+           fi
            mv -f $APP_LOCATION  "${APP_LOCATION}.old"
            if [ $? -eq 0 ]; then
                   mkdir -p $APP_LOCATION
@@ -152,7 +188,7 @@ function mvappfold { #--- set a copy of the app home dir and replace an empty ap
            else
                   message "  - Error : Folder $APP_LOCATION could not be overwritten; please check your User permissions"
                   pushlogs "error"
-                  exit 5  #--- wrong permissions to set folders
+                  exit "$WRONG_DIR_PERMISSIONS"  #--- wrong permissions in a directory
            fi
    else
            message "  - Info : seems like folder $APP_LOCATION isn't available to move "
@@ -160,16 +196,16 @@ function mvappfold { #--- set a copy of the app home dir and replace an empty ap
            mkdir -p $APP_LOCATION
            if [ $? -eq 0 ]; then
                   message "  - Success : Folder for $APP_LOCATION backup created OK  "
-                  message "  - Operations : Setting permissions for new $APP_LOCATION folder "                 
-                  OWNER=$( bup -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f1  )
-                  GROUP=$( bup -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f2  )                 
+                  message "  - Operations : Setting permissions for new $APP_LOCATION folder "
+                  OWNER=$( "$BUP_CMD" -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f1  )
+                  GROUP=$( "$BUP_CMD" -d $BKP_APP_DIR join $BUP_NAME |tar -tPf - -v | sed -n '1p' | awk ' { print $2 } ' | cut -d"/" -f2  )
                   message "  - Operations : Checking User existance in the system "
-                  if [ -n "$( getent passwd $OWNER )" ]; then 
+                  if [ -n "$( getent passwd $OWNER )" ]; then
                          chown -R $OWNER:$GROUP $APP_LOCATION
                          message "- Success: user exists, setting permissions to new $APP_LOCATION folder "
-                  else 
-                         message "- Info: User not exists, to preserve permissions $OWNER will be created"                         
-                         useradd -p $( mkpasswd -s $OWNER ) -s /bin/bash -d /home/$OWNER -m $OWNER 
+                  else
+                         message "- Info: User not exists, to preserve permissions $OWNER will be created"
+                         useradd -p $( mkpasswd -s $OWNER ) -s /bin/bash -d /home/$OWNER -m $OWNER
                          if [ $? -eq 0 ]; then
                                 if [ -z "$( egrep -i "^${GROUP}" /etc/group )" ]; then
                                         groupadd $GROUP
@@ -182,16 +218,17 @@ function mvappfold { #--- set a copy of the app home dir and replace an empty ap
                          else
                                 message "  - Error : User $OWNER for $APP_LOCATION backup could not be created; please check your User permissions  "
                                 pushlogs "error"
-                                exit 5  #--- wrong permissions to set folders
+                                exit "$WRONG_DIR_PERMISSIONS"  #--- wrong permissions in a directory
                          fi
                   fi
            else
                   message "  - Error : Folder for app $APP_LOCATION not set; please check your User permissions  "
                   pushlogs "error"
-                  exit 5  #--- wrong permissions to set folders
-           fi             
+                  exit "$WRONG_DIR_PERMISSIONS"  #--- wrong permissions in a directory
+           fi
    fi
 }
+
 
 function mydumppush () {    #--- restores the mysql Databases "#-- Mysqldump --#
    message "  - Operations : checking the dump file for mysqldump restore "
@@ -212,21 +249,23 @@ function mydumppush () {    #--- restores the mysql Databases "#-- Mysqldump --#
           message "  - Error : dump file for mysqldump file not available "
           message "- Error : mysqldump copy-back operations Failed "
           pushlogs "error"
-          exit 8 #--- mysqldump restore failed
+          exit "$SQL_FILE_DOESNT_EXIST" #--- MySql file doesnt exist
    fi
 }
+
 
 function bupjoin { #--- Depends on getbkname function to be accomplished first
       message "  - Operations : start the Restoring of files and folders in $APP_LOCATION  "
       if [ -n "$BUP_NAME" ]; then
                   echo "  - Operations : List of restored files and folders in $APP_LOCATION :  " >> $REST_FILES_LOG
-                  bup -d $BKP_APP_DIR join $BUP_NAME | tar  xvpPf - -C / -v >$REST_FILES_LOG  2>&1           #--- join operation by bup restore files
+                  "$BUP_CMD" -d $BKP_APP_DIR join $BUP_NAME | tar  xvpPf - -C / -v >$REST_FILES_LOG  2>&1           #--- join operation by bup restore files
                   if [ $? -eq 0 ]; then
                          message "  - Success : Restoring files in $APP_LOCATION finish, restore process continues ..."
                          message "  - Info    : the list of restored files can be seen at $REST_FILES_LOG "
                   fi
       fi
 }
+
 
 function validate_service { #--- Ensures an app is in place
    message "  - Check : Validating $APP_NAME Application is present "
@@ -241,9 +280,11 @@ function validate_service { #--- Ensures an app is in place
    fi
 }
 
+
 function get_app_status () {
     APP_STATUS=$( puppet resource service $APP_NAME | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
 }
+
 
 function appstop () { #--- Stops a service from puppet resorce command
    validate_service
@@ -255,10 +296,10 @@ function appstop () { #--- Stops a service from puppet resorce command
                  get_app_status
                  if [ "$APP_STATUS" = "stopped" ]; then
                           message "  - Success : $APP_NAME Service status is \"stop\""
-                 else 
+                 else
                           message "  - Error : $APP_NAME stop signal no finish status is \"Unknow\""
                           pushlogs "error"
-                          exit 3    # send the status that will be interpreted as error in
+                          exit "$SERVICE_STOP_FAILED"    # send the status that will be interpreted as error in
                  fi
            ;;
            "stopped")
@@ -270,7 +311,8 @@ function appstop () { #--- Stops a service from puppet resorce command
    fi
 }
 
-function appstart () { #--- Stops a service from puppet resorce command 
+
+function appstart () { #--- Stops a service from puppet resorce command
     get_app_status
     case $APP_STATUS in
     "running")          # --- weird and barely imposible status but anyway I left as it is.
@@ -278,15 +320,15 @@ function appstart () { #--- Stops a service from puppet resorce command
             service $APP_NAME restart
             get_app_status
             if [ "$APP_STATUS" = "running" ]; then
-                          rstfls=$( bup -d $BKP_APP_DIR join $BUP_NAME | tar -tf - | wc -l )
+                          rstfls=$( "$BUP_CMD" -d $BKP_APP_DIR join $BUP_NAME | tar -tf - | wc -l )
                           message "  - Success : $APP_NAME Service status is \"running\""
                           message "  - Success : $APP_NAME Restore process concluded succesfully applications \"running\""
-                          message "  - Info    : $APP_NAME Total files restored: $rstfls " 
+                          message "  - Info    : $APP_NAME Total files restored: $rstfls "
                           pushlogs "success"
-            else 
+            else
                           message "  - Error : $APP_NAME Running signal not successful status is \"Unknow\""
                           pushlogs "error"
-                          exit 9    # send the status that will be interpreted as error in start
+                          exit "$SERVICE_START_FAILED"    #--- App didn't restart succesfully
             fi
     ;;
     "stopped")
@@ -296,14 +338,15 @@ function appstart () { #--- Stops a service from puppet resorce command
                            message "  - Success : $APP_NAME server status is \"running\""
                            message "  - Operations : Running Puppet Agent to apply configurations to $APP_NAME   "
                            puppet agent -t 2>&1    #TODO  ===== set cases to restart different applications.
-            else 
+            else
                            message "  - Error : $APP_NAME Running signal not successful status is \"Unknow\""
                            pushlogs "error"
-                           exit 9    # send the status that will be interpreted as error in start
-            fi            
+                           exit "$SERVICE_START_FAILED"    # App didn't restart succesfully
+            fi
     ;;
-    esac   
+    esac
 }
+
 
 function mysqldstop (){ #--- reviews and stop if necessary mysql service
    get_app_status
@@ -314,7 +357,7 @@ function mysqldstop (){ #--- reviews and stop if necessary mysql service
              get_app_status
              if [ "$APP_STATUS" = "stopped" ]; then
                    message "  - Success : MySQL server status is \"stop\""
-             else 
+             else
                    message "  - Error : MySQL stop signal no finish status is \"Unknow\""
              fi
        ;;
@@ -325,26 +368,28 @@ function mysqldstop (){ #--- reviews and stop if necessary mysql service
    else
        message "  - Error : MySQL server no installed here"     #-- TODO see what to do in this case to fulfill the task
    fi
-}  
+}
+
 
 function mysqldstart(){ #--- reviews and stop if necessary mysql service
    APP_STATUS=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
    if [ -z "$APP_STATUS" ]; then
            message "  - Error : MySQL server no installed here"     #-- TODO see what to do in this case to fulfill the task
-           exit 10
+           exit "$MYSQL_NOT_INSTALLED"
    fi
    if [ $APP_STATUS = "stopped" ]; then
              service mysql start
              APP_STATUS=$( puppet resource service mysql | grep ensure | awk ' BEGIN { FS=">" } { print $2} ' | cut -d"," -f1 | cut -d"'" -f2 )
              if [ "$APP_STATUS" = "running" ]; then
                    message "  - Success : MySQL server status is \"running\""
-             else 
+             else
                    message "  - Error : MySQL running signal not success, status is Unknow"
                    pushlogs "error"
-                   exit 10
-             fi    
+                   exit "$MYSQL_NOT_INSTALLED"
+             fi
    fi
-}  
+}
+
 
 function startservices { #--- start services for a refered application
    case $dbtool in
@@ -360,13 +405,14 @@ function startservices { #--- start services for a refered application
    if [ $IS_SERVICE = "0" ]; then
       appstart
    fi
-   if [ -d "$APP_LOCATION" ]; then  
+   if [ -d "$APP_LOCATION" ]; then
          restfiles=$( ls -lR $APP_LOCATION | wc -l )
          message "- Success: restored files-folders: $restfiles "
-   fi 
+   fi
    message "- Info: Restored process concluded OK"
    pushlogs "success"              #--- send the the logs to the remote central backup storage instance (maestro)
 }
+
 
 function stopservices { #--- take care of the services used per application
    message "- Running: Performing Operations on the services implied on the restore of $APP_NAME "
@@ -386,11 +432,12 @@ function stopservices { #--- take care of the services used per application
    esac
 }
 
+
 function setfolders () { #--- will set the folders (new for restored, old to preserve current files)
 
    case $dbtool in
    "innobackupex")
-          # mvsqlfold 
+          # mvsqlfold
    ;;
    "mysqldump")
           mvsqlfoldcp
@@ -398,6 +445,7 @@ function setfolders () { #--- will set the folders (new for restored, old to pre
    esac
    mvappfold
 }
+
 
 function setlocals { #--- will work for local repo restore, setting values to point local and avoid a remote pull
    message "- Running: Validating local directory provided as repo  for $APP_NAME "
@@ -413,20 +461,20 @@ function setlocals { #--- will work for local repo restore, setting values to po
                   message "- Error: Data of backup $APP_NAME isn't pulled complete, check the backup process "
                   exit 12
            fi
-           bup -d $BKP_CONTENT ls -a
+           "$BUP_CMD" -d $BKP_CONTENT ls -a
            if [ $? -eq 0 ]; then
                   message "- Success: Validations to local repo $APP_NAME OK "
-                  message "- Success: Bup local repo $APP_NAME OK "                  
-                  BUP_NAME=$(bup -d $BKP_APP_DIR ls | cut -d"/" -f1)                   #--- gets the bup backup name from the repository
+                  message "- Success: Bup local repo $APP_NAME OK "
+                  BUP_NAME=$("$BUP_CMD" -d $BKP_APP_DIR ls | cut -d"/" -f1)                   #--- gets the bup backup name from the repository
            fi
    else
            message "- Error: Validation to local repo not succed, not valid path"
            message "- Error: Error 6, bup repository not set in place"
            message "- Error: Not valid path, please verify your setup"
-           exit 6    #---Directory repository not set in place
+           exit "$BKP_CONTENT_DOESNT_EXIST"    #--- BKP_CONTENT doesnt exist
    fi
 }
- 
+
 function setenvironment () {
    case $SC_MODE in
    "-p")
@@ -440,19 +488,22 @@ function setenvironment () {
       stopservices
       setfolders
    ;;
-   esac 
+   esac
 }
-   
+
+
 function setrestore () { #-- finalize the operation
    bupjoin #--- do the bup operations to restore files
    startservices
 }
 
+
 function main (){ #--- control and centralice the actions performed by this script
+    set_bup_cmd
     message "- Running: Performing restore for $APP_NAME "
     message "- Running: Performing restore for $APP_NAME "
-    setenvironment     #-- do the necessarily movent before the restore                
-    setrestore                                                             
+    setenvironment     #-- do the necessarily movent before the restore
+    setrestore
 }
 
-main 
+main

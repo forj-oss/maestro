@@ -17,7 +17,7 @@
  * HomeController
  *
  * @module      :: Controller
- * @description	:: A set of functions called `actions`.
+ * @description :: A set of functions called `actions`.
  *
  *                 Actions contain code telling Sails how to respond to a certain type of request.
  *                 (i.e. do stuff, then send some JSON, show an HTML page, or redirect to another URL)
@@ -32,10 +32,11 @@
  var async = require('async');
  var blueprint_utils = require('blueprint/blueprint');
  var kit_ops = require('kit-ops/kit-ops');
+ var backup_utils = require('backup/backup');
 
 module.exports = {
-    
-  
+
+
 
 
   /**
@@ -57,13 +58,27 @@ module.exports = {
             result = new Error('Unable to parse malformed JSON');
             console.error('Unable to parse malformed JSON: '+e.message)
           }
-          
+
           if(result instanceof Error){
             res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
             console.error('Unable to get the instance_id of the kit (result instanceoff Error): '+result.message)
           }else{
             var tools = [];
+            var backupYaml = null;
             async.series({
+                backupYaml: function(callback){
+                  backup_utils.getYamlObj(function (error, yamlObj) {
+                    if(error){
+                      console.error('Unable to retrieve backupYaml: ' + error);
+                    } else {
+                      backupYaml = yamlObj;
+                      for( var propt in backupYaml ){
+                        console.log (propt + ': ' + yamlObj[propt]);
+                      }
+                    }
+                    callback(null); // Telling async that we are done
+                  });
+                },
                 tools: function(callback){
                   blueprint_utils.get_blueprint_section(result.id, 'tools', function(err){
                     console.error('Unable to retrieve the list of tools:'+err.message);
@@ -88,9 +103,9 @@ module.exports = {
                   res.view(results, 200);
                 }
             });
-            
+
           }
-          
+
         }
       });
   },
@@ -99,42 +114,42 @@ module.exports = {
     res.view({ layout: null, service: service });
   },
   tutorial: function(req, res){
-  	blueprint_utils.get_blueprint_id(
-  	  function(err){
+    blueprint_utils.get_blueprint_id(
+      function(err){
           console.error('Unable to get the instance_id of the kit: '+err.message);
           res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
         },
-  	  function(result){
-  	    result = JSON.parse(result);
-  		blueprint_utils.get_blueprint_section(result.id, 'tools',
-  		  function(err){
+      function(result){
+        result = JSON.parse(result);
+        blueprint_utils.get_blueprint_section(result.id, 'tools',
+          function(err){
               console.error('Unable to retrieve the list of tools:'+err.message);
-  			res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
+            res.view({ layout: null, gerrit_ip: 'my_gerrit_ip', zuul_ip: 'my_zuul_ip' });
             },
-  		  function(result){
-  			result = JSON.parse(result);
-  			var gerrit_ip = 'my_gerrit_ip'
-  			var zuul_ip = 'my_zuul_ip';
-  			for (i=0; i<result.length; i++){
-  			  if (result[i].name == "gerrit"){
+          function(result){
+            result = JSON.parse(result);
+            var gerrit_ip = 'my_gerrit_ip'
+            var zuul_ip = 'my_zuul_ip';
+            for (i=0; i<result.length; i++){
+              if (result[i].name == "gerrit"){
                   // Only nums and point
-  				gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
-  				if (gerrit_ip == ''){
-  				  gerrit_ip = 'my_gerrit_ip'
-  				}
-  			  }
-  			  if (result[i].name == "zuul"){
-  				zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
-  				if (zuul_ip == ''){
-  				  zuul_ip = 'my_zuul_ip'
-  				}
-  			  }
-  			}
+                gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
+                if (gerrit_ip == ''){
+                  gerrit_ip = 'my_gerrit_ip'
+                }
+              }
+              if (result[i].name == "zuul"){
+                zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
+                if (zuul_ip == ''){
+                  zuul_ip = 'my_zuul_ip'
+                }
+              }
+            }
               res.view({ layout: null, 'gerrit_ip': gerrit_ip, 'zuul_ip': zuul_ip });
             }
           );
-  	  }
-  	);
+      }
+    );
   },
   projects: function(req, res){
     res.view({ layout: null });
@@ -158,7 +173,7 @@ module.exports = {
         if(notificationID === undefined){
           res.view('500', { layout: null, errors: [ 'We could not retrieve the notificationID' ]});
         }else{
-          
+
           var enabled = req.param('enabled');
           kit_ops.enable_notifications(enabled, notificationID, function(error, success){
             if(error){

@@ -39,6 +39,14 @@ module.exports.env = {
             resource_uri: '/kitops/'
         }
     },
+    backups: {
+        path: '/mnt/backups',
+        backup_status_yaml: '/mnt/backups/backup-status.yaml',
+        backup_status_cmd: '/usr/lib/forj/sbin/backup-status.py',
+        conf_dir: '/etc/forj/conf.d',
+        runbkp_cmd: '/usr/lib/forj/sbin/runbkp.sh',
+        restore_cmd: '/usr/lib/forj/sbin/restoreraid.sh',
+    },
     plugins: {
       auth: [
         { name: 'keystone', path: '../../plugins/auth/keystone/keystone.js', default: false },
