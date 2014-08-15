@@ -15,6 +15,8 @@
 # setup default heira data
 
 class hiera::data (
+  $config = hiera('hiera::data::config','puppet:///modules/hiera/hiera/hiera.yaml'),
+  $source = hiera('hiera::data::source','puppet:///modules/hiera/hiera/hieradata'),
 ) {
   if (! defined(File['/etc/puppet/hiera.yaml']))
   {
@@ -23,7 +25,7 @@ class hiera::data (
       owner   => 'root',
       group   => 'root',
       mode    => '0555',
-      source  => 'puppet:///modules/hiera/hiera/hiera.yaml',
+      source  => $config,
       replace => true,
     }
   }
@@ -32,7 +34,7 @@ class hiera::data (
   {
     file { '/etc/puppet/hieradata':
       ensure  => 'directory',
-      source  => 'puppet:///modules/hiera/hiera/hieradata',
+      source  => $source,
       recurse => true,
       owner   => 'root',
       group   =>'root',
