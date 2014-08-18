@@ -102,6 +102,25 @@ EOF
 #_METADATA="{\"cdkdomain\": \"${_INSTANCE_DOMAIN}\", \"cdksite\": \"${_SITE}\", \"eroip\": \"${_PUPPET_MASTER_IP}\", \"erodomain\": \"${_INSTANCE_DOMAIN}\", \"erosite\": \"${_PUPPET_MASTER}\", \"kitopsip\": \"${_PUPPET_MASTER_PRIV_IP}\"}"
 echo '<%= @metadata %>' > /meta.js
 
+apt-get install -y git
+
+git clone https://github.com/openstack-infra/config
+
+bash ./config/install_puppet.sh
+
+echo 'node default {
+
+    notice("setup ${::fqdn}")
+
+    $pkgs = [ "libtool", "curl", "wget", "bison" , "python-novaclient", "build-essential", "openssl",
+    "unzip", "gcc", "make", "perl", "cpio" , "patch", "autoconf",
+    "bzip2", "tcpdump", "strace", "python-paramiko", "libxslt-dev" ]
+
+    package { $pkgs: ensure => present }
+}' > build_proto.pp
+
+puppet apply --modulepath=/etc/puppet/modules/:. build_proto.pp
+
 set +x
 echo "################# BOOTHOOK End ##########################"
 exec 1>&6 6>&-
