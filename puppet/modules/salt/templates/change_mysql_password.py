@@ -19,7 +19,6 @@
 
 '''
 import traceback
-import socket
 from subprocess import check_call
 
 
@@ -51,7 +50,7 @@ def change_mysql_password(host_param, user_param, db_param, passwd_param, new_pa
         return trace
     else:
         query = u"SET PASSWORD FOR '%s'@'%s' = PASSWORD('%s')" % \
-        (user_param, host_param, new_passwd_param)
+                (user_param, host_param, new_passwd_param)
         try:
             cursor = connection.cursor()
             cursor.execute(query)
