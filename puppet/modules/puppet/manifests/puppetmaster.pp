@@ -77,10 +77,10 @@ class puppet::puppetmaster
     } ->
 
     file { "${puppet_lib_dir}/reports":
-      ensure  => directory,
-      owner   => puppet,
-      group   => puppet,
-      mode    => '0750',
+      ensure => directory,
+      owner  => puppet,
+      group  => puppet,
+      mode   => '0750',
     } ->
 
     file { '/etc/default/puppetmaster':

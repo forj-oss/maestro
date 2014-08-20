@@ -34,11 +34,11 @@ class gardener::tests::pinas_autosign (
   }
 
   pinas_autosign {$nodes:
-    ensure           => present,
-    instance_id      => $instance_id,
-    instance_domain  => $instance_domain,
-    credentials      => $creds,
-    provider         => puppet_hp,
-    require          => Class['gardener::pinas_requirements'],
+    ensure          => present,
+    instance_id     => $instance_id,
+    instance_domain => $instance_domain,
+    credentials     => $creds,
+    provider        => puppet_hp,
+    require         => Class['gardener::pinas_requirements'],
   }
 }

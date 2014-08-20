@@ -22,10 +22,10 @@ class gardener::server_destroy (
 {
   include gardener::requirements
   pinas {"server_destroy ${blueprint}":
-    ensure       => absent,
-    instance_id  => $instance_id,
-    nodes        => $nodes,
-    do_parallel  => $do_threaded,
-    require      => Class['gardener::requirements'],
+    ensure      => absent,
+    instance_id => $instance_id,
+    nodes       => $nodes,
+    do_parallel => $do_threaded,
+    require     => Class['gardener::requirements'],
   }
 }

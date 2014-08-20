@@ -24,10 +24,10 @@ define jimador::discover (
   if $tools_data != undef
   {
     jimador::manage_config { $tools:
-      tools_hash      => $tools_data,
-      node_name       => $node,
-      default_tools   => $tools,
-      filter_tools    => $tools_filter,
+      tools_hash    => $tools_data,
+      node_name     => $node,
+      default_tools => $tools,
+      filter_tools  => $tools_filter,
     }
   }
 }

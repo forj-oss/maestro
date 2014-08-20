@@ -41,9 +41,9 @@ class maestro::backup::configure_box (
     if !defined(File[$maestro::backup::params::box_backup_path])
     {
       file { $maestro::backup::params::box_backup_path :
-        ensure  => directory,
-        owner   => $maestro::backup::params::box_backup_user,
-        mode    => '0755',
+        ensure => directory,
+        owner  => $maestro::backup::params::box_backup_user,
+        mode   => '0755',
       }
     }
 
@@ -93,10 +93,10 @@ class maestro::backup::configure_box (
         content => $private_key,
       }
       cacerts::add_ssh_host { $maestro::backup::params::backup_user :
-        host_address  => $maestro::backup::params::maestro_backup_server,
-        host_user     => $maestro::backup::params::backup_user,
-        local_user    => $maestro::backup::params::box_backup_user,
-        keyfile_name  => $maestro::backup::params::backup_user,
+        host_address => $maestro::backup::params::maestro_backup_server,
+        host_user    => $maestro::backup::params::backup_user,
+        local_user   => $maestro::backup::params::box_backup_user,
+        keyfile_name => $maestro::backup::params::backup_user,
       }->
       notify {"${maestro::backup::params::backup_user} ssh configuration added.":}
     }
@@ -113,28 +113,28 @@ class maestro::backup::configure_box (
     $log_forj_path='/var/log/forj'
 
     file { $etc_path :
-      ensure  => directory,
-      owner   => $maestro::backup::params::box_backup_user,
-      mode    => '0755',
+      ensure => directory,
+      owner  => $maestro::backup::params::box_backup_user,
+      mode   => '0755',
     } ->
     file { $confd_path :
-      ensure  => directory,
-      owner   => $maestro::backup::params::box_backup_user,
-      mode    => '0755',
+      ensure => directory,
+      owner  => $maestro::backup::params::box_backup_user,
+      mode   => '0755',
     }
 
     file { $log_forj_path :
-      ensure  => directory,
-      owner   => $maestro::backup::params::box_backup_user,
-      mode    => '0755',
+      ensure => directory,
+      owner  => $maestro::backup::params::box_backup_user,
+      mode   => '0755',
     } ->
     cron { 'box_backup':
-      user          => $maestro::backup::params::box_backup_user,
-      hour          => '00',
-      minute        => '20',
-      command       => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp.sh --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
-      environment   => [  'PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"'],
-      require       => [  File["${sbin_path}/runbkp.sh"],
+      user        => $maestro::backup::params::box_backup_user,
+      hour        => '00',
+      minute      => '20',
+      command     => "${sbin_path}/master_bkp.sh --script ${sbin_path}/runbkp.sh --configs ${confd_path}/*.conf >> ${log_forj_path}/backup_cron.log 2>&1",
+      environment => [  'PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"'],
+      require     => [  File["${sbin_path}/runbkp.sh"],
                           File[$confd_path],
                           File["${sbin_path}/master_bkp.sh"] ],
     }->
@@ -148,7 +148,7 @@ class maestro::backup::configure_box (
     $logrotate_create_owner = $maestro::backup::params::logrotate_create_owner
     $logrotate_create_group = $maestro::backup::params::logrotate_create_group
     $logrotate_rotate       = $maestro::backup::params::logrotate_rotate
-    file { "/etc/logrotate.d/${$maestro::backup::params::logrotate_name}":
+    file { "/etc/logrotate.d/${maestro::backup::params::logrotate_name}":
       owner   => 'root',
       group   => 'root',
       mode    => '0444',

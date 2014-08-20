@@ -57,11 +57,11 @@ class puppet (
   }
 
   cron { 'puppet-agent-graph':
-    ensure   => $cron,
-    command  => '/usr/local/bin/puppet-graph',
-    user     => 'root',
-    hour     => '2',
-    minute   => $minute3,
+    ensure  => $cron,
+    command => '/usr/local/bin/puppet-graph',
+    user    => 'root',
+    hour    => '2',
+    minute  => $minute3,
   }
 
   if ($::osfamily == 'Debian') {
@@ -130,9 +130,9 @@ class puppet (
 
   # make /var/lib/puppet readable for running facter -p as non-root
   file { '/var/lib/puppet':
-    ensure  => directory,
-    owner   => 'puppet',
-    group   => 'puppet',
-    mode    => '2755',
+    ensure => directory,
+    owner  => 'puppet',
+    group  => 'puppet',
+    mode   => '2755',
   }
 } # end class puppet

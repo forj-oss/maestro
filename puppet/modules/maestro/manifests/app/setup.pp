@@ -68,9 +68,9 @@ class maestro::app::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'kitops.js':
-    script_dir  => "${app_dir_use}/forj.config",
-    user        => $user,
-    require     => [  Nodejs_wrap::Pm2instance['mon-api.js'],
+    script_dir => "${app_dir_use}/forj.config",
+    user       => $user,
+    require    => [  Nodejs_wrap::Pm2instance['mon-api.js'],
                       Nodejs_wrap::Pm2instance['app.js'],
                       Nodejs_wrap::Pm2instance['bp-app.js']
                     ],
@@ -89,7 +89,7 @@ class maestro::app::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'mon-api.js':
-    script_dir  => "${app_dir_use}/forj.mon",
-    user        => $user,
+    script_dir => "${app_dir_use}/forj.mon",
+    user       => $user,
   }
 }

@@ -72,10 +72,10 @@ define cacerts::cacerts_setupdb (
   if !defined(File['/opt/config'])
   {
     file { '/opt/config':
-      ensure  => directory,
-      owner   => 'puppet',
-      group   => 'puppet',
-      mode    => '2755',
+      ensure => directory,
+      owner  => 'puppet',
+      group  => 'puppet',
+      mode   => '2755',
     }
   }
   if !defined(File[$ca_certs_root_dir])
@@ -97,10 +97,10 @@ define cacerts::cacerts_setupdb (
             "${ca_certs_root_dir}/ca2013/private",
             "${ca_certs_root_dir}/ca2013/crl",
             ]:
-      ensure  => directory,
-      owner   => 'puppet',
-      group   => 'puppet',
-      mode    => '0750',
+      ensure => directory,
+      owner  => 'puppet',
+      group  => 'puppet',
+      mode   => '0750',
     } ->
     cacerts::cacerts_setupdb_staticfiles { [
                                     'util.py',

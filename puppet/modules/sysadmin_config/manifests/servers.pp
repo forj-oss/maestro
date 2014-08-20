@@ -58,9 +58,9 @@ class sysadmin_config::servers (
       replace => true,
     }
     service { 'rsyslog':
-      ensure      => running,
-      hasrestart  => true,
-      subscribe   => File['/etc/rsyslog.d/50-default.conf'],
+      ensure     => running,
+      hasrestart => true,
+      subscribe  => File['/etc/rsyslog.d/50-default.conf'],
     }
 
     # Ubuntu installs their whoopsie package by default, but it eats through

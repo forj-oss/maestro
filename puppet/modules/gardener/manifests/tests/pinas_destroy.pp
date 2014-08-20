@@ -23,9 +23,9 @@ class gardener::tests::pinas_destroy (
   ) {
 
   pinas {'destroy openstack':
-    ensure       => absent,
-    instance_id  => $instance_id,
-    nodes        => $nodes,
-    do_parallel  => $threaded,
+    ensure      => absent,
+    instance_id => $instance_id,
+    nodes       => $nodes,
+    do_parallel => $threaded,
   }
 }

@@ -32,8 +32,8 @@ define maestro::orchestrator::gencerts (
     $site = "${site_name}.${instance_id}"
   }
   cacerts::master_make_keys{ $site :
-    domain       => $domain,
-    serial_init  => $serial_init,
+    domain      => $domain,
+    serial_init => $serial_init,
   }
 }
 

@@ -74,10 +74,10 @@ define maestro::app::run_ddl(
   if $ddl_source != undef
   {
     file { "${ddl_home_dir}/${ddl_name}":
-      ensure  => file,
-      owner   => 'root',
-      mode    => '0755',
-      source  => $ddl_source,
+      ensure => file,
+      owner  => 'root',
+      mode   => '0755',
+      source => $ddl_source,
     }
   } elsif $ddl_content != undef
   {

@@ -88,11 +88,11 @@ define gardener::gen_userdata (
     replace => true,
   }->
   exec { "create ${userdata}":
-    command     => $create_udata,
-    cwd         => '/tmp',
+    command => $create_udata,
+    cwd     => '/tmp',
   }->
   exec { "dos2unix for ${userdata}":
-    command     => "dos2unix ${userdata}",
-    require     => Package['dos2unix'],
+    command => "dos2unix ${userdata}",
+    require => Package['dos2unix'],
   }
 }

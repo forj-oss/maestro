@@ -41,10 +41,10 @@ class cacerts::custom
     elsif (!defined(File["${ca_certs_db}/custom"])) # we still need a folder
     {
       file { "${ca_certs_db}/custom":
-        ensure  => directory,
-        owner   => 'puppet',
-        group   => 'puppet',
-        mode    => '0640',
+        ensure => directory,
+        owner  => 'puppet',
+        group  => 'puppet',
+        mode   => '0640',
       }
     }
     cacerts::unprotect{"${ca_certs_db}/custom":

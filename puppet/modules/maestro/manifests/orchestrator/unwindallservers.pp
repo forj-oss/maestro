@@ -27,13 +27,13 @@ class maestro::orchestrator::unwindallservers(
   }
   include gardener::params
   class {'maestro::orchestrator::managedns':
-    ensure           => absent,
-    instance_id      => $instance,
-    zone             => $zone_name,
+    ensure      => absent,
+    instance_id => $instance,
+    zone        => $zone_name,
   } ->
   class { 'gardener::server_destroy':
-    nodes            => $nodes,
-    instance_id      => $instance,
+    nodes       => $nodes,
+    instance_id => $instance,
   }
 
   notify { 'completed unwindallservers':

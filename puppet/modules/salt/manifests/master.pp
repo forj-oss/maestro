@@ -156,32 +156,32 @@ class salt::master (
   }
 
   file { '/var/run/salt' :
-    ensure    => directory,
-    owner     => 'salt',
-    group     => 'salt',
-    mode      => '0755',
-    require   => [
+    ensure  => directory,
+    owner   => 'salt',
+    group   => 'salt',
+    mode    => '0755',
+    require => [
       Package['salt-master'],
       User['salt'],
     ],
   }
 
   file { '/var/run/salt/master' :
-    ensure    => directory,
-    owner     => 'salt',
-    group     => 'salt',
-    mode      => '0755',
-    require   => [
+    ensure  => directory,
+    owner   => 'salt',
+    group   => 'salt',
+    mode    => '0755',
+    require => [
       File['/var/run/salt']
     ],
   }
 
   file { '/var/run/salt/minion' :
-    ensure    => directory,
-    owner     => 'salt',
-    group     => 'salt',
-    mode      => '0755',
-    require   => [
+    ensure  => directory,
+    owner   => 'salt',
+    group   => 'salt',
+    mode    => '0755',
+    require => [
       File['/var/run/salt']
     ],
   }
@@ -200,11 +200,11 @@ class salt::master (
   }
 
   exec {'register-minions':
-    command     => 'salt-key --accept-all --yes',
-    require     => Service['salt-master'],
-    onlyif      => ["test $(salt-key --list=pre | grep ${::erodomain} | grep -v 'Unaccepted Keys:' | wc -l) -gt 0"],
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    logoutput   => true,
+    command   => 'salt-key --accept-all --yes',
+    require   => Service['salt-master'],
+    onlyif    => ["test $(salt-key --list=pre | grep ${::erodomain} | grep -v 'Unaccepted Keys:' | wc -l) -gt 0"],
+    path      => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    logoutput => true,
   }
 
   if ! defined(File['/etc/sudoers.d/salt-sudoer'])

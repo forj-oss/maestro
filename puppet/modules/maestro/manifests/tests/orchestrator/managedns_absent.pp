@@ -20,8 +20,8 @@ class maestro::tests::orchestrator::managedns_absent (
 )
 {
   class {'maestro::orchestrator::managedns':
-    ensure           => absent,
-    instance_id      => 'jg',
-    zone             => 'cdkdev.org',
+    ensure      => absent,
+    instance_id => 'jg',
+    zone        => 'cdkdev.org',
   }
 }

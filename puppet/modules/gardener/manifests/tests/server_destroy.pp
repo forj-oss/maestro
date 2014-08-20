@@ -22,8 +22,8 @@ class gardener::tests::server_destroy (
   $threaded    = true,
   ) {
   class {'gardener::server_destroy':
-    nodes        => $nodes,
-    instance_id  => $instance_id,
-    do_threaded  => $threaded,
+    nodes       => $nodes,
+    instance_id => $instance_id,
+    do_threaded => $threaded,
   }
 }

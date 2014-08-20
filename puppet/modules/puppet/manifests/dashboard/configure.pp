@@ -43,17 +43,17 @@ class puppet::dashboard::configure(
   }
 
   class { '::dashboard':
-    dashboard_ensure    => 'present',
-    dashboard_user      => 'www-data',
-    dashboard_group     => 'www-data',
-    dashboard_password  => $password,
-    dashboard_db        => 'dashboard_prod',
-    dashboard_charset   => 'utf8',
-    dashboard_site      => $::fqdn,
-    dashboard_port      => '3000',
-    mysql_root_pw       => $mysql_password,
-    passenger           => true,
-    require             => Package['ruby1.9.3'],
+    dashboard_ensure   => 'present',
+    dashboard_user     => 'www-data',
+    dashboard_group    => 'www-data',
+    dashboard_password => $password,
+    dashboard_db       => 'dashboard_prod',
+    dashboard_charset  => 'utf8',
+    dashboard_site     => $::fqdn,
+    dashboard_port     => '3000',
+    mysql_root_pw      => $mysql_password,
+    passenger          => true,
+    require            => Package['ruby1.9.3'],
   }
 
   file { '/etc/mysql/conf.d/mysqld_innodb_fpt.cnf':

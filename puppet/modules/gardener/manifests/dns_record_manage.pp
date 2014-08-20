@@ -39,11 +39,11 @@ define gardener::dns_record_manage (
     if ($ip_address != '' and $ensure == present) or $ensure == absent
     {
       pinasdns {"${node_name}.${zone_name}":
-        ensure          => $ensure,
-        record_type     => $record_type,
-        ip_data         => $ip_address,
-        provider        => record,
-        require         => Class['gardener::requirements'],
+        ensure      => $ensure,
+        record_type => $record_type,
+        ip_data     => $ip_address,
+        provider    => record,
+        require     => Class['gardener::requirements'],
       }
     } else
     {

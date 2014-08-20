@@ -24,16 +24,16 @@ class gardener::tests::server_up (
   $image_name      = 'proto2b',
 ) {
   class {'gardener::params':
-      image_name         => $image_name,
+      image_name   => $image_name,
       # can also be a number like 100
-      flavor_name        => 'standard.xsmall',
-      key_name           => 'nova',
-      network_name       => 'private',
+      flavor_name  => 'standard.xsmall',
+      key_name     => 'nova',
+      network_name => 'private',
   } ->
   class {'gardener::server_up':
-      nodes            => $nodes,
-      instance_id      => $instance_id,
-      instance_domain  => $instance_domain,
-      do_threaded      => false,
+      nodes           => $nodes,
+      instance_id     => $instance_id,
+      instance_domain => $instance_domain,
+      do_threaded     => false,
   }
 }

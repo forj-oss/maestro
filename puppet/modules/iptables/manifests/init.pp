@@ -45,8 +45,8 @@ class iptables(
   }
 
   file { $::iptables::params::rules_dir:
-    ensure     => directory,
-    require    => Package['iptables'],
+    ensure  => directory,
+    require => Package['iptables'],
   }
 
   # This file is not required on Red Hat distros... but it

@@ -42,10 +42,10 @@ class puppet::dashboard::maintjobs(
     if defined (Class['dashboard'])
     {
       file { '/usr/share/puppet-dashboard/puppet-dashboard-start-worker.sh':
-        ensure   => file,
-        owner    => 'root',
-        mode     => '0755',
-        source   => 'puppet:///modules/puppet/puppet-dashboard-start-worker.sh',
+        ensure => file,
+        owner  => 'root',
+        mode   => '0755',
+        source => 'puppet:///modules/puppet/puppet-dashboard-start-worker.sh',
       }
 
       cron { 'puppet-dashboard-start-worker':
@@ -59,10 +59,10 @@ class puppet::dashboard::maintjobs(
 
       # (2) Deletes old puppet dashboard reports
       file { '/usr/share/puppet-dashboard/puppet-dashboard-mysql-prune.sh':
-        ensure   => file,
-        owner    => 'root',
-        mode     => '0755',
-        source   => 'puppet:///modules/puppet/puppet-dashboard-mysql-prune.sh',
+        ensure => file,
+        owner  => 'root',
+        mode   => '0755',
+        source => 'puppet:///modules/puppet/puppet-dashboard-mysql-prune.sh',
       }
 
       cron { 'puppet-dashboard-mysql-prune':
@@ -77,10 +77,10 @@ class puppet::dashboard::maintjobs(
 
       # (3) Optimizes puppet dashboard mysql tables
       file { '/usr/share/puppet-dashboard/puppet-dashboard-mysql-optimize.sh':
-        ensure   => file,
-        owner    => 'root',
-        mode     => '0755',
-        source   => 'puppet:///modules/puppet/puppet-dashboard-mysql-optimize.sh',
+        ensure => file,
+        owner  => 'root',
+        mode   => '0755',
+        source => 'puppet:///modules/puppet/puppet-dashboard-mysql-optimize.sh',
       }
       cron { 'puppet-dashboard-mysql-optimize':
         command     => '/usr/share/puppet-dashboard/puppet-dashboard-mysql-optimize.sh',

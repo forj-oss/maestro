@@ -61,8 +61,8 @@ class mysql_tuning (
   }
 
   mysql::server::config { 'tuning':
-    settings                   => {
-      'mysqld'                 => {
+    settings => {
+      'mysqld' => {
         'key_buffer_size'      => $key_buffer_size,
         'table_open_cache'     => $table_open_cache,
         'max_allowed_packet'   => $max_allowed_packet,
@@ -75,6 +75,6 @@ class mysql_tuning (
         'join_buffer_size'     => $join_buffer_size,
       }
     },
-    require                    => Class['mysql::server'],
+    require  => Class['mysql::server'],
   }
 }

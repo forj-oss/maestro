@@ -67,12 +67,12 @@ class maestro::ui::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'app.js':
-    script_dir  => "${app_dir_use}/maestro/ui/",
-    user        => $user,
+    script_dir => "${app_dir_use}/maestro/ui/",
+    user       => $user,
   } ->
   nodejs_wrap::pm2instance{'bp-app.js':
-      script_dir  => "${app_dir_use}/maestro/api/bp-api/",
-      user        => $user,
+      script_dir => "${app_dir_use}/maestro/api/bp-api/",
+      user       => $user,
   } ->
   a2mod { ['proxy_http','proxy']:
     ensure  => present,
@@ -85,9 +85,9 @@ class maestro::ui::setup(
         servername => 'localhost',
   } ->
   file { "${app_dir_use}/maestro/api/bp-api/config/config.json":
-    ensure  => 'link',
-    target  => "/opt/config/${::settings::environment}/config.json",
-    owner   => $user,
-    group   => $user,
+    ensure => 'link',
+    target => "/opt/config/${::settings::environment}/config.json",
+    owner  => $user,
+    group  => $user,
   }
 }

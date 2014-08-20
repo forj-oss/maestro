@@ -32,10 +32,10 @@ define gardener::dns_zone_manage (
   }
   include gardener::requirements
   pinasdns {$zone_name:
-    ensure          => $ensure,
-    email           => $email,
-    ttl             => $ttl,
-    provider        => zone,
-    require         => Class['gardener::requirements'],
+    ensure   => $ensure,
+    email    => $email,
+    ttl      => $ttl,
+    provider => zone,
+    require  => Class['gardener::requirements'],
   }
 }

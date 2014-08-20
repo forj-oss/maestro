@@ -41,22 +41,22 @@ class gardener::tests::object_storage (
   } ->
   # Creating a file in Cloud Storage
   object_storage {'myObjectStorage':
-    ensure          => present,
-    credentials     => $creds,
-    provider        => hp,
-    file_name       => 'sample.txt',
-    remote_dir      => 'fog-rocks',
-    local_dir       => '/tmp',
+    ensure      => present,
+    credentials => $creds,
+    provider    => hp,
+    file_name   => 'sample.txt',
+    remote_dir  => 'fog-rocks',
+    local_dir   => '/tmp',
   } ->
 
   # Deleting a file in Cloud Storage
   object_storage {'myObjectStorage2':
-    ensure          => absent,
-    credentials     => $creds,
-    provider        => hp,
-    file_name       => 'sample.txt',
-    remote_dir      => 'fog-rocks',
-    local_dir       => '/tmp',
+    ensure      => absent,
+    credentials => $creds,
+    provider    => hp,
+    file_name   => 'sample.txt',
+    remote_dir  => 'fog-rocks',
+    local_dir   => '/tmp',
   }
 
 }

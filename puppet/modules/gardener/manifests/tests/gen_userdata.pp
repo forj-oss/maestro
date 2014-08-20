@@ -25,12 +25,12 @@ class gardener::tests::gen_userdata (
 {
   include gardener::requirements
   class {'gardener::params':
-      image_name         => $image_name,
+      image_name        => $image_name,
       # can also be a number like 100
-      flavor_name        => 'standard.xsmall',
-      key_name           => 'nova',
-      network_name       => 'private',
-      template_userdata  => $fspec_userdata,
+      flavor_name       => 'standard.xsmall',
+      key_name          => 'nova',
+      network_name      => 'private',
+      template_userdata => $fspec_userdata,
   }
   $udata     = $gardener::params::template_userdata
   $full_host = "<% if server_id == \'\' %><%= server_name %>.${::domain}<%else%><%= server_host %>.${::domain}<%end%>"

@@ -134,12 +134,12 @@ class maestro (
   {
     # create a server with non-default values
     class { 'maestro::orchestrator::setupallservers':
-      environment     => $environment,
-      nodes           => $nodes,
-      instance        => $instance,
-      ssh_gen_keys    => $ssh_user_keys,
-      extra_metadata  => $meta_data,
-      require         => Class['puppet::puppetmaster'],
+      environment    => $environment,
+      nodes          => $nodes,
+      instance       => $instance,
+      ssh_gen_keys   => $ssh_user_keys,
+      extra_metadata => $meta_data,
+      require        => Class['puppet::puppetmaster'],
     }
   }
 

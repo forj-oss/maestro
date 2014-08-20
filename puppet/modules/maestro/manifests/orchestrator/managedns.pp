@@ -93,8 +93,8 @@ class maestro::orchestrator::managedns (
     }
     # 6. Manage the records
     gardener::dns_add_records { $nodes:
-      data      => $dns_data,
-      zone      => $zone_name,
+      data => $dns_data,
+      zone => $zone_name,
     }
   } elsif $ensure == absent {
     # 7. remove the zone sense this is absent

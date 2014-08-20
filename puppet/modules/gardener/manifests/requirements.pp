@@ -39,15 +39,15 @@ class gardener::requirements(
       }
     }
     downloader {"${unix_cli_url}/${unix_cli_version}/hpcloud-${unix_cli_version}.gem":
-              ensure          => present,
-              path            => "/var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
-              md5             => $unix_cli_md5,
-              owner           => 'puppet',
-              group           => 'puppet',
-              mode            => 755,
-              replace         => false,
-              provider        => url,
-              require         => File['/var/lib/forj']
+              ensure   => present,
+              path     => "/var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem",
+              md5      => $unix_cli_md5,
+              owner    => 'puppet',
+              group    => 'puppet',
+              mode     => 755,
+              replace  => false,
+              provider => url,
+              require  => File['/var/lib/forj']
     } ->
     exec { "gem1.8 install /var/lib/forj/${unix_cli_version}-${unix_cli_version}.gem":
           path    => ['/bin', '/usr/bin'],

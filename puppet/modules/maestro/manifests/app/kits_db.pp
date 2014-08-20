@@ -52,30 +52,30 @@ class maestro::app::kits_db(
     }
   }
   maestro::app::run_ddl{ 'kit_tools_ui.sql':
-    mysql_server         => $mysql_server,
-    mysql_root_user      => $mysql_root_user,
-    mysql_root_password  => $mysql_root_password,
-    mysql_user           => $mysql_user,
-    mysql_password       => $mysql_password,
-    ddl_content          => 'maestro/app/ddl/kit_tools_ui.erb.sql',
-    ddl_home_dir         => $ddl_home_dir_use,
+    mysql_server        => $mysql_server,
+    mysql_root_user     => $mysql_root_user,
+    mysql_root_password => $mysql_root_password,
+    mysql_user          => $mysql_user,
+    mysql_password      => $mysql_password,
+    ddl_content         => 'maestro/app/ddl/kit_tools_ui.erb.sql',
+    ddl_home_dir        => $ddl_home_dir_use,
   }
   maestro::app::run_ddl{ 'setup-db.sql':
-    mysql_server         => $mysql_server,
-    mysql_root_user      => $mysql_root_user,
-    mysql_root_password  => $mysql_root_password,
-    mysql_user           => $mysql_user,
-    mysql_password       => $mysql_password,
-    ddl_content          => 'maestro/app/ddl/setup-db.erb.sql',
-    ddl_home_dir         => $ddl_home_dir_use,
+    mysql_server        => $mysql_server,
+    mysql_root_user     => $mysql_root_user,
+    mysql_root_password => $mysql_root_password,
+    mysql_user          => $mysql_user,
+    mysql_password      => $mysql_password,
+    ddl_content         => 'maestro/app/ddl/setup-db.erb.sql',
+    ddl_home_dir        => $ddl_home_dir_use,
   }
   maestro::app::run_ddl{ 'forj.config-setup-db.sql':
-    mysql_server         => $mysql_server,
-    mysql_root_user      => $mysql_root_user,
-    mysql_root_password  => $mysql_root_password,
-    mysql_user           => $mysql_user,
-    mysql_password       => $mysql_password,
-    ddl_content          => 'maestro/app/ddl/forj.config-setup-db.erb.sql',
-    ddl_home_dir         => $ddl_home_dir_use,
+    mysql_server        => $mysql_server,
+    mysql_root_user     => $mysql_root_user,
+    mysql_root_password => $mysql_root_password,
+    mysql_user          => $mysql_user,
+    mysql_password      => $mysql_password,
+    ddl_content         => 'maestro/app/ddl/forj.config-setup-db.erb.sql',
+    ddl_home_dir        => $ddl_home_dir_use,
   }
 }

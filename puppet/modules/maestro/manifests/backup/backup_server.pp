@@ -30,14 +30,14 @@ class maestro::backup::backup_server (
     comment    => 'User which keeps the kits backups boxes',
   }->
   file { $home:
-    ensure  => directory,
-    owner   => $::maestro::backup::params::backup_user,
-    mode    => '0755',
+    ensure => directory,
+    owner  => $::maestro::backup::params::backup_user,
+    mode   => '0755',
   }->
   file { "${home}/.ssh":
-    ensure  => directory,
-    owner   => $::maestro::backup::params::backup_user,
-    mode    => '0755',
+    ensure => directory,
+    owner  => $::maestro::backup::params::backup_user,
+    mode   => '0755',
   }->
   cacerts::sshgenkeys { $::maestro::backup::params::backup_user:
     do_cacertsdb => true,
@@ -87,11 +87,11 @@ class maestro::backup::backup_server (
   if $backup_public_key != '' and $backup_public_key != undef
   {
     file { "${home}/.ssh/authorized_keys":
-      ensure   => present,
-      owner    => $::maestro::backup::params::backup_user,
-      mode     => '0400',
-      content  => $backup_public_key,
-      require  => Cacerts::Sshgenkeys[$::maestro::backup::params::backup_user],
+      ensure  => present,
+      owner   => $::maestro::backup::params::backup_user,
+      mode    => '0400',
+      content => $backup_public_key,
+      require => Cacerts::Sshgenkeys[$::maestro::backup::params::backup_user],
     }
   }
   ## Set backup folder
