@@ -19,7 +19,6 @@ import os.path
 import subprocess
 import sys
 import logging
-import Colorer
 
 logger = ''
 

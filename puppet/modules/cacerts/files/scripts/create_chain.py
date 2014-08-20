@@ -63,74 +63,74 @@ def main():
     cacerts_dir = os.path.abspath(args.cacerts_dir)
     ca2013_dir = os.path.abspath(os.path.join(cacerts_dir, "ca2013"))
     site_name = args.site + "." + args.domain
-    subject = args.subject + "/CN="+site_name
+    subject = args.subject + "/CN=" + site_name
 
     util.validate_directory(cacerts_dir)
     util.validate_directory(ca2013_dir)
-    util.validate_directory(ca2013_dir+"/private")
-    util.validate_directory(ca2013_dir+"/certs")
-    util.validate_directory(ca2013_dir+"/crl")
-    util.validate_directory(ca2013_dir+"/newcerts")
+    util.validate_directory(ca2013_dir + "/private")
+    util.validate_directory(ca2013_dir + "/certs")
+    util.validate_directory(ca2013_dir + "/crl")
+    util.validate_directory(ca2013_dir + "/newcerts")
 
-    util.validate_file(cacerts_dir+"/openssl.cnf")
-    util.validate_file(cacerts_dir+"/serial")
-    util.validate_file(ca2013_dir+"/serial")
+    util.validate_file(cacerts_dir + "/openssl.cnf")
+    util.validate_file(cacerts_dir + "/serial")
+    util.validate_file(ca2013_dir + "/serial")
 
     # Creating root cert
     # Running at cacerts_dir
-    copyfile("/dev/null", cacerts_dir+"/index.txt")
+    copyfile("/dev/null", cacerts_dir + "/index.txt")
     print "(1)"
-    util.openssl_cmd("genrsa -passout pass:"+args.password+" -des3 -out private/cakey.key 4096", "", cacerts_dir, "")
-    copyfile(cacerts_dir+"/private/cakey.key", cacerts_dir+"/private/cakey.pem")
+    util.openssl_cmd("genrsa -passout pass:" + args.password + " -des3 -out private/cakey.key 4096", "", cacerts_dir, "")
+    copyfile(cacerts_dir + "/private/cakey.key", cacerts_dir + "/private/cakey.pem")
     print "(2)"
     util.openssl_cmd("req -passin pass:" + args.password + " -subj " + subject + " -new -x509 -nodes -sha1 -days 1825 -key private/cakey.key -out cacert.pem -config ./openssl.cnf", "", cacerts_dir, "")
 
     # Creating intermediate cert
     # Running at cacerts_dir/ca2013
-    copyfile("/dev/null", ca2013_dir+"/index.txt")
-    copyfile(cacerts_dir+"/openssl.cnf", ca2013_dir+"/openssl.cnf")
+    copyfile("/dev/null", ca2013_dir + "/index.txt")
+    copyfile(cacerts_dir + "/openssl.cnf", ca2013_dir + "/openssl.cnf")
     print "(3)"
-    util.openssl_cmd("genrsa -passout pass:"+args.password+" -des3 -out private/cakey.pem 4096", "", ca2013_dir, "")
+    util.openssl_cmd("genrsa -passout pass:" + args.password + " -des3 -out private/cakey.pem 4096", "", ca2013_dir, "")
     print "(4)"
     util.openssl_cmd("req -passin pass:" + args.password + " -subj " + subject + " -new -sha1 -key private/cakey.pem -out ca2013.csr -config ./openssl.cnf", "", ca2013_dir, "")
     print "(5)"
-    util.openssl_cmd("ca -batch -extensions v3_ca -days 365 -out cacert.pem -in ca2013.csr -config openssl.cnf -key "+args.password+" -keyfile ../private/cakey.key -cert ../cacert.pem", "", ca2013_dir, "")
-    copyfile(ca2013_dir+"/cacert.pem", ca2013_dir+"/chain.crt")
-    file2 = open(cacerts_dir+"/cacert.pem", "rb")
-    with open(ca2013_dir+"/chain.crt", "a") as myfile:
+    util.openssl_cmd("ca -batch -extensions v3_ca -days 365 -out cacert.pem -in ca2013.csr -config openssl.cnf -key " + args.password + " -keyfile ../private/cakey.key -cert ../cacert.pem", "", ca2013_dir, "")
+    copyfile(ca2013_dir + "/cacert.pem", ca2013_dir + "/chain.crt")
+    file2 = open(cacerts_dir + "/cacert.pem", "rb")
+    with open(ca2013_dir + "/chain.crt", "a") as myfile:
         myfile.write(file2.read())
 
     # Root and Intermediate certificates
-    copyfile(cacerts_dir+"/cacert.pem", cacerts_dir+"/root.cer")
-    copyfile(ca2013_dir+"/cacert.pem", cacerts_dir+"/intermediate.cer")
+    copyfile(cacerts_dir + "/cacert.pem", cacerts_dir + "/root.cer")
+    copyfile(ca2013_dir + "/cacert.pem", cacerts_dir + "/intermediate.cer")
 
     # Permissions
-    os.chmod(cacerts_dir+"/cacert.pem", 0755)
-    os.chmod(cacerts_dir+"/intermediate.cer", 0755)
-    os.chmod(cacerts_dir+"/root.cer", 0755)
-    os.chmod(cacerts_dir+"/private/cakey.pem", 0400)
-    os.chmod(cacerts_dir+"/ca2013/private/cakey.pem", 0755)
-    os.chmod(cacerts_dir+"/private/cakey.key", 0755)
-    os.chmod(cacerts_dir+"/ca2013/ca2013.csr", 0755)
-    os.chmod(cacerts_dir+"/ca2013/cacert.pem", 0755)
-    os.chmod(cacerts_dir+"/ca2013/chain.crt", 0755)
-    os.chmod(cacerts_dir+"/index.txt", 0765)
-    os.chmod(cacerts_dir+"/ca2013/index.txt", 0765)
+    os.chmod(cacerts_dir + "/cacert.pem", 0755)
+    os.chmod(cacerts_dir + "/intermediate.cer", 0755)
+    os.chmod(cacerts_dir + "/root.cer", 0755)
+    os.chmod(cacerts_dir + "/private/cakey.pem", 0400)
+    os.chmod(cacerts_dir + "/ca2013/private/cakey.pem", 0755)
+    os.chmod(cacerts_dir + "/private/cakey.key", 0755)
+    os.chmod(cacerts_dir + "/ca2013/ca2013.csr", 0755)
+    os.chmod(cacerts_dir + "/ca2013/cacert.pem", 0755)
+    os.chmod(cacerts_dir + "/ca2013/chain.crt", 0755)
+    os.chmod(cacerts_dir + "/index.txt", 0765)
+    os.chmod(cacerts_dir + "/ca2013/index.txt", 0765)
 
     # TODO: create a recursive chown def
     uid = getpwnam('puppet').pw_uid
     gid = getpwnam('puppet').pw_gid
-    os.chown(cacerts_dir+"/cacert.pem", uid, gid)
-    os.chown(cacerts_dir+"/intermediate.cer", uid, gid)
-    os.chown(cacerts_dir+"/root.cer", uid, gid)
-    os.chown(cacerts_dir+"/private/cakey.pem", uid, gid)
-    os.chown(cacerts_dir+"/ca2013/private/cakey.pem", uid, gid)
-    os.chown(cacerts_dir+"/private/cakey.key", uid, gid)
-    os.chown(cacerts_dir+"/ca2013/ca2013.csr", uid, gid)
-    os.chown(cacerts_dir+"/ca2013/cacert.pem", uid, gid)
-    os.chown(cacerts_dir+"/ca2013/chain.crt", uid, gid)
-    os.chown(cacerts_dir+"/index.txt", uid, gid)
-    os.chown(cacerts_dir+"/ca2013/index.txt", uid, gid)
+    os.chown(cacerts_dir + "/cacert.pem", uid, gid)
+    os.chown(cacerts_dir + "/intermediate.cer", uid, gid)
+    os.chown(cacerts_dir + "/root.cer", uid, gid)
+    os.chown(cacerts_dir + "/private/cakey.pem", uid, gid)
+    os.chown(cacerts_dir + "/ca2013/private/cakey.pem", uid, gid)
+    os.chown(cacerts_dir + "/private/cakey.key", uid, gid)
+    os.chown(cacerts_dir + "/ca2013/ca2013.csr", uid, gid)
+    os.chown(cacerts_dir + "/ca2013/cacert.pem", uid, gid)
+    os.chown(cacerts_dir + "/ca2013/chain.crt", uid, gid)
+    os.chown(cacerts_dir + "/index.txt", uid, gid)
+    os.chown(cacerts_dir + "/ca2013/index.txt", uid, gid)
 
 
 if __name__ == '__main__':
