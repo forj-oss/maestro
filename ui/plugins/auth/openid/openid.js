@@ -59,6 +59,9 @@ module.exports = {
             email: function(callback){
               callback(null, result.email);
             },
+            claimedIdentifier: function(callback){
+              callback(null, result.claimedIdentifier);
+            },
             gravatar_hash: function(callback){
               callback(null, crypto.createHash('md5').update(result.email).digest('hex'));
             },

@@ -137,6 +137,9 @@ module.exports = {
               req.session.has_gravatar = result.has_gravatar;
               req.session.is_admin = result.is_admin;
               req.session.email = result.email;
+              if (result.claimedIdentifier != undefined){
+                req.session.claimedIdentifier = result.claimedIdentifier;
+              }
             }
             
             //Clean the auth_method
@@ -151,6 +154,9 @@ module.exports = {
             req.session.has_gravatar = result.has_gravatar;
             req.session.is_admin = result.is_admin;
             req.session.email = result.email;
+            if (result.claimedIdentifier != undefined){
+              req.session.claimedIdentifier = result.claimedIdentifier;
+            }
             
             //Clean the auth_method
             req.session.auth_method = null;
