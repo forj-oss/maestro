@@ -8,9 +8,9 @@
       <% if(tools !== undefined && (tools instanceof Array)){ %>
         <% tools.forEach(function(tool){ %>
           <%if(tool.visible!=='true'?false:true){ %>
-          <li style="display: none; padding-top: 15px;">
+          <li id="<%=tool.name%>" name="<%=tool.name%>" class="tool-container" style="display: none; padding-top: 15px;" >
             <% if(tool.status == 'online') { %>
-            	<div class="tool-ops" style="width: 80px;float: right;">
+                <div class="tool-ops" style="width: 80px;float: right;">
                 <% if(req.session.is_admin){ %>
                   <%if(tool.settings_url !== '#'){%>
                     <div class="ops-admin">
@@ -22,29 +22,43 @@
                     </div>
                   <% } %>
                 <% } %>
+                <%
+
+                var path = "$.backup.*[" + tool.name + "].status";
+                var backupStatus = jsonPath.eval(backupYaml, path);
+                var backupCss = 'ops-offline';
+
+                if (backupStatus == sails.config.env.backups.ok){
+                  backupCss = 'ops-ok';
+                }
+                if (backupStatus == sails.config.env.backups.warning){
+                  backupCss = 'ops-warning';
+                }
+                if (backupStatus == sails.config.env.backups.error){
+                  backupCss = 'ops-critical';
+                }
+              %>
                 <!-- app.settings.env is the ENV variable, it should only show the buttons if it's not production  -->
                <% if(sails.config.environment=="development"){%>
               <div class="ops-workload ops-offline ops">Workload</div>
-              <div class="ops-backup ops-offline ops">Backup</div>
-              <% }else{ %>
-              <!--  <div class="ops-workload ops-offline ops">Workload</div> -->
-              <!--  <div class="ops-backup ops-offline ops">Backup</div> -->
+              <div class="tool-view ops-backup <%=backupCss%> ops" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">Backup</div>
               <% } %>
-
               </div>
               <%if(tool.tool_url !== '#'){%>
-                <a class="tool-view" href="<%=tool.tool_url%>" target="_blank" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">
+                <a href="<%=tool.tool_url%>" target="_blank" data-largesrc="/tools_images/tool_<%=tool.name%>.png">
               <% }else{ %>
-                <a class="tool-view" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
+                <a href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>">
               <% } %>
-						    <% if(tool.icon!=='true'?false:true){ %>
+                            <% if(tool.icon!=='true'?false:true){ %>
                   <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
                 <% }else{ %>
                   <img src="/tools_images/tool_no_icon.png" alt="<%=tool.name%>"/>
                 <% } %>
-  					  </a>
-  	          <span class="tool-desc-name" href="#"><%=tool.dname%></span>
-  					  <span style="clear:both;"></span>
+                      </a>
+                      <!-- The below empty link is needed to draw a pointer to the tool when you expand the Grid (Draws the blue triangle / arrow) -->
+                      <a class="tool-view"></a>
+              <span class="tool-desc-name" href="#"><%=tool.dname%></span>
+                      <span style="clear:both;"></span>
             <% } %>
             <% if(tool.status == 'offline') { %>
               <div class="tool-ops" style="width: 80px;float: right;">
@@ -57,27 +71,23 @@
                <% if(sails.config.environment=="development"){%>
               <div class="ops-workload ops-offline ops">Workload</div>
               <div class="ops-backup ops-offline ops">Backup</div>
-              <% }else{ %>
-              <!--  <div class="ops-workload ops-offline ops">Workload</div> -->
-              <!--  <div class="ops-backup ops-offline ops">Backup</div> -->
               <% } %>
-
               </div>
-              <a class="tool-view ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>" style="cursor: default;">
+              <a class="ops-offline" href="#" data-largesrc="/tools_images/tool_<%=tool.name%>.png" data-tool-dname="<%=tool.dname%>" style="cursor: default;">
                 <% if(tool.icon!=='true'?false:true){ %>
                   <img src="/tools_images/tool_<%=tool.name%>.png" alt="<%=tool.name%>"/>
                 <% }else{ %>
                   <img src="/tools_images/tool_no_icon.png" alt="<%=tool.name%>"/>
                 <% } %>
-  					  </a>
-  	          <span class="tool-desc-name ops-offline" href="#"><%=tool.dname%></span>
-  					  <span style="clear:both;"></span>
+                      </a>
+              <span class="tool-desc-name ops-offline" href="#"><%=tool.dname%></span>
+                      <span style="clear:both;"></span>
             <% } %>
           </li>
           <% } %>
         <% }); %>
       <% } %>
-		</ul>
+        </ul>
   </div>
 </div>
 <% if(req.session.is_admin){ %>
@@ -156,7 +166,7 @@
                           }
                       });
                     }
-                  })
+                  });
                 });
               </script>
             </div>
@@ -191,6 +201,8 @@
 <script src="../js/grid.js"></script>
 <script>
   $(window).ready(function(){
+    Grid.init();
+
     //FadeIn tools on secuence
     var _delay= 0;
     $('#og-grid > li').delay(400).each(function() {
@@ -199,9 +211,6 @@
     });
     
     $('.ops-workload').click(function(){
-      $('.modal').modal('show');
-    });
-    $('.ops-backup').click(function(){
       $('.modal').modal('show');
     });
     $('.monitoring-option').click(function () {

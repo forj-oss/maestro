@@ -46,6 +46,9 @@ module.exports.env = {
         conf_dir: '/etc/forj/conf.d',
         runbkp_cmd: '/usr/lib/forj/sbin/runbkp.sh',
         restore_cmd: '/usr/lib/forj/sbin/restoreraid.sh',
+        ok: '0',
+        warning: '1',
+        error: '2'
     },
     plugins: {
       auth: [

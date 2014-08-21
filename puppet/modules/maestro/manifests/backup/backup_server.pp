@@ -55,7 +55,7 @@ class maestro::backup::backup_server (
     ensure  => present,
     owner   => $::maestro::backup::params::backup_user,
     source  => 'puppet:///modules/maestro/backup/backup-status.py',
-    mode    => '0544',
+    mode    => '0555',
     require => File[$home],
   }
   # Ensure old corebkpadm is removed from the system.
@@ -104,5 +104,16 @@ class maestro::backup::backup_server (
   file { "${home}/backups":
     ensure => link,
     target => $::maestro::backup::params::backup_fullpath,
+  }
+  if ! defined(File['/etc/sudoers.d/forj-bck-sudoer'])
+  {
+    file { '/etc/sudoers.d/forj-bck-sudoer':
+      ensure  => present,
+      source  => 'puppet:///modules/maestro/backup/forj-bck-sudoer',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0440',
+      require => User[$::maestro::backup::params::backup_user],
+    }
   }
 }

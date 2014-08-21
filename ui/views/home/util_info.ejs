@@ -1,0 +1,286 @@
+<link rel="stylesheet" href="/linker/styles/backup.css">
+<div id="backupPanel" style="display:none;">
+  <span class="og-close"></span>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="row">
+        <h4 class="service-name"><%=service%> - Backup Sets</h4>
+        <br>
+          <%
+          for (i=0; i<backupList.length; i++){
+          %>
+            <div class="div-outline" style="width: 300px; line-height: 34px; display: table-cell; vertical-align: middle;">
+              <div class="backup-cell" style="float: left;"><%=backupList[i]%></div>
+              <div style="float:right;">
+                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: restore('<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
+                <div class="backup-cell" style="float: left;">|</div>
+                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="backup/logs?app=<%=app%>&week=<%=backupList[i]%>" target="_blank">Backup Log</a>&nbsp;&nbsp;</div>
+              </div>
+            </div>
+            <div style="clear: both;"/>
+          <%
+          }
+          %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="progressPanel" style="display:none;">
+<span class="og-close"></span>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <div class="row" style="padding-left: 10px; position: relative; z-index: 2;">
+      <h4 class="service-name"><%=service%> - Service Status</h4>
+      <br>
+        <div>
+          <h5><strong id="progressPanelMsg1" style="display: none;"></strong></h5>
+        </div>
+        <div>
+          <span id="progressPanelMsg2" style="padding-right: 10px; display: none;" ></span>
+        </div>
+        <div style="width:384px; overflow: hidden; padding-top: 10px; padding-bottom: 10px;">
+          <div style="float: left; width: 350px;">
+            <div class="progress-bar" id="progressBar" style="display: none; float: left;">
+              <div class="bar" id="progressBarBg" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div style="float: left; width: 34px;">
+            <div class="" id="progressPanelIcon" style="float: right; height: 34px; width: 34px;"></div>
+          </div>
+        </div>
+        <div>
+          <br>
+          <span id="progressPanelMsg3" style="color: #797979; padding-right: 10px; display:none;" ></span>
+        </div>
+        <div id="progressPanelDone" style="display: none">
+          <br>
+          <br>
+          <div id="progress-panel-done-btn" style="background-color: #1D4E6F; height:35px; width: 70px; display: table-cell; vertical-align:middle; cursor:pointer;" align="center">Done</div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div id="mainPanel">
+  <span class="og-close"></span>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="row" style="padding-left: 10px;position: relative; z-index: 2;">
+        <h4 class="service-name"><%=service%> - Service Status</h4>
+      </div>
+      <div class="row" style="padding-left: 10px;">
+        <div class="col-md-6" style="padding-top: 10px;">
+          <div class="row" style="margin-bottom: 10px;">
+            <span class="error-icon" style="height: 34px;width: 34px;float: left;margin-right: 10px;"></span>
+            <h5><strong>Workload</strong> - CPU usage has reached 90%</h5>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <a href="#">Monitoring Page</a>
+          </div>
+          <div class="row">
+            <div style="display: inline-block;margin-right: 5px;">
+              <span style="display: block;">CPU</span>
+              <canvas id="service_cpu" data-current="90" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+            </div>
+            <div style="display: inline-block;margin-right: 5px;">
+              <span style="display: block;">Memory</span>
+              <canvas id="service_mem" data-current="65" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+            </div>
+            <div style="display: inline-block;margin-right: 5px;">
+              <span style="display: block;">Disk</span>
+              <canvas id="service_disk" data-current="45" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
+            </div>
+          </div>
+          <div class="row">
+            <h5 class="service-details">Details</h5>
+            <div style="width: 230px;"><span>Registered users</span><span style="float: right;font-weight: bold;">34</span></div>
+            <div style="width: 230px;"><span>Commits in last 24hrs</span><span style="float: right;font-weight: bold;">11</span></div>
+            <div style="width: 230px;"><span>Gates passed</span><span style="float: right;font-weight: bold;">4</span></div>
+          </div>
+        </div>
+        <div class="col-md-6" style="padding-top: 10px;">
+          <div class="row" style="margin-bottom: 10px;">
+            
+            <%
+            var backupH5 = 'There are no backups!';
+            var backupIcon = 'error-icon';
+
+            if (backupInfo['status'] == sails.config.env.backups.ok){
+              backupH5 = 'Backup completed succesfully!';
+              backupIcon = 'check-icon';
+              
+            }
+            if (backupInfo['status'] == sails.config.env.backups.warning){
+              backupH5 = 'Backup completed with warnings!';
+              backupIcon = 'trial-icon';
+            }
+            if (backupInfo['status'] == sails.config.env.backups.error){
+              backupH5 = 'Backup failed!';
+              backupIcon = 'error-icon';
+            }
+            %>
+            <span class="<%=backupIcon%>" style="height: 34px;width: 34px;float: left;margin-right: 10px;"></span>
+            <h5><strong>Backup</strong> - <%=backupH5%></h5>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <div style="float:left;padding-right: 5px;"><a href="#" id="backup-now-btn">Backup Now</a></div>
+            <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#" id="backup-sets-btn">Backup Sets</a></div>
+            <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#" id="restore-btn">Restore</a></div>
+            <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="../backup/logs?app=<%=app%>" target="_blank">Download Backup Log</a></div>
+          </div>
+          <div class="row">
+            <div>
+            <span style="padding-right: 10px;" id="last-backup">Last Backup Run: <%=(backupInfo['last']!=undefined) ? backupInfo['last'] : ''  %></span>
+            </div>
+            <div>
+              <span style="padding-right: 10px;" id="log-message">Log Message: <%=(backupInfo['message']!=undefined) ? backupInfo['message'] : ''%></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+</div>
+
+<script>
+  function showPanel(id){
+    $('#mainPanel').hide();
+    $('#backupPanel').hide();
+    $('#progressPanel').hide();
+    $('#'+id).show();
+  }
+
+
+  function updateBackupStatus(app, opsClass){
+      $('#'+app).find('.ops-backup').removeClass('ops-offline');
+      $('#'+app).find('.ops-backup').removeClass('ops-warning');
+      $('#'+app).find('.ops-backup').removeClass('ops-critical');
+      $('#'+app).find('.ops-backup').removeClass('ops-ok');
+      $('#'+app).find('.ops-backup').addClass(opsClass);  
+  }
+
+
+  function backup(app){
+    showPanel('progressPanel');
+    setupProgressPanel('<%= sails.config.env.backups.ok%>', 'Running ' + app + ' Backup', 'This may take up to 5 minutes...', 'Checking service', '25%');
+    var date = new Date();
+    backupDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+    socket.get('/backup/backup', {
+      app: app
+    }, function(results) {
+      switch(results.status.toString()){
+        case '<%= sails.config.env.backups.ok%>':
+          setupProgressPanel('<%= sails.config.env.backups.ok%>', 'Backup completed succesfully!', backupDate, 'Log message: ' + results.message, '100%');
+          updateBackupStatus(app, 'ops-ok');
+          break;
+        case '<%= sails.config.env.backups.warning%>':
+          setupProgressPanel('<%= sails.config.env.backups.warning%>', 'Backup completed with warnings!', backupDate, 'Log message: ' + results.message, '100%');
+          updateBackupStatus(app, 'ops-warning');
+          break;
+        case '<%= sails.config.env.backups.error%>':
+          setupProgressPanel('<%= sails.config.env.backups.error%>', 'Backup failed!', backupDate, 'Log message: ' + results.message, '100%');
+          updateBackupStatus(app, 'ops-critical');
+          break;
+        default:
+          setupProgressPanel('<%= sails.config.env.backups.error%>', 'Backup failed!', backupDate, 'Log message: ' + 'Undefined error', '100%');
+          updateBackupStatus(app, 'ops-critical');
+      }
+    });
+  }
+
+
+  function restore(app, week){
+    showPanel('progressPanel');
+    setupProgressPanel(false, 'Running ' + app + ' Restore', 'This may take up to 5 minutes...', 'Checking service', '25%');
+    var date = new Date();
+    restoreDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+    socket.get('/backup/restore', {
+      app: app,
+      week: week
+    }, function(response) {
+      if(response.success == 'failed'){
+        setupProgressPanel(true, 'Restore failed!', restoreDate, 'Log message: ' + response.message, '100%');
+      }
+      if(response.success == 'success'){
+        setupProgressPanel(false, 'Restore completed succesfully!', restoreDate, 'Log message: ' + response.message, '100%');
+      }
+    });
+  }
+
+
+  function updateIcon(status){
+    $('#progressPanelIcon').removeClass('check-icon');
+    $('#progressPanelIcon').removeClass('trial-icon');
+    $('#progressPanelIcon').removeClass('error-icon');
+    
+    switch(status.toString()){
+      case '<%= sails.config.env.backups.ok%>':
+        $('#progressPanelIcon').addClass('check-icon');
+        break;
+      case '<%= sails.config.env.backups.warning%>':
+        $('#progressPanelIcon').addClass('trial-icon');
+        break;
+      case '<%= sails.config.env.backups.error%>':
+        $('#progressPanelIcon').addClass('error-icon');
+        break;
+    }
+  }
+
+
+  function setupProgressPanel(status, msg1, msg2, msg3, percentage){
+    $('#progressPanelMsg1').fadeOut(500, function(){
+      $(this).text(msg1);
+    }).fadeIn(500);
+    $('#progressPanelMsg2').fadeOut(500, function(){
+      $(this).text(msg2);
+    }).fadeIn(500);
+    $('#progressPanelMsg3').fadeOut(500, function(){
+      $(this).text(msg3);
+      if (status == '<%= sails.config.env.backups.error%>'){
+        $(this).css({'color':'#E16138'});
+      }
+    }).fadeIn(500);
+    $('#progressBar').fadeOut(500, function(){
+      $('#progressBarBg').css('width', percentage);
+      if (status == '<%= sails.config.env.backups.error%>'){
+        $('#progressBarBg').css('background-color:', '#E16138');
+        $('#progressBarBg').css('color', '#E16138');
+      }
+    }).fadeIn(500);
+    $('#progressPanelIcon').fadeOut(500, function(){
+      if (percentage == '100%'){
+        updateIcon(status);
+        $('#progressPanelDone').fadeOut(500).fadeIn(500);
+      }
+    }).fadeIn(500);
+    
+  }
+
+
+  $(document).ready(function(){
+    progress('service_cpu', 90, 'new');
+    progress('service_mem', 65, 'new');
+    progress('service_disk', 45, 'new');
+
+   $('#backup-now-btn').click(function(){
+      backup('<%=app%>');
+    });
+
+    $('#restore-btn').click(function(){
+      restore('<%=app%>', null);
+    });
+
+    $('#backup-sets-btn').click(function(){
+      showPanel('backupPanel');
+    });
+
+  });
+
+</script>

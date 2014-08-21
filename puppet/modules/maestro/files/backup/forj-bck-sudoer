@@ -1,0 +1,2 @@
+#Let the user "puppet" run: sudo -u forj-bck
+puppet ALL = (forj-bck) NOPASSWD:ALL

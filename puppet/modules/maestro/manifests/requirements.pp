@@ -34,8 +34,8 @@ class maestro::requirements(
     ensure: '0.8.2'
     provider: 'npm'
     require: 'Class[nodejs]'
-  forever:
-    ensure: '0.10.11'
+  JSONPath:
+    ensure: '0.10.0'
     provider: 'npm'
     require: 'Class[nodejs]'
   optimist:

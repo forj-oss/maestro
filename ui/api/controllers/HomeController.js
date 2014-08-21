@@ -29,6 +29,7 @@
  *
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
+"use strict";
  var async = require('async');
  var blueprint_utils = require('blueprint/blueprint');
  var kit_ops = require('kit-ops/kit-ops');
@@ -47,36 +48,35 @@ module.exports = {
   index: function(req, res){
     blueprint_utils.get_blueprint_id(function(err){
         console.error('Unable to get the instance_id of the kit: '+err.message);
-        res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+        res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit. ' ]});
       }, function(result){
-        if(result === undefined){
-          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
+        if(!result){
+          res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit. ' ]});
         }else{
           try{
             result = JSON.parse(result);
           }catch(e){
             result = new Error('Unable to parse malformed JSON');
-            console.error('Unable to parse malformed JSON: '+e.message)
+            console.error('Unable to parse malformed JSON: ' + e.message);
           }
-
           if(result instanceof Error){
-            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
-            console.error('Unable to get the instance_id of the kit (result instanceoff Error): '+result.message)
+            res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: ' + result.message ]});
+            console.error('Unable to get the instance_id of the kit (result instanceoff Error): ' + result.message);
           }else{
             var tools = [];
-            var backupYaml = null;
             async.series({
-                backupYaml: function(callback){
+                jsonPath: function(callback){
+                  var jsonPath = require('JSONPath');
+                  callback(null, jsonPath); // Telling async that we are done
+                },
+                backupYaml: function(callback){  // Yaml object from backup-status.yaml
                   backup_utils.getYamlObj(function (error, yamlObj) {
                     if(error){
-                      console.error('Unable to retrieve backupYaml: ' + error);
+                      console.error(error);
+                      callback(null, {});  // Empty object
                     } else {
-                      backupYaml = yamlObj;
-                      for( var propt in backupYaml ){
-                        console.log (propt + ': ' + yamlObj[propt]);
-                      }
+                      callback(null, yamlObj); // Telling async that we are done
                     }
-                    callback(null); // Telling async that we are done
                   });
                 },
                 tools: function(callback){
@@ -86,32 +86,80 @@ module.exports = {
                   }, function(res_tools){
                     tools = JSON.parse(res_tools);
                     callback(null, tools);
-                  })
+                  });
                 },
                 layout: function(callback){
                   if(req.isAjax){
                     callback(null, null);
                   }else{
-                    callback(null, 'layout')
+                    callback(null, 'layout');
                   }
                 }
             }, function(errasync, results) {
                 if (errasync) {
-                  console.error(errasync.message)
+                  console.error(errasync.message);
                   res.view('500', { layout: null, errors: [ errasync.message ]});
                 }else{
                   res.view(results, 200);
                 }
             });
-
           }
-
         }
       });
   },
-  statics: function(req, res){
+  util_info: function(req, res){
     var service = req.param('service');
-    res.view({ layout: null, service: service });
+    var app = req.param('app');
+    async.series({
+          jsonPath: function(callback){
+            var jsonPath = require('JSONPath');
+            callback(null, jsonPath); // Telling async that we are done
+          },
+          backupInfo: function(callback){  // App yaml with backup information
+            backup_utils.getBackupInfo(app, function (error, data) {
+              if(error){
+                console.error(error);
+                callback(null, {});  // Empty object
+              } else {
+                callback(null, data); // Telling async that we are done
+              }
+            });
+          },
+          backupList: function(callback){  // App yaml with backup information
+            backup_utils.getBackupList(app, function (error, weeks) {
+              if(error){
+                console.error(error);
+                callback(null, {});  // Empty object
+              } else {
+                console.log('Backups count: ' + weeks.length);
+                for (var i=0; i<weeks.length; i++){
+                    console.log('Files: ' + weeks[i]);
+                }
+                callback(null, weeks); // Telling async that we are done
+              }
+            });
+          },
+          layout: function(callback){
+              callback(null, null);
+          },
+          service: function(callback){
+              callback(null, service);
+          },
+          app: function(callback){
+              callback(null, app);
+          }
+      }, function(errasync, results) {
+          if (errasync) {
+            console.error(errasync.message);
+            res.view('500', { layout: null, errors: [ errasync.message ]});
+          }else{
+            //res.view(results, 200);
+            res.view(results);
+          }
+      });
+
+
+    //res.view({ layout: null, service: service });
   },
   tutorial: function(req, res){
     blueprint_utils.get_blueprint_id(
@@ -128,20 +176,20 @@ module.exports = {
             },
           function(result){
             result = JSON.parse(result);
-            var gerrit_ip = 'my_gerrit_ip'
+            var gerrit_ip = 'my_gerrit_ip';
             var zuul_ip = 'my_zuul_ip';
-            for (i=0; i<result.length; i++){
+            for (var i=0; i<result.length; i++){
               if (result[i].name == "gerrit"){
                   // Only nums and point
                 gerrit_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
-                if (gerrit_ip == ''){
-                  gerrit_ip = 'my_gerrit_ip'
+                if (!gerrit_ip){
+                  gerrit_ip = 'my_gerrit_ip';
                 }
               }
               if (result[i].name == "zuul"){
                 zuul_ip = result[i].tool_url.replace(/[^0-9.]/g, '');
-                if (zuul_ip == ''){
-                  zuul_ip = 'my_zuul_ip'
+                if (!zuul_ip){
+                  zuul_ip = 'my_zuul_ip';
                 }
               }
             }
@@ -156,9 +204,9 @@ module.exports = {
   },
   user_options: function(req, res){
     if(req.session.authenticated){
-      res.view({ layout: null, guest: false })
+      res.view({ layout: null, guest: false });
     }else{
-      res.view({ layout: null, guest: true })
+      res.view({ layout: null, guest: true });
     }
   },
   notifications_enabled: function(req, res){
@@ -168,9 +216,9 @@ module.exports = {
         res.view('500', { layout: null, errors: [ open_err.message ]});
       }else{
         var notificationID = identifier.option_id;
-        var notificationValue = identifier.option_value;
+        // var notificationValue = identifier.option_value;
 
-        if(notificationID === undefined){
+        if(!notificationID){
           res.view('500', { layout: null, errors: [ 'We could not retrieve the notificationID' ]});
         }else{
 
