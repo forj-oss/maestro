@@ -14,7 +14,7 @@
 #    limitations under the License.
 class maestro::ldap::ldapserver
 {
-  $ca_certs_db = hiera('maestro::certs_dir' ,'/opt/config/cacerts')
+  $ca_certs_db = hiera('maestro::ldap::ldapserver::certs_dir' ,'/opt/config/cacerts')
   $ssl_ca_file_contents = cacerts_getkey(join([$ca_certs_db , '/ca2013/chain.crt']))
   $ssl_cert_file_contents = cacerts_getkey(join([$ca_certs_db , "/ca2013/certs/${::fqdn}.crt"]))
   $ssl_key_file_contents = cacerts_getkey(join([$ca_certs_db , "/ca2013/certs/${::fqdn}.key"]))
