@@ -51,7 +51,7 @@ if Facter.value('meta_location') != nil and Facter.value('meta_location') != ''
     Facter.add(key) do
       setcode do
         if value != nil and value != ''
-          Facter::Util::Resolution.exec("echo #{value}")
+          Facter::Util::Resolution.exec("echo '#{value}'")
         else
           Facter::Util::Resolution.exec("echo")
         end
