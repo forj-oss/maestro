@@ -27,6 +27,7 @@ classes:
   - gardener
   - sysadmin_config::manage_servers
   - maestro::ldap::ldapserver
+  - maestro::redis::redisserver
 
 # swap location and default config
 sysadmin_config::swap::swap_file: '/mnt/swapfile'
