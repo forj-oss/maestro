@@ -1,15 +1,57 @@
-#(c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
-# TODO
+  
 require 'spec_helper'
+
+oses = @oses
+
+describe 'ldap::server::master' do
+ 
+  oses.keys.each do |os|
+	
+		describe "Running on #{os}" do
+
+      let(:facts) { { 
+				:osfamily                  => oses[os][:osfamily],
+				:operatingsystem           => oses[os][:operatingsystem],
+				:operatingsystemmajrelease => oses[os][:operatingsystemmajrelease],
+				:architecture              => oses[os][:architecture],
+      } }
+    
+      let(:params) { { 
+        :suffix => 'dc=example,dc=com',
+        :rootpw => 'asdqw',
+      } }
+    
+			it { should include_class('ldap::params') }
+			it { should contain_service(oses[os][:service]) }
+			it { should contain_package(oses[os][:server_pkg]) }
+			it { should contain_file(oses[os][:server_cfg]) }
+
+			context 'Motd disabled (default)' do
+				it { should_not contain_motd__register('ldap::server::master') }
+			end
+      
+			context 'Motd enabled' do
+				let(:params) { {
+					:suffix => 'dc=example,dc=com',
+					:rootpw => 'asdqw',
+					:enable_motd => true 
+				} }
+				it { should contain_motd__register('ldap::server::master') }
+			end
+		end
+	end
+	
+	describe "Running on unsupported OS" do
+		let(:facts) { { :osfamily => 'solaris' } }
+		let(:params) { { 
+			:suffix => 'dc=example,dc=com',
+			:rootpw => 'asdqw',
+		} }
+		it {
+			expect {
+				should include_class('ldap::params')
+			}.to raise_error(Puppet::Error, /^Operating system.*/)
+		}
+	end
+
+end
