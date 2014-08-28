@@ -128,17 +128,18 @@ class maestro (
 
 
   # Fog file may not be installed, and following code may fails. But maestro ui should be already installed and configured, anyway.
+  debug("instance_id is ${instance_id}")
   $instance = $instance_id
   if ($provision == true) and ($::fog != 'UNDEF') and ($nodes != undef)
   {
     # create a server with non-default values
     class { 'maestro::orchestrator::setupallservers':
-      environment     => $environment,
-      nodes           => $nodes,
-      instance        => $instance,
-      ssh_gen_keys    => $ssh_user_keys,
-      extra_metadata  => $meta_data,
-      require         => Class['puppet::puppetmaster'],
+      environment    => $environment,
+      nodes          => $nodes,
+      instance       => $instance,
+      ssh_gen_keys   => $ssh_user_keys,
+      extra_metadata => $meta_data,
+      require        => Class['puppet::puppetmaster'],
     }
   }
 
