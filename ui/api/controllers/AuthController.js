@@ -51,7 +51,7 @@ module.exports = {
   sign_in: function(req, res){
     var message = req.param('message');
     findElement(sails.config.env.plugins.auth, 'default', true, function(auth_plugin){
-      res.view({ default_auth: auth_plugin.name, layout: 'login_layout', message: message });
+      res.view({ default_auth: auth_plugin.name, auth_basic: auth_plugin.auth_basic, display_name: auth_plugin.display_name ,layout: 'login_layout', message: message });
     });
   },
   sign_out: function(req, res){
@@ -83,10 +83,15 @@ module.exports = {
             res.send(error, 500);
           
           }else{
-            if(authenticated === true){
-            
-              //User gets authenticated
-              res.send(200);
+            if(authenticated.authenticated === true){
+              
+              //ADD THE SESSION PROPERTIES AND VALUES
+              for(var property in authenticated){
+                req.session[property] = authenticated[property];
+              }
+              
+              //SEND THE RESPONSE
+              res.send(authenticated.authenticated, 200);
             
             }else if(redirect !== null){
             

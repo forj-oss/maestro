@@ -233,7 +233,7 @@
 }
 .ops-admin a{
   color: #FFFFFF;
-  text-decoration: none;
+  text-decoration: none;
 }
 .ops-offline{
   background-color: #797979 !important;
@@ -251,6 +251,12 @@
   background-color: #D6332C;
 }
 
+.text-ok{
+  color: #47CC3A;
+}
+.text-error{
+  color: #D6332C;
+}
 /*------NAV-------*/
   
 #navcontainer
@@ -567,4 +573,24 @@
   color: #FFF;
   text-decoration: none;
   background-color: #093C5F;
+}
+.auth-form{
+  height: 30px;
+  margin-bottom: 3px;
+  
+  font-family: "Open Sans Regular", "Open Sans Bold", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+}
+.auth-form label{
+  width: 80px;
+  text-align: left;
+  font-weight: 700;
+  
+}
+.auth-form input{
+  height: 90%;
+  border: 0;
+  outline: 0;
+  border-radius: 3px;
+  color: #797979;
+  padding-left: 5px;
 }
