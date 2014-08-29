@@ -40,6 +40,7 @@ then # TODO: Support to receive a different layout then default one.
 
    if [ "${TEST_BOX_REPOS[$BLUEPRINT]}" = "" ]
    then
+      echo "Call of : bp.py --install \"$BLUEPRINT\" -v"
       /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
    else
       # TODO: Be able to pass all TEST_BOX list to bp.py and wait if needed.
@@ -49,7 +50,7 @@ then # TODO: Support to receive a different layout then default one.
    #puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
    MODPATH="$(grep modulepath /etc/puppet/puppet.conf | sed 's/\$environment/production/g
                                                              s/^ *modulepath *= *//g')"
-   echo "Repplying: puppet apply /opt/config/production/git/maestro/puppet/manifesst/site.pp --modulepath=<from puppet.conf>"
+   echo "Re-applying: puppet apply /opt/config/production/git/maestro/puppet/manifest/site.pp --modulepath=<from puppet.conf>"
    echo "puppet.conf: modulepath = $MODPATH"
 
 # TODO: remove after we're done debuggin:
@@ -69,6 +70,3 @@ then # TODO: Support to receive a different layout then default one.
    export PATH="/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"
    puppet agent --debug --verbose $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
 fi
-
-
-
