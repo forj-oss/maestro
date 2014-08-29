@@ -1,0 +1,44 @@
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+# Modus blueprint - Version 0.01
+
+# It describes what development tools, flows and services are implemented to start developing like Openstack do development and Continuous integration.
+
+# This is a prototype version
+
+# All blueprint files will be located in /usr/lib/maestro/blueprints
+# This file will need to be installed as modus-master.yaml under 'blueprints' directory.
+# By convention, we will name it <BluePrintName>-master.yaml to make distinction with the layout.
+# Each repository will create a <repo>/blueprint/ which will contains different blueprint this repository can offer.
+# Blueprints convention is to have <repo>/blueprint/<Blueprint>-master.yaml
+# A default layout can be automatically loaded by maestro, for trial versions, stored as:
+# <repo>/blueprint/default_layout/<Blueprint>-layout.yaml
+
+blueprint:
+  name: modus
+  description: SCM-Manager development model
+  icon:
+    file: redstone.png
+    content: (--- base64 encoded ---)
+  # by default, it should refer to our forj web documentation, to present the blueprint documentation. But we can propose to change it.
+  documentation: 'http://openstack.org/forj'
+  locations:
+    modules:
+      - src-repo: modus
+        git: https://review.forj.io/p/forj-oss/modus
+        install:
+          puppet-apply: install
+        uninstall:
+          puppet-apply: uninstall
