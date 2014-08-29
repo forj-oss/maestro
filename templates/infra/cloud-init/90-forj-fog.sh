@@ -94,12 +94,15 @@ default:
 # DNS_TENANT_ID - Provided by meta-data 'dns_tenantid'
 # DNS_ZONE      - Provided by meta-data 'dns_zone'.
 
-check_var "$DNS_KEY"       "Missing DNS_KEY. Check your metadata 'hpcloud_priv'."
-check_var "$DNS_SECRET"    "Missing DNS_SECRET. Check your metadata 'hpcloud_priv'."
-check_var "$DNS_ZONE"      "Missing DNS_ZONE. Check your metadata 'dns_zone'."
-check_var "$DNS_TENANT_ID" "Missing DNS_TENANT_ID. Check your metadata 'dns_tenantid'."
+if [ "$DNS_TENANT_ID" != "" ]
+then
+    echo "Found DNS_TENANT_ID. Enabling FOG dns credentials."
+	check_var "$DNS_KEY"       "Missing DNS_KEY. Check your metadata 'hpcloud_priv'."
+	check_var "$DNS_SECRET"    "Missing DNS_SECRET. Check your metadata 'hpcloud_priv'."
+	check_var "$DNS_ZONE"      "Missing DNS_ZONE. Check your metadata 'dns_zone'."
+	check_var "$DNS_TENANT_ID" "Missing DNS_TENANT_ID. Check your metadata 'dns_tenantid'."
 
-echo "$DEFAULT
+	echo "$DEFAULT
 dns:
   hp_access_key: '${DNS_KEY}'
   hp_secret_key: '${DNS_SECRET}'
@@ -111,6 +114,14 @@ forj:
   provider: openstack 
  
 # vim: syntax=yaml" > /opt/config/fog/cloud.fog
+else
+    echo "DNS_TENANT_ID not found. Disabling DNS in fog."
+	echo "$DEFAULT
+forj:
+  provider: openstack 
+ 
+# vim: syntax=yaml" > /opt/config/fog/cloud.fog
+fi
 
 chown puppet:puppet /opt/config/fog/cloud.fog
 echo "/opt/config/fog/cloud.fog created"
