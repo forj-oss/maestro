@@ -125,7 +125,7 @@ module Puppet
            raise Puppet::Error, "Error : #{e}"
         end
   
-        Puppet.notice "server created #{server_name}"
+        Puppet.notice "server created #{server_name} on net #{template[:network_name]} "
         begin
           server_ip_assign(server_name)
         rescue  Exception => e
@@ -140,7 +140,8 @@ module Puppet
         if server_exist?(server_name)
           server = find_match(@compute.servers, server_name)
           server.addresses.each do |address|
-            if (address.include? 'private' and  address.length == 2) #TODO: research why is this 'private' for a public ip?
+            network_name = address.keys.reduce
+            if (address.include? network_name and  address.length == 2) #TODO: research why is this 'private' for a public ip?
               if address[1].length >= 2
                 Puppet.debug "found floating ip = #{address[1][1].inspect}"
                 public_ip = address[1][1].addr
@@ -156,7 +157,8 @@ module Puppet
         if server_exist?(server_name)
           server = find_match(@compute.servers, server_name)
           server.addresses.each do |address|
-            if (address.include? 'private' and  address.length == 2)
+            network_name = address.keys.reduce
+            if (address.include? network_name and  address.length == 2)
               if address[1].length >= 1
                 Puppet.debug "found private ip = #{address[1][0].inspect}"
                 private_ip = address[1][0].addr
@@ -174,7 +176,8 @@ module Puppet
       def get_server_id_by_private_ip(private_ip)
         @compute.servers.each do |server|
           server.addresses.each do |address|
-            if (address.include? 'private' and address.length == 2)
+            network_name = address.keys.reduce
+            if (address.include? network_name and address.length == 2)
               if address[1].length >= 1
                 return server.id if address[1][0].addr == private_ip
               end
@@ -188,10 +191,11 @@ module Puppet
       # TODO: consider moving to network class.
       # only assign an ip if the server does not have two addresses yet.
       def server_ip_assign(server_name)
-        server = find_match(@compute.servers, server_name)
+        server = find_match(@compute.servers)
         if server != nil
           addresses = server.addresses
-          if addresses['private'].count < 2
+          network_name = server.addresses.keys.reduce
+          if addresses[network_name].count < 2
           # check if already assigned
             new_ip = nil
             ip = get_free_floating_ip(server)
