@@ -139,8 +139,8 @@ module Puppet
         public_ip = ''
         if server_exist?(server_name)
           server = find_match(@compute.servers, server_name)
+          network_name = server.addresses.keys.reduce
           server.addresses.each do |address|
-            network_name = address.keys.reduce
             if (address.include? network_name and  address.length == 2) #TODO: research why is this 'private' for a public ip?
               if address[1].length >= 2
                 Puppet.debug "found floating ip = #{address[1][1].inspect}"
@@ -156,8 +156,8 @@ module Puppet
         private_ip = ''
         if server_exist?(server_name)
           server = find_match(@compute.servers, server_name)
+          network_name = server.addresses.keys.reduce
           server.addresses.each do |address|
-            network_name = address.keys.reduce
             if (address.include? network_name and  address.length == 2)
               if address[1].length >= 1
                 Puppet.debug "found private ip = #{address[1][0].inspect}"
@@ -175,8 +175,8 @@ module Puppet
       # @return string [String] the server id
       def get_server_id_by_private_ip(private_ip)
         @compute.servers.each do |server|
+          network_name = server.addresses.keys.reduce
           server.addresses.each do |address|
-            network_name = address.keys.reduce
             if (address.include? network_name and address.length == 2)
               if address[1].length >= 1
                 return server.id if address[1][0].addr == private_ip
@@ -191,10 +191,15 @@ module Puppet
       # TODO: consider moving to network class.
       # only assign an ip if the server does not have two addresses yet.
       def server_ip_assign(server_name)
-        server = find_match(@compute.servers)
+        server = find_match(@compute.servers, server_name)
         if server != nil
           addresses = server.addresses
-          network_name = server.addresses.keys.reduce
+          if addresses != nil
+            network_name = server.addresses.keys.reduce
+          else
+            Puppet.warning "falling back to default network_name => 'private'"
+            network_name = 'private' # HACK HACK HACK
+          end  
           if addresses[network_name].count < 2
           # check if already assigned
             new_ip = nil
