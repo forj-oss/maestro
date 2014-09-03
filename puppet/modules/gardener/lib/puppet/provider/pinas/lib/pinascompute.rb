@@ -197,8 +197,8 @@ module Puppet
           if addresses != nil
             network_name = server.addresses.keys.reduce
           else
-            Puppet.warning "falling back to default network_name => 'private'"
-            network_name = 'private' # HACK HACK HACK
+            Puppet.warning "falling back to default network"
+            network_name = 0 # HACK HACK HACK
           end  
           if addresses[network_name].count < 2
           # check if already assigned
