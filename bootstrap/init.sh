@@ -75,7 +75,7 @@ then
       if [ -d $BOX_BOOT_DIR/$REPO ]
       then
          echo "--- $0: Added '$BOX_BOOT_DIR/$REPO' to the Box bootstrap list"
-         BOOTSTRAP_PATH="$BOOTSTRAP_PATH $BOX_BOOT_DIR/$REPO"
+         BOOTSTRAP_PATH="$BOX_BOOT_DIR/$REPO $BOOTSTRAP_PATH"
       else
          echo "=== $0: WARNING! '$BOX_BOOT_DIR/$REPO' is not found. Bootstrap path ignored."
       fi  
@@ -92,25 +92,32 @@ then
    for BOOT_FILE in $BOOT_FILES
    do
       echo "$BOOT_FILE ..."
+      EXECUTED=False
       for DIR in $BOOTSTRAP_PATH
       do  
-         if [ -f $DIR/$BOOT_FILE ]
-         then
-            if [ -x $DIR/$BOOT_FILE ]
+         if [ -f $DIR/$BOOT_FILE ] 
+         then 
+            if [ "$EXECUTED" = False ]
             then
-               echo "*****************************************
-Maestro boot init repo: $DIR/$BOOT_FILE Starting..."
-               if [ "$EMULATE" = True ]
+               if [ -x $DIR/$BOOT_FILE ]
                then
-                  echo "Maestro boot init repo: should start :
+                  EXECUTED=True
+                  echo "*****************************************
+Maestro boot init repo: $DIR/$BOOT_FILE Starting..."
+                  if [ "$EMULATE" = True ]
+                  then
+                     echo "Maestro boot init repo: should start :
 INIT_FUNCTIONS=$INIT_FUNCTIONS $DIR/${BOOT_FILE}"
-               else
-                  INIT_FUNCTIONS=$INIT_FUNCTIONS $DIR/$BOOT_FILE
-               fi
-               echo "Maestro boot init repo: $DIR/$BOOT_FILE executed.
+                  else
+                     INIT_FUNCTIONS=$INIT_FUNCTIONS $DIR/$BOOT_FILE
+                  fi
+                  echo "Maestro boot init repo: $DIR/$BOOT_FILE executed.
 *****************************************"
+               else
+                  echo "*** Maestro boot init repo: Error! $DIR/$BOOT_FILE was not executed. Check rights."
+               fi
             else
-               echo "*** Maestro boot init repo: Error! $DIR/$BOOT_FILE was not executed. Check rights."
+               echo "*** Maestro boot init repo: $DIR/$BOOT_FILE is ignored, because step '$BOOT_FILE' was previously executed from a different directory. If you need to execute this script anyway, re-organize your files name to avoid step name conflicts."
             fi
          fi  
       done
