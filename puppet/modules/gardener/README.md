@@ -39,14 +39,16 @@ Manage cloud things for forj kits.
 
 ## Testing ##
   setup your environment for testing:
+* basic requirements for ubuntu
+  apt-get -y update && apt-get -y upgrade
+  apt-get -y install git curl wget
+  mkdir -p /opt/config/production/git && cd /opt/config/production/git && GIT_SSL_NO_VERIFY=true git clone https://review.forj.io/forj-oss/maestro
 * Install puppet
-    /opt/workspace/git/maestro/puppet/install_puppet.sh 
+  /opt/config/production/git/maestro/puppet/install_puppet.sh 
 * Install 3rd party modules
-    /opt/workspace/git/maestro/puppet/install_modules.sh 
-* ruby 1.8 dev package
-  puppet resource package ruby1.8-dev ensure=present
+  /opt/config/production/git/maestro/puppet/install_modules.sh 
 * Install hiera
-    /opt/workspace/git/maestro/hiera/hiera.sh 
+  /opt/config/production/git/maestro/hiera/hiera.sh 
 
 * Install required gems 
     gem1.8 install bundler --no-rdoc --no-ri
