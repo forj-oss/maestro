@@ -14,6 +14,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# package requirements
+puppet resource package build-essential ensure=present
+puppet resource package make ensure=present
+puppet resource package ruby1.8-dev ensure=present
+puppet resource package libxml2-dev ensure=present
+puppet resource package libxslt-dev ensure=present
 
 
 #Install hiera using gems.

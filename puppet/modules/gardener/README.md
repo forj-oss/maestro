@@ -43,6 +43,8 @@ Manage cloud things for forj kits.
     /opt/workspace/git/maestro/puppet/install_puppet.sh 
 * Install 3rd party modules
     /opt/workspace/git/maestro/puppet/install_modules.sh 
+* ruby 1.8 dev package
+  puppet resource package ruby1.8-dev ensure=present
 * Install hiera
     /opt/workspace/git/maestro/hiera/hiera.sh 
 

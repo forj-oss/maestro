@@ -28,6 +28,7 @@ group(:development, :test) do
   gem 'rspec', "~> 2.10.0", :require => false
 end
 
+`puppet resource package build-essential ensure=present`
 `puppet resource package vim ensure=present`
 `puppet resource package git ensure=present`
 `puppet resource package make ensure=present`
