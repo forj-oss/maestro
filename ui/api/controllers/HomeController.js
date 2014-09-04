@@ -34,6 +34,7 @@
  var blueprint_utils = require('blueprint/blueprint');
  var kit_ops = require('kit-ops/kit-ops');
  var backup_utils = require('backup/backup');
+ var jsonPath = require('JSONPath');
 
 module.exports = {
 
@@ -66,7 +67,6 @@ module.exports = {
             var tools = [];
             async.series({
                 jsonPath: function(callback){
-                  var jsonPath = require('JSONPath');
                   callback(null, jsonPath); // Telling async that we are done
                 },
                 backupYaml: function(callback){  // Yaml object from backup-status.yaml
