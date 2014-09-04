@@ -39,7 +39,7 @@
                 }
               %>
                 <!-- app.settings.env is the ENV variable, it should only show the buttons if it's not production  -->
-               <% if(sails.config.environment=="development"){%>
+              <% if(req.session.is_admin && sails.config.environment=="development"){%>
               <div class="ops-workload ops-offline ops">Workload</div>
               <div class="tool-view ops-backup <%=backupCss%> ops" data-tool-dname="<%=tool.dname%>" data-tool="<%=tool.name%>">Backup</div>
               <% } %>
@@ -68,7 +68,7 @@
                     </div>
                 <% } %>
                 <!-- app.settings.env is the ENV variable, it should only show the buttons if it's not production  -->
-               <% if(sails.config.environment=="development"){%>
+                <% if(req.session.is_admin && sails.config.environment=="development"){%>
               <div class="ops-workload ops-offline ops">Workload</div>
               <div class="ops-backup ops-offline ops">Backup</div>
               <% } %>

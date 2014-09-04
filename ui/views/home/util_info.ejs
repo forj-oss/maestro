@@ -13,7 +13,7 @@
             <div class="div-outline" style="width: 300px; line-height: 34px; display: table-cell; vertical-align: middle;">
               <div class="backup-cell" style="float: left;"><%=backupList[i]%></div>
               <div style="float:right;">
-                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: restore('<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
+                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: confirmRestore('<%=service%>', '<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
                 <div class="backup-cell" style="float: left;">|</div>
                 <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="backup/logs?app=<%=app%>&week=<%=backupList[i]%>" target="_blank">Backup Log</a>&nbsp;&nbsp;</div>
               </div>
@@ -66,6 +66,51 @@
 </div>
 
 
+<div id="confirmationPanel" style="display:none;">
+<span class="og-close"></span>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <div class="row" style="padding-left: 10px; position: relative; z-index: 2;">
+      <h4 class="service-name"><%=service%> - Service Status</h4>
+      <br>
+      <div>
+        <h5><strong ></strong></h5>
+      </div>
+      <div>
+        <span id="confirmationPanelAppLabel" style="padding-right: 10px;" >You are about to run a process</span>
+      </div>
+      <div>
+        <br>
+        <span style="padding-right: 10px;" ><strong>This process does not have an undo option.</strong> Are you sure you want to continue? </span>
+      </div>
+      <div>
+        <br>
+        <div style="width: 305px;">
+          <div style="float:left;">
+            <div style="float:left;">
+              <input type="text" id="confirmationPanelAgree" placeholder="Type I AGREE" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
+            </div>
+            <div style="float:right;">
+              <div id="confirmationPanelContinue" style="background-color: #1D4E6F; height:35px; width: 70px; display: table-cell; vertical-align:middle; cursor:pointer;" align="center">Continue</div>
+            </div>
+          </div>
+          <div style="float:right;">
+            <div id="confirmationPanelCancel" style="background-color: #1D4E6F; height:35px; width: 70px; display: table-cell; vertical-align:middle; cursor:pointer;" align="center">Cancel</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding-right: 10px; padding-top: 15px; height:35px; display: table-cell; vertical-align:middle;">
+        <span id="confirmationPanelError" style="color: #E16138; padding-right: 10px; display: none" >Please type I AGREE in CAPS</span>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="hidden" id="confirmationPanelApp" value="">
+<input type="hidden" id="confirmationPanelWeek" value="">
+</div>
+
+
 <div id="mainPanel">
   <span class="og-close"></span>
   <div class="row">
@@ -104,6 +149,7 @@
             <div style="width: 230px;"><span>Gates passed</span><span style="float: right;font-weight: bold;">4</span></div>
           </div>
         </div>
+        
         <div class="col-md-6" style="padding-top: 10px;">
           <div class="row" style="margin-bottom: 10px;">
             
@@ -154,6 +200,7 @@
     $('#mainPanel').hide();
     $('#backupPanel').hide();
     $('#progressPanel').hide();
+    $('#confirmationPanel').hide();
     $('#'+id).show();
   }
 
@@ -195,6 +242,13 @@
     });
   }
 
+
+  function confirmRestore(service, app, week){
+    $('#confirmationPanelAppLabel').text(' You are about to run ' + service + ' restore process.');
+    $('#confirmationPanelApp').val(app); 
+    $('#confirmationPanelWeek').val(week);  
+    showPanel('confirmationPanel');
+  }
 
   function restore(app, week){
     showPanel('progressPanel');
@@ -269,18 +323,32 @@
     progress('service_mem', 65, 'new');
     progress('service_disk', 45, 'new');
 
-   $('#backup-now-btn').click(function(){
+    $('#backup-now-btn').click(function(){
       backup('<%=app%>');
     });
 
     $('#restore-btn').click(function(){
-      restore('<%=app%>', null);
+      confirmRestore('<%=service%>', '<%=app%>', null);
     });
 
     $('#backup-sets-btn').click(function(){
       showPanel('backupPanel');
     });
 
+    $('#confirmationPanelContinue').click(function(){
+      if ($('#confirmationPanelAgree').val()=='I AGREE'){
+    	  $('#confirmationPanelError').hide();
+        restore($('#confirmationPanelApp').val(), $('#confirmationPanelWeek').val());
+      }else{
+        $('#confirmationPanelError').fadeOut(500, function(){
+        }).fadeIn(500);      
+      }
+    });
+
+    $('#confirmationPanelCancel').click(function(){
+      showPanel('mainPanel');
+    });
   });
+
 
 </script>
