@@ -25,6 +25,7 @@ else
 fi
 
 PUPPET_DEBUG="$(GetJson /meta-boot.js PUPPET_DEBUG)"
+GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
 
 if [ "$PUPPET_DEBUG" = "True" ]
 then
@@ -34,9 +35,10 @@ fi
 #
 # puppetlabs broke, and we needed to grab a newer version of this script without forwarding config repo
 # TODO: need to get to latest version of config repo so we can un-fork install_puppet.sh
-
+if [ ! "${GITBRANCH}" = "" ] && [ ! "${GITBRANCH}" = "master" ] ; then
+  export MODULES_ENV=$GITBRANCH
+fi
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
-#bash /opt/config/production/git/config/install_modules.sh
 bash /opt/config/production/git/maestro/puppet/install_modules.sh
 bash /opt/config/production/git/maestro/hiera/hiera.sh
 
