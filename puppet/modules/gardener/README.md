@@ -147,9 +147,9 @@ Manage cloud things for forj blueprints with puppet.
 - Use export FOG_DEBUG=true , this will show excon debug output ... note, passwords will show up to.
 - Use export SPEC_PP_OFF=false, this will turn off the :apply flag and prevent puppet apply steps.
 - Use ruby-debug + debugger statement in source, this enables interactive debugging on source.
-    rake debugging can be done with rdebug rake spec.
-    rspec debugging can be done with rspec -d <spec file>
-    rspec debugging when called from rake can be done by setting SPEC_OPTS='-d' export
+  - rake debugging can be done with rdebug rake spec.
+  - rspec debugging can be done with rspec -d <spec file>
+  - rspec debugging when called from rake can be done by setting SPEC_OPTS='-d' export
 
 ## LICENSE ##
 
