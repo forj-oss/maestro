@@ -13,20 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function getFullPath
-{
-   _CWD=$(pwd)
-   cd $1 > /dev/null 2<&1
-   [ ! $? -eq 0 ] && echo "ERROR: cd ${1} failed" && exit 1
-
-   pwd
-   [ ! $? -eq 0 ] && echo "ERROR: pwd failed" && exit 1
-
-   cd "${_CWD}" > /dev/null 2<&1
-}
 
 SCRIPT_NAME=$(basename $0)
-SCRIPT_DIR=$(getFullPath "$(dirname $0)")
+SCRIPT_DIR=$(readlink -f "$(dirname $0)")
 MODULE_PATH=/etc/puppet/modules
 
 function remove_module {
@@ -90,11 +79,11 @@ if [ "${DEFAULT_MODULES}" = "1" ] ; then
   MODULES["openstackci-vcsrepo"]="0.0.8"
 
   MODULES["puppetlabs-apache"]="0.0.4"
-  MODULES["puppetlabs-apt"]="1.1.0"
+  MODULES["puppetlabs-apt"]="1.4.2"
   MODULES["puppetlabs-haproxy"]="0.4.1"
   MODULES["puppetlabs-mysql"]="0.6.1"
   MODULES["puppetlabs-postgresql"]="3.4.1"
-  MODULES["puppetlabs-stdlib"]="3.2.0"
+  MODULES["puppetlabs-stdlib"]="4.3.2"
   MODULES["saz-memcached"]="2.0.2"
   MODULES["spiette-selinux"]="0.5.1"
   MODULES["rafaelfc-pear"]="1.0.3"
@@ -104,12 +93,14 @@ if [ "${DEFAULT_MODULES}" = "1" ] ; then
   MODULES["stankevich-python"]="1.6.6"
   MODULES["puppetlabs-rabbitmq"]="4.0.0"
 
+# Source modules should use tags, explicit refs or remote branches because
+# we do not update local branches in this script.
   SOURCE_MODULES["https://github.com/nibalizer/puppet-module-puppetboard"]="2.4.0"
   SOURCE_MODULES["https://git.openstack.org/openstack-infra/puppet-storyboard"]="origin/master"
 fi
 
-if [ -z "${!MODULES[*]}" ] ; then
-  echo "nothing to do , unable to find MODULES env"
+if [ -z "${!MODULES[*]}" ] && [ -z "${!SOURCE_MODULES[*]}" ] ; then
+  echo "nothing to do , unable to find MODULES env or SOURCE_MODULES"
   exit 0
 fi
 
