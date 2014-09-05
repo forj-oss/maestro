@@ -29,14 +29,17 @@ GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
 
 if [ "$PUPPET_DEBUG" = "True" ]
 then
-    PUPPET_FLAGS="--debug --verbose"
+  PUPPET_FLAGS="--debug --verbose"
 fi
 
 #
-# puppetlabs broke, and we needed to grab a newer version of this script without forwarding config repo
-# TODO: need to get to latest version of config repo so we can un-fork install_puppet.sh
+# we use install_puppet.sh and install_modules.sh for puppet setup support
+# TODO: consider if we source/download this file from openstack public repos
+#
+# MODULE_FILE will be changed to non-default when GITBRANCH is empty or not 
+# master.
 if [ ! "${GITBRANCH}" = "" ] && [ ! "${GITBRANCH}" = "master" ] ; then
-  export MODULES_ENV=$GITBRANCH
+  export MODULE_FILE=modules.$GITBRANCH.env
 fi
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
 bash /opt/config/production/git/maestro/puppet/install_modules.sh

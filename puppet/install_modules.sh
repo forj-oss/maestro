@@ -46,18 +46,14 @@ remove_module "limits" # remove saz-limits (required by saz-gearman)
 
 # load additional modules from modules.env
 # modules.env should exist in the same folder as install_modules.sh
-# * use export MODULES_ENV to specify an alternate config
+# * use export MODULE_FILE to specify an alternate config
 #   file that can be used to pull environment specific modules.
 #   the default is empty.
 # * allow modules.env to unset DEFAULT_MODULES to something other than 1
 #   this should disable default modules from installing.
 
 export DEFAULT_MODULES=1
-if [ ! -z "${MODULES_ENV}" ] ; then
-  MODULE_FILE="modules.${MODULES_ENV}.env"
-else
-  MODULE_FILE="modules.env"
-fi
+MODULE_FILE=${MODULE_FILE:-modules.env}
 if [ -f "${SCRIPT_DIR}/${MODULE_FILE}" ] ; then
   . "${SCRIPT_DIR}/${MODULE_FILE}"
 fi
