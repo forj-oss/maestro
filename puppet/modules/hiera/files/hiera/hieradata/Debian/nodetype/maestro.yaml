@@ -110,6 +110,8 @@ salt::salt_master: "%{::erosite}.%{::erodomain}"
 # setup server (iptables, rsyslog, tcpdump, ssh)
 sysadmin_config::manage_servers::iptables_public_tcp_ports:
   - 80
+  - 389
+  - 636
   - 443
   - 3000
   - 4505
