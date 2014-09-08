@@ -32,7 +32,7 @@ class redis::params {
   $daemonize                   = hiera('redis::params::daemonize',true)
   $databases                   = hiera('redis::params::databases',16)
   $dbfilename                  = hiera('redis::params::dbfilename','db-dump.rdb')
-  $extra_config_file           = hiera('redis::params::extra_config_file',undef)
+  $extra_config_file           = hiera('redis::params::extra_config_file',false)
   $hash_max_ziplist_entries    = hiera('redis::params::hash_max_ziplist_entries',512)
   $hash_max_ziplist_value      = hiera('redis::params::hash_max_ziplist_value',64)
   $list_max_ziplist_entries    = hiera('redis::params::list_max_ziplist_entries',512)
@@ -42,19 +42,19 @@ class redis::params {
   $log_level                   = hiera('redis::params::log_level','notice')
   #lets play/tune with this...default is 10k, but that is a bit much
   $maxclients                  = hiera('redis::params::maxclients',1000)
-  $maxmemory                   = hiera('redis::params::maxmemory',undef)
-  $maxmemory_policy            = hiera('redis::params::maxmemory_policy',undef)
-  $maxmemory_samples           = hiera('redis::params::maxmemory_samples',undef)
+  $maxmemory                   = hiera('redis::params::maxmemory',false)
+  $maxmemory_policy            = hiera('redis::params::maxmemory_policy',false)
+  $maxmemory_samples           = hiera('redis::params::maxmemory_samples',false)
   $no_appendfsync_on_rewrite   = hiera('redis::params::no_appendfsync_on_rewrite',false)
   $pid_file                    = hiera('redis::params::pid_file','/var/run/redis/redis-server.pid')
   $port                        = hiera('redis::params::port',6379)
   $rdbcompression              = hiera('redis::params::rdbcompression',true)
-  $requirepass                 = hiera('redis::params::requirepass',undef)
+  $requirepass                 = hiera('redis::params::requirepass',false)
   $set_max_intset_entries      = hiera('redis::params::set_max_intset_entries',512)
   $slowlog_log_slower_than     = hiera('redis::params::slowlog_log_slower_than',10000)
   $slowlog_max_len             = hiera('redis::params::slowlog_max_len',1024)
-  $syslog_enabled              = hiera('redis::params::syslog_enabled',undef)
-  $syslog_facility             = hiera('redis::params::syslog_facility',undef)
+  $syslog_enabled              = hiera('redis::params::syslog_enabled',false)
+  $syslog_facility             = hiera('redis::params::syslog_facility',false)
   $timeout                     = hiera('redis::params::timeout',0)
   # TODO: am wondering about this param...
   $ulimit                      = hiera('redis::params::ulimit',65536)
@@ -63,12 +63,12 @@ class redis::params {
   $zset_max_ziplist_value      = hiera('redis::params::zset_max_ziplist_value',64)
 
   #replication
-  $masterauth                  = hiera('redis::params::masterauth',undef)
+  $masterauth                  = hiera('redis::params::masterauth',false)
   $repl_ping_slave_period      = hiera('redis::params::repl_ping_slave_period',10)
   $repl_timeout                = hiera('redis::params::repl_timeout',60)
   $slave_read_only             = hiera('redis::params::slave_read_only',true)
   $slave_serve_stale_data      = hiera('redis::params::slave_serve_stale_data',true)
-  $slaveof                     = hiera('redis::params::slaveof',undef)
+  $slaveof                     = hiera('redis::params::slaveof',false)
 
   case $::osfamily {
     'Debian': {
