@@ -1,0 +1,121 @@
+#
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# generated from the facter value for fqdn and instance id calculation
+# performs installation of maestro ui and rest services
+# designed to work with puppetmaster subnodetype
+#
+---
+classes:
+  - maestro
+  - salt
+  - maestro::backup::configure_box
+  - maestro::params
+  - maestro::node_vhost_lookup
+  - gardener
+  - sysadmin_config::manage_servers
+  - maestro::ldap::ldapserver
+  - maestro::redis::redisserver
+
+# swap location and default config
+sysadmin_config::swap::swap_file: '/mnt/swapfile'
+sysadmin_config::swap::block_size: '1M'
+
+# setup parameters for puppet class
+puppet::reports: 'http'
+puppet::reporturl: "http://%{::erosite}.%{::erodomain}:3000/reports/upload"
+puppet::manifestdir: "/opt/config/$environment/git/maestro/puppet/manifests"
+puppet::modulepath: "%{::bp_modulepath}/opt/config/$environment/git/maestro/puppet/modules:%{::extra_modulepath}/opt/config/$environment/git/config/modules:/etc/puppet/modules"
+puppet::puppetmaster: "%{::erosite}.%{::erodomain}"
+puppet::puppetmaster::certname: "%{::erosite}.%{::erodomain}"
+
+# configure site keys
+jimador::site:
+  maestro_url: "http://%{::maestro::node_vhost_lookup::vname}"
+  global_manage_projects: "admin"
+# TODO: To move somewhere else. Those data should be attached to the forj instance. Not maestro.
+#  shortname: "&quot;&agrave; la Openstack&quot;"
+# setup documentation links for maestro, we only need to do this on maestro node
+
+# This parameter is used in order to hide an application from the UI. Note: you also need to set to false the 'visible' property from the common.yaml.
+jimador::default_tools_filter:
+  - 'zuul'
+
+jimador::discover:
+  puppet:
+    tool_email: ''
+    tool_config: "%{::puppet_url_config}"
+    tool_url: "%{::puppet_url}"
+    category: 'dev'
+    dname: 'Puppet Dashboard'
+    desc: 'View managed nodes'
+    icon: true
+    visible: true
+
+# nodejs wrap global defaults
+nodejs_wrap::node_env: "%{::maestro::params::node_env}"
+nodejs_wrap::manage_repo: true
+
+# Should never be defined here, but in a forj instance.
+# maestro::nodes:
+
+# This is going to be configured if maestro is aware about his cloud host.
+maestro::dns::global::default_contact: 'admin@%{::erodomain}'
+maestro::dns:
+  maestro:
+    hostname: 'maestro'
+    type: 'A'
+    node_search: '/maestro.%{::maestro_id}.*/'
+
+maestro::ssh_user_keys:
+  - 'forjio'
+
+# configure backups for all nodes
+# Use defaults from the generic class.
+# maestro::backup::backup_user: 'forj-bck'
+#maestro::backup::backup_home: '/home'
+#maestro::backup::backup_fullpath:        '/mnt/backups'
+#maestro::backup::box_backup_path:        '/usr/lib/forj'
+#maestro::backup::box_backup_etc_path:    '/etc/forj'
+#maestro::backup::box_backup_user: 'root'
+#maestro::backup::maestro_backup_server: '%{::eroip}'
+
+maestro::instance_domain: '%{::erodomain}'
+maestro::image_name: '%{::image_name}'
+maestro::flavor_name: '%{::flavor_name}'
+maestro::key_name: '%{::key_name}'
+maestro::network_name: '%{::network_name}'
+maestro::security_groups: '%{::security_groups}'
+maestro::meta_data: 'http_proxy=%{::webproxy}'
+maestro::ldap::ldapserver::certs_dir: '/opt/config/cacerts'
+
+# maestro ui /app configuration
+maestro::app::setup::revision: '%{::gitbranch}'
+maestro::ui::setup::revision: '%{::gitbranch}'
+
+salt::salt_master: "%{::erosite}.%{::erodomain}"
+
+# setup server (iptables, rsyslog, tcpdump, ssh)
+sysadmin_config::manage_servers::iptables_public_tcp_ports:
+  - 80
+  - 389
+  - 636
+  - 443
+  - 3000
+  - 4505
+  - 4506
+  - 8080
+  - 8139
+  - 8140

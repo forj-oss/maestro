@@ -229,10 +229,11 @@ case  "$(GetOs)" in
     apt-get -qy upgrade
     ;;
   CentOS)
-    yum install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-    yum-config-manager --enable rhel-6-server-optional-rpms
+    yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+    yum -y install git wget vim yum-utils
+    #yum-config-manager --enable rhel-6-server-optional-rpms
 
-    yum update
+    yum -y update
     ;;
   *)
     ;;

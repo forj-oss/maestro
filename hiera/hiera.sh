@@ -44,7 +44,9 @@ function is_ubuntu {
 #
 
 function setup_hiera_rhel6 {
-  puppet resource package build-essential ensure=present
+  puppet resource package gcc ensure=present
+  puppet resource package gcc-c++ ensure=present
+  puppet resource package kernel-devel ensure=present
   puppet resource package make ensure=present
   puppet resource package ruby-devel ensure=present
   puppet resource package rubygems ensure=present
