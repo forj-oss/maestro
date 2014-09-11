@@ -71,7 +71,7 @@ puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/p
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite1.log
 service puppetmaster stop
 service apache2 restart
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysote2.log
+puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite2.log
 service puppetmaster stop
 service apache2 restart
 # Added due to npm install sometimes throwing undefined install errors... clears up after subsequent runs.

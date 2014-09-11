@@ -36,8 +36,37 @@ else:
 "
 }
 
+function GetOs
+{
+  python -c "
+import platform
+import sys
+
+def linux_distribution():
+  try:
+    return platform.linux_distribution()
+  except:
+    return "N/A"
+
+
+print(str(platform.linux_distribution()[0]))
+"
+}
+
 # Install log requirement.
-apt-get install gawk -y
+case  "$(GetOs)" in
+  Ubuntu)
+   INST_TOOL="$(which apt-get)"
+   apt-get install gawk -y
+   ;;
+   CentOS)
+   INST_TOOL="$(which yum)"
+   ;;
+   *)
+   INST_TOOL="N/A"
+   ;;
+esac
+
 
 exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
                  print POUT;
@@ -111,19 +140,37 @@ fi
 _PROXY="$(GetJson $PREFIX/meta-boot.js webproxy)"
 if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
 then
-    set -x
-    echo "export HTTP_PROXY=$_PROXY
+  set -x
+  echo "export HTTP_PROXY=$_PROXY
 export http_proxy=$_PROXY
 export HTTPS_PROXY=$_PROXY
 export https_proxy=$_PROXY
 export FTP_PROXY=$_PROXY
 export no_proxy=localhost,127.0.0.1,10.0.0.1,169.254.169.254" >> /etc/environment
-    source /etc/environment
-    echo "Acquire::http::proxy \"$_PROXY\";
+source /etc/environment
+
+  case  "$(GetOs)" in
+    Ubuntu)
+
+      if [ ! -f /etc/apt/apt.conf ]; then
+      echo "Acquire::http::proxy \"$_PROXY\";
 Acquire::https::proxy \"$_PROXY\";
 Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
-    set +x
-fi	
+      fi
+      ;;
+    CentOS)
+      if [ -f /etc/yum.conf ]; then
+        grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
+        if [ ! $? -eq 0 ]; then
+          echo "proxy=$_PROXY" >>/etc/yum.conf
+        fi
+      fi
+      ;;
+    *)
+      ;;
+  esac
+  set +x
+fi
 # hostname, and domain settings have to be fixed to make puppet master/agent running together.
 
 # Loading Metadata
@@ -145,10 +192,10 @@ if [ ! $? -eq 0 ]; then
    HOSTSTR=$(echo "127.0.0.1 ${_FQDN} ${_HOSTNAME}")
    bash -c 'echo '"$HOSTSTR"'>> /etc/hosts'
 fi
-hostname -b -F /etc/hostname
+hostname -F /etc/hostname
 
 
-# maestro 	to /etc/hosts
+# maestro   to /etc/hosts
 
 _PUPPET_MASTER_FQDN=$_PUPPET_MASTER.$_PUPPET_DOMAIN
 _PUPPET_MASTER_HOSTNAME=$(echo $_PUPPET_MASTER | awk -F'.' '{print $1}')
@@ -157,25 +204,40 @@ if [ "$(grep "^$_PUPPET_MASTER_IP" /etc/hosts)" = "" ]; then
    HOSTSTR=$(echo "$_PUPPET_MASTER_IP $_PUPPET_MASTER_FQDN $_PUPPET_MASTER_HOSTNAME salt")
    bash -c 'echo '"$HOSTSTR"'>> /etc/hosts'
 fi
+
+# OS specific finetuning
+case  "$(GetOs)" in
+  Ubuntu)
 # remove the ability from dhclient to update doamin and search parameters
-cp /etc/dhcp/dhclient.conf /etc/dhcp/dhclient.conf.bak
-sed -e "s/domain-name, domain-name-servers, domain-search, host-name,/domain-name-servers,/" /etc/dhcp/dhclient.conf --in-place
+    cp /etc/dhcp/dhclient.conf /etc/dhcp/dhclient.conf.bak
+    sed -e "s/domain-name, domain-name-servers, domain-search, host-name,/domain-name-servers,/" /etc/dhcp/dhclient.conf --in-place
 
 
 #if [ -n "$APT_MIRROR" ]
 #then
 #   sed --in-place=.bak 's/^deb .*archive\.ubuntu\.com\/ubuntu/deb '"$APT_MIRROR"'/g' /etc/apt/sources.list
-  sed -i -e \
-            's,^archive.ubuntu.com/ubuntu,nova.clouds.archive.ubuntu.com/ubuntu,g'  \
-             /etc/apt/sources.list 
+      sed -i -e \
+                's,^archive.ubuntu.com/ubuntu,nova.clouds.archive.ubuntu.com/ubuntu,g'  \
+                 /etc/apt/sources.list
 #fi
 # We want to make sure we use the ubuntu repo for passenger
 # otherwise we run into compatability issues with puppetmaster-passenger and others.
 # TODO: need to move this into puppet
-[ -f /etc/apt/sources.list.d/passenger.list ] && rm -f /etc/apt/sources.list.d/passenger.list
+    [ -f /etc/apt/sources.list.d/passenger.list ] && rm -f /etc/apt/sources.list.d/passenger.list
 
-apt-get -qy update
-apt-get -qy upgrade
+    apt-get -qy update
+    apt-get -qy upgrade
+    ;;
+  CentOS)
+    yum install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+    yum-config-manager --enable rhel-6-server-optional-rpms
+
+    yum update
+    ;;
+  *)
+    ;;
+esac
+echo "Public IP = $(curl --noproxy 169.254.169.254 http://169.254.169.254/latest/meta-data/public-ipv4)"
 set +x
 echo "################# 1st sequence : user_data BOOTHOOK ended  #################"
 exec 1>&6 2>&1

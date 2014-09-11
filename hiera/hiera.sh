@@ -14,45 +14,101 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# package requirements
-puppet resource package build-essential ensure=present
-puppet resource package make ensure=present
-puppet resource package ruby1.8-dev ensure=present
-puppet resource package rubygems ensure=present
-puppet resource package libxml2-dev ensure=present
-puppet resource package libxslt-dev ensure=present
+#
+# Distro identification functions
+#  note, can't rely on lsb_release for these as we're bare-bones and
+#  it may not be installed yet)
 
 
-#Install hiera using gems.
-gem install --include-dependencies --no-rdoc --no-ri hiera
+function is_fedora {
+    [ -f /usr/bin/yum ] && cat /etc/*release | grep -q -e "Fedora"
+}
 
-#TODO we only need one of the below installations, but as puppet is having issues we need to install hiera twice.
-#Install hiera-puppet on systems without native packages.
-ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
+function is_rhel6 {
+    [ -f /usr/bin/yum ] && \
+        cat /etc/*release | grep -q -e "Red Hat" -e "CentOS" && \
+        cat /etc/*release | grep -q 'release 6'
+}
 
-#Install hiera-puppet using puppet, this can be also installed with command but it was not created with the correct permissions.
-puppet resource package hiera-puppet ensure=installed
+function is_rhel7 {
+    [ -f /usr/bin/yum ] && \
+        cat /etc/*release | grep -q -e "Red Hat" -e "CentOS" && \
+        cat /etc/*release | grep -q 'release 7'
+}
+
+function is_ubuntu {
+    [ -f /usr/bin/apt-get ]
+}
+#
+# Distro specific puppet installs
+#
+
+function setup_hiera_rhel6 {
+  puppet resource package build-essential ensure=present
+  puppet resource package make ensure=present
+  puppet resource package ruby-devel ensure=present
+  puppet resource package rubygems ensure=present
+  puppet resource package libxml2-devel ensure=present
+  puppet resource package libxslt-devel ensure=present
+  puppet resource package hiera ensure=installed
+  puppet resource package hiera-puppet ensure=installed
+
+  }
+
+function setup_hiera_ubuntu {
+  # package requirements
+  puppet resource package build-essential ensure=present
+  puppet resource package make ensure=present
+  puppet resource package ruby1.8-dev ensure=present
+  puppet resource package rubygems ensure=present
+  puppet resource package libxml2-dev ensure=present
+  puppet resource package libxslt-dev ensure=present
+  #Install hiera using gems.
+  ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri hiera
+
+  #TODO we only need one of the below installations, but as puppet is having issues we need to install hiera twice.
+  #Install hiera-puppet on systems without native packages.
+  ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
+
+  #Install hiera-puppet using puppet, this can be also installed with command but it was not created with the correct permissions.
+  puppet resource package hiera-puppet ensure=installed
+
+}
 
 # Create the folder for the hiera data
 mkdir -p /etc/puppet/hieradata
 
+
+if is_rhel6; then
+    setup_hiera_rhel6
+elif is_ubuntu; then
+    setup_hiera_ubuntu
+else
+    echo "*** Can not setup hiera: distribution not recognized"
+    exit 1
+fi
+
+
+
 echo "################# Hiera Installation done, step 1/2 ###################"
 
 #install hiera-eyaml
-ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
-ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri deep_merge
-ruby1.8 -S gem install --include-dependencies --no-rdoc --no-ri json
+gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
+gem install --include-dependencies --no-rdoc --no-ri deep_merge
+gem install --include-dependencies --no-rdoc --no-ri json
+
+
 
 #create location to store the public and private keys
 mkdir -p /etc/puppet/secure
 cd /etc/puppet/secure
 if [ -f /etc/puppet/secure/keys/public_key.pkcs7.pem ] ; then
-	cp /etc/puppet/secure/keys/public_key.pkcs7.pem /etc/puppet/secure/keys/public_key.pkcs7.pem.bak
-	rm -f /etc/puppet/secure/keys/public_key.pkcs7.pem
+    cp /etc/puppet/secure/keys/public_key.pkcs7.pem /etc/puppet/secure/keys/public_key.pkcs7.pem.bak
+    rm -f /etc/puppet/secure/keys/public_key.pkcs7.pem
 fi
 if [ -f /etc/puppet/secure/keys/private_key.pkcs7.pem ] ; then
-	cp /etc/puppet/secure/keys/private_key.pkcs7.pem /etc/puppet/secure/keys/private_key.pkcs7.pem.bak
-	rm -f /etc/puppet/secure/keys/private_key.pkcs7.pem
+    cp /etc/puppet/secure/keys/private_key.pkcs7.pem /etc/puppet/secure/keys/private_key.pkcs7.pem.bak
+    rm -f /etc/puppet/secure/keys/private_key.pkcs7.pem
 fi
 
 #create keys

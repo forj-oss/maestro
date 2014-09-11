@@ -185,6 +185,24 @@ On your workstation, you can start test-box.sh --configure <IP> --repo ${GITNAME
  RestoreDebugInfo
 }
 
+# Function that returns the distribution name (Ubuntu, CentOS)
+# can be enhanced to return OS revision and nickname
+function GetOs
+{
+  python -c "
+import platform
+import sys
+
+def linux_distribution():
+  try:
+    return platform.linux_distribution()
+  except:
+    return "N/A"
+
+
+print(str(platform.linux_distribution()[0]))
+"
+}
 # TODO: find if we can source meta.js values from facter since we
 #  have all meta.js in facters now.
 
