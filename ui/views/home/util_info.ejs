@@ -86,16 +86,16 @@
       </div>
       <div>
         <br>
-        <div style="width: 305px;">
-          <div style="float:left;">
+        <div style="display:inline-block; white-space:nowrap;">
+          <div style="float:left; margin-right: 10px;" >
             <div style="float:left;">
-              <input type="text" id="confirmationPanelAgree" placeholder="Type I AGREE" style="outline: 0;border: 1px solid #CCC;padding: 5px; margin-right: 5px;color: #797979;" />
+              <input type="text" id="confirmationPanelAgree" placeholder="Type I AGREE" style="outline: 0; border: 1px solid #CCC; padding: 5px; margin-right: 10px; color: #797979;" />
             </div>
             <div style="float:right;">
               <div id="confirmationPanelContinue" style="background-color: #1D4E6F; height:35px; width: 70px; display: table-cell; vertical-align:middle; cursor:pointer;" align="center">Continue</div>
             </div>
           </div>
-          <div style="float:right;">
+          <div style="float:left;">
             <div id="confirmationPanelCancel" style="background-color: #1D4E6F; height:35px; width: 70px; display: table-cell; vertical-align:middle; cursor:pointer;" align="center">Cancel</div>
           </div>
         </div>
@@ -249,6 +249,7 @@
     $('#confirmationPanelWeek').val(week);  
     showPanel('confirmationPanel');
   }
+
 
   function restore(app, week){
     showPanel('progressPanel');
