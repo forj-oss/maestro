@@ -25,5 +25,6 @@ Puppet.features.add(:net_helper) do
     true
   rescue Exception => err
     Puppet.warning "Could not load net_helper: #{err}"
+    false
   end
 end

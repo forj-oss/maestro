@@ -25,5 +25,6 @@ Puppet.features.add(:forj_common) do
     true
   rescue Exception => err
     Puppet.warning "Could not load forj_common: #{err}"
+    false
   end
 end
