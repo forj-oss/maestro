@@ -59,6 +59,7 @@ class maestro::ui::setup(
     source   => 'https://review.forj.io/p/forj-oss/maestro',
     require  => [ Package['JSONPath'],
                   Package['optimist'],
+                  Package['bunyan'],
                   Package['restify'],
                   Package['path'],
                   Package['mysql'],
