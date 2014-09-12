@@ -52,9 +52,12 @@ module.exports.env = {
     },
     plugins: {
       auth: [
-        { name: 'keystone', path: '../../plugins/auth/keystone/keystone.js', default: false },
-        { name: 'openid', path: '../../plugins/auth/openid/openid.js', default: true },
-        { name: 'ldap', path: '../../plugins/auth/ldap/ldap.js', default: false }
+        { name: 'keystone', display_name: 'Keystone', path: '../../plugins/auth/keystone/keystone.js', default: false, auth_basic: true },
+        { name: 'openid', display_name: 'OpenID', path: '../../plugins/auth/openid/openid.js', default: true, auth_basic: false },
+        { name: 'ldap', display_name: 'LDAP', path: '../../plugins/auth/ldap/ldap.js', default: false, auth_basic: true }
      ]
+    },
+    fog: {
+      path: process.env['FOG_RC'] !== undefined ? process.env['FOG_RC'] : '/opt/config/fog/cloud.fog'
     }
 };

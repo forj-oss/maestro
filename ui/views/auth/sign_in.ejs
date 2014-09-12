@@ -4,11 +4,85 @@
         <h3>Sign In</h3>
       </div>
       <div class="row" style="padding-left: 380px;">
-        <p style="color: #babfc3;">Sign in with OpenID.</p>
+        <p style="color: #babfc3;">Sign in with <%=display_name%>.</p>
       </div>
-      <img src="/images/launchpad.png" title="Launchpad OpenID" alt="Launchpad OpenID" style="padding: 10px 0px 20px 366px;"/>
+      <%if(auth_basic){%>
+      <div class="row" style="padding-left: 380px;">
+        <div class="auth-form">
+          <label>Username</label>
+          <input type="text" id="username" min="1" required>
+        </div>
+        <div class="auth-form">
+          <label>Password</label>
+          <input type="password" id="password" min="1" required>
+        </div>
+        <div>
+          <label id="auth-message" style="font-weight: 100; margin: 0;"></label>
+        </div>
+      </div>
+      <% }else{ %>
+        <img src="/images/launchpad.png" title="Launchpad OpenID" alt="Launchpad OpenID" style="padding: 10px 0px 20px 366px;"/>
+      <% } %>
       <div class="row" style="padding: 10px;padding-left: 380px;">
-        <a href="../auth/authenticate?module=<%=default_auth%>" class="sign-in" style="font-size: 15px !important; position: inherit !important;">Sign In</a>
+        <%if(auth_basic){%>
+          <a href="#" class="sign-in" style="font-size: 15px !important; position: inherit !important;">Sign In</a>
+          <script>
+          $(document).ready(function(){
+            $('#password').on('keypress', function (event) {
+              if(event.which == '13'){
+                auth();
+              }
+            });
+            $('#username, #password').on('keydown', function(e){
+              $('#auth-message').fadeTo(300, 0, function(){
+                $(this).text('');
+              });
+            });
+          });
+          $('.sign-in').click(function(){
+            auth();
+          });
+          function auth(callback){
+            $('#auth-message').fadeTo(200, 0, function(){
+                $(this).text('Please wait.');
+                $(this).removeClass('text-error');
+                $(this).addClass('text-ok');
+            }).fadeTo(100, 1);
+            $.ajax({
+              type: "POST",
+              url: '/auth/authenticate?module=<%=default_auth%>',
+              data: { username: $('#username').val(), password: $('#password').val() },
+              dataType: 'JSON',
+              success: function(result){
+                if(result === true){
+                  window.location.href = '/..';
+                }else{
+                  $('#auth-message').fadeTo(300, 0, function(){
+                    $(this).text('Invalid username or password');
+                    $(this).addClass('text-error');
+                  }).fadeTo(270, 1);
+                }
+              },
+              error: function(x) {
+                if(x.status == 401) {
+                  $('#auth-message').fadeTo(300, 0, function(){
+                    $(this).text(x.responseText);
+                    $(this).addClass('text-error');
+                  }).fadeTo(270, 1);
+                }
+                if(x.status == 500){
+                  $('#auth-message').fadeTo(300, 0, function(){
+                    $(this).text(x.responseText);
+                    $(this).addClass('text-error');
+                  }).fadeTo(270, 1);
+                }
+              },
+            });
+          }
+          </script>
+        <% }else{ %>
+          <a href="../auth/authenticate?module=<%=default_auth%>" class="sign-in" style="font-size: 15px !important; position: inherit !important;">Sign In</a>
+        <% } %>
         <a href="../home/index" class="sign-in" style="font-size: 15px !important; position: inherit !important;">Cancel</a>
       </div>
     </div>
