@@ -42,6 +42,10 @@ class maestro::requirements(
     ensure: '0.6.1'
     provider: 'npm'
     require: 'Class[nodejs]'
+  bunyan:
+    ensure: '1.0.1'
+    provider: 'npm'
+    require: 'Class[nodejs]'
   restify:
     ensure: '2.6.3'
     provider: 'npm'
