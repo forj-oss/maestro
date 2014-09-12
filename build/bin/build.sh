@@ -280,7 +280,7 @@ while true ; do
         --meta)
             META_NAME="$(echo "$2" | awk -F= '{print $1}' | awk '{ print $1}')"
             META_VAL="$( echo "$2" | awk -F= '{print $2}')"
-            META[$META_NAME]="$META_NAME='$META_VAL'"
+            META[$META_NAME]="$META_NAME=$META_VAL"
             echo "Meta set : ${META[$META_NAME]}"
             unset META_NAME META_VAL
             shift;shift;; 
@@ -567,7 +567,7 @@ then
 fi  
 if [ "$META_DATA" != "" ]
 then
-   HPCLOUD_PAR="$HPCLOUD_PAR --metadata $META_DATA"
+   HPCLOUD_PAR="$HPCLOUD_PAR --metadata '$META_DATA'"
 fi  
 
 
@@ -576,9 +576,9 @@ trap "Error 1 'Ctrl-C keystroke by user. Build killed.'" SIGINT
 # Creating the instance. Use metadata/userdata from ../../bootstrap/eroPlus
 if [ "$HPC_DETECTED" != 12.12 ] && [ $FORJ_HPC_NETID != "" ]
 then
-   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -n $FORJ_HPC_NETID -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR
+   eval "hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -n $FORJ_HPC_NETID -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR"
 else
-   hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR
+   eval "hpcloud servers:add $BUILD_ID $FORJ_FLAVOR_ID -i $FORJ_BASE_IMG_ID -k ${FORJ_KEYPAIR} -a $FORJ_HPC -s ${FORJ_SECURITY_GROUP} $HPCLOUD_PAR"
 fi
 
 if [ $? -ne 0 ]
