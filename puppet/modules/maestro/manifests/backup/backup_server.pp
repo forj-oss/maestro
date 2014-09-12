@@ -19,6 +19,7 @@ class maestro::backup::backup_server (
 )
 {
   include maestro::backup::params
+  include maestro::backup::cdn_upload
   ## Prepares user
   $home = "${::maestro::backup::params::backup_home}/${::maestro::backup::params::backup_user}"
   user { $::maestro::backup::params::backup_user:
