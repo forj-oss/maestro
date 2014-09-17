@@ -18,19 +18,20 @@ module.exports = {
             if(err){
               callback(err.message, null , null);
             }else{
+              var auth = { authenticated: false };
               relyingParty.authenticate(openid_url, false, function(error, authUrl)
               {
                 if (error)
                 {
-                  callback('Authentication failed: ' + error.message, null , null);
+                  callback('Authentication failed: ' + error.message, null , auth);
                 }
                 else if (!authUrl)
                 {
-                  callback(null, null , false);
+                  callback(null, null , auth);
                 }
                 else
                 {
-                  callback(null, authUrl, null);
+                  callback(null, authUrl, auth);
                 }
               });
             }
