@@ -120,7 +120,13 @@ fi
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
 if [ "$_test_data" = "" ]
 then
-  echo '{"cdkdomain":"forj.io","cdksite":"maestro.hard","erosite":"maestro.hard","erodomain":"forj.io","eroip": "127.0.0.1", "gitlink": "htts://review.for.io/p/forj-oss/maestro","instanceid": "hard", "network_name": "private"}' > $PREFIX/meta.js
+  echo '{"network_name":"private","gitbranch":"master","eroip":"127.0.0.1","PUPPET_DEBUG":"True", 
+"image_name":"Ubuntu Precise 12.04.4 LTS Server 64-bit 20140414 (Rescue Image)","dns_tenantid":"10522083304212", 
+"cdkdomain":"dev.forj.io","key_name":"forj","blueprint":"redstone","hpcloud_os_region":"region-a.geo-1", 
+"erodomain":"dev.forj.io","erosite":"maestro.hard","cdksite":"maestro.hard","security_groups":"default","tenant_name":"Dev-V1-CDK", 
+"dns_zone":"region-a.geo-1", 
+"hpcloud_priv":"base-64 encoded credentials" 
+}' > $PREFIX/meta.js
   echo "WARNING! $PREFIX/meta.js not found. HARDCODING DATA"
 fi
 
@@ -232,8 +238,8 @@ case  "$(GetOs)" in
     yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
     yum -y install git wget vim yum-utils
     #yum-config-manager --enable rhel-6-server-optional-rpms
-
-    yum -y update
+    # DO NOT RUN UPDATE, it will replace / destroy cloud-init making the machine useless/unaccessible
+    #yum -y update
     ;;
   *)
     ;;
