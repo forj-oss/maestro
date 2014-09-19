@@ -6,22 +6,20 @@
     <div class="col-md-8">
       <div class="row">
         <h4 class="service-name"><%=service%> - Backup Sets</h4>
+        <div style="width: 450px; height: 250px; overflow: auto;">
         <br>
-          <%
-          for (i=0; i<backupList.length; i++){
-          %>
-            <div class="div-outline" style="width: 300px; line-height: 34px; display: table-cell; vertical-align: middle;">
-              <div class="backup-cell" style="float: left;"><%=backupList[i]%></div>
-              <div style="float:right;">
-                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: confirmRestore('<%=service%>', '<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
-                <div class="backup-cell" style="float: left;">|</div>
-                <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="backup/logs?app=<%=app%>&week=<%=backupList[i]%>" target="_blank">Backup Log</a>&nbsp;&nbsp;</div>
-              </div>
+        <% for (i=0; i<backupList.length; i++){ %>
+          <div class="div-outline" style="width: 300px; line-height: 34px; display: table-cell; vertical-align: middle;">
+            <div class="backup-cell" style="float: left;"><%=backupList[i]%></div>
+            <div style="float:right;">
+              <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: confirmRestore('<%=service%>', '<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
+              <div class="backup-cell" style="float: left;">|</div>
+              <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="backup/logs?app=<%=app%>&week=<%=backupList[i]%>" target="_blank">Backup Log</a>&nbsp;&nbsp;</div>
             </div>
-            <div style="clear: both;"/>
-          <%
-          }
-          %>
+          </div>
+          <div style="clear: both;"/>
+        <% } %>
+        <div>
       </div>
     </div>
   </div>
