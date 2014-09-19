@@ -40,6 +40,9 @@ class puppet (
   $storeconfigs    = hiera('puppet::storeconfigs', false),
   ) {
 
+  if ( $puppetmaster == '.' or $puppetmaster == undef or $puppetmaster == '') {
+    fail("puppet can't be configured with puppetmaster = ${puppetmaster} value")
+  }
 
   $minute1=fqdn_rand(30)
   $minute2 = $minute1 + 30
