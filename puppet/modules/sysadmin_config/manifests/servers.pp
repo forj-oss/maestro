@@ -32,6 +32,8 @@ class sysadmin_config::servers (
   $sysadmins                 = [],
   $certname                  = $::fqdn,
   $install_users             = false,
+  $enable_unbound            = false,
+  $install_resolv_conf       = true,
 ){
   class { 'sysadmin_config::template':
     iptables_public_tcp_ports => $iptables_public_tcp_ports,
@@ -40,6 +42,8 @@ class sysadmin_config::servers (
     iptables_rules6           => $iptables_rules6,
     certname                  => $certname,
     install_users             => $install_users,
+    enable_unbound            => $enable_unbound,
+    install_resolv_conf       => $install_resolv_conf,
   }
   #TODO: we won't be using this for now
   #class { 'exim':

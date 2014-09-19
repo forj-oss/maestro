@@ -23,7 +23,9 @@ class sysadmin_config::template (
   $iptables_rules4           = [],
   $iptables_rules6           = [],
   $install_users = true,
-  $certname = $::fqdn
+  $certname = $::fqdn,
+  $enable_unbound            = false,
+  $install_resolv_conf       = true,
 ) {
   include ssh
   include snmpd
@@ -49,5 +51,11 @@ class sysadmin_config::template (
 
   package { 'tcpdump':
     ensure => present,
+  }
+
+  if ($enable_unbound) {
+    class { 'unbound':
+      install_resolv_conf => $install_resolv_conf
+    }
   }
 }
