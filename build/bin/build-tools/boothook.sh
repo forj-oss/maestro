@@ -52,11 +52,49 @@ def linux_distribution():
 print(str(platform.linux_distribution()[0]))
 "
 }
+# Proxy management
+# This has to happen before any install is attempted.
+_PROXY="$(GetJson $PREFIX/meta-boot.js webproxy)"
+if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
+then
+  set -x
+  echo "export HTTP_PROXY=$_PROXY
+export http_proxy=$_PROXY
+export HTTPS_PROXY=$_PROXY
+export https_proxy=$_PROXY
+export FTP_PROXY=$_PROXY
+export no_proxy=localhost,127.0.0.1,10.0.0.1,169.254.169.254" >> /etc/environment
+source /etc/environment
+
+  case  "$(GetOs)" in
+    Ubuntu)
+
+      if [ ! -f /etc/apt/apt.conf ]; then
+      echo "Acquire::http::proxy \"$_PROXY\";
+Acquire::https::proxy \"$_PROXY\";
+Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
+      fi
+      ;;
+    CentOS)
+      if [ -f /etc/yum.conf ]; then
+        grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
+        if [ ! $? -eq 0 ]; then
+          echo "proxy=$_PROXY" >>/etc/yum.conf
+        fi
+      fi
+      ;;
+    *)
+      ;;
+  esac
+  set +x
+fi
+
 
 # Install log requirement.
 case  "$(GetOs)" in
   Ubuntu)
    INST_TOOL="$(which apt-get)"
+   
    apt-get install gawk -y
    ;;
    CentOS)
@@ -142,41 +180,7 @@ then
    exit 1
 fi
 
-# Proxy management
-_PROXY="$(GetJson $PREFIX/meta-boot.js webproxy)"
-if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
-then
-  set -x
-  echo "export HTTP_PROXY=$_PROXY
-export http_proxy=$_PROXY
-export HTTPS_PROXY=$_PROXY
-export https_proxy=$_PROXY
-export FTP_PROXY=$_PROXY
-export no_proxy=localhost,127.0.0.1,10.0.0.1,169.254.169.254" >> /etc/environment
-source /etc/environment
 
-  case  "$(GetOs)" in
-    Ubuntu)
-
-      if [ ! -f /etc/apt/apt.conf ]; then
-      echo "Acquire::http::proxy \"$_PROXY\";
-Acquire::https::proxy \"$_PROXY\";
-Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
-      fi
-      ;;
-    CentOS)
-      if [ -f /etc/yum.conf ]; then
-        grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
-        if [ ! $? -eq 0 ]; then
-          echo "proxy=$_PROXY" >>/etc/yum.conf
-        fi
-      fi
-      ;;
-    *)
-      ;;
-  esac
-  set +x
-fi
 # hostname, and domain settings have to be fixed to make puppet master/agent running together.
 
 # Loading Metadata
