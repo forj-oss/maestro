@@ -1,2 +1,3 @@
 # bp-api
-### a Sails application
+
+a [Sails](http://sailsjs.org) application
