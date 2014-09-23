@@ -128,6 +128,7 @@ function CloneRepo()
  GITBRANCH="$3"
  GITNAME="$1"
  GITURL="$2"
+ source /etc/environment
  git clone -b $GITBRANCH $GITURL $GITNAME
  if [ "${TEST_BOX_REPOS[$GITNAME]}" != "" ]
  then

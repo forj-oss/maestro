@@ -54,16 +54,32 @@ print(str(platform.linux_distribution()[0]))
 }
 # Proxy management
 # This has to happen before any install is attempted.
-_PROXY="$(GetJson $PREFIX/meta-boot.js webproxy)"
-if [ -n "$_PROXY" ] && [ "$(grep -i http_proxy /etc/environment)" = "" ]
-then
-  set -x
-  echo "export HTTP_PROXY=$_PROXY
-export http_proxy=$_PROXY
-export HTTPS_PROXY=$_PROXY
+_PROXY="$(GetJson $PREFIX/meta.js webproxy)"
+if [ -n "$_PROXY" ] ; then
+
+  if [ "$(grep  http_proxy /etc/environment)" = "" ] ; then
+    echo "export http_proxy=$_PROXY
 export https_proxy=$_PROXY
-export FTP_PROXY=$_PROXY
-export no_proxy=localhost,127.0.0.1,10.0.0.1,169.254.169.254" >> /etc/environment
+export ftp_PROXY=$_PROXY" >> /etc/environment
+  fi
+  if  [ "$(grep  HTTP_PROXY /etc/environment)" = "" ] ; then
+    echo "export HTTP_PROXY=$_PROXY
+export HTTPS_PROXY=$_PROXY
+export FTP_PROXY=$_PROXY" >> /etc/environment
+  fi
+  if [ "$(grep  no_proxy /etc/environment)" = "" ] ; then
+    echo "
+export no_proxy=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
+  fi
+  if [ "$(grep  NO_PROXY /etc/environment)" = "" ] ; then
+    echo "
+export NO_PROXY=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
+  fi
+  # Need to set GIT_SSL_NO_VERIFY as the Forj ssl is self signed.
+  if [ "$(grep  GIT_SSL_NO_VERIFY /etc/environment)" = "" ] ; then
+    echo "
+export GIT_SSL_NO_VERIFY=true" >> /etc/environment
+  fi  
 source /etc/environment
 
   case  "$(GetOs)" in
@@ -94,11 +110,20 @@ fi
 case  "$(GetOs)" in
   Ubuntu)
    INST_TOOL="$(which apt-get)"
+   exec 6>&1 > >( awk '{ POUT=$0;
+                 print POUT;
+                 print POUT >> "/var/log/cloud-init.log"
+                 fflush("");
+                }') 2>&1
    
-   apt-get install gawk -y
    ;;
    CentOS)
    INST_TOOL="$(which yum)"
+   exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
+                 print POUT;
+                 print POUT >> "/var/log/cloud-init.log"
+                 fflush("");
+                }') 2>&1
    ;;
    *)
    INST_TOOL="N/A"
@@ -106,11 +131,7 @@ case  "$(GetOs)" in
 esac
 
 
-exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
-                 print POUT;
-                 print POUT >> "/var/log/cloud-init.log"
-                 fflush("");
-                }') 2>&1
+
 
 echo "################# 1st sequence : user_data BOOTHOOK Start #################"
 
@@ -237,6 +258,7 @@ case  "$(GetOs)" in
 
     apt-get -qy update
     apt-get -qy upgrade
+    apt-get -qy install gawk git wget
     ;;
   CentOS)
     yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
