@@ -213,6 +213,7 @@ function setup_pip {
 #
 # Install pip & puppet
 #
+source /etc/environment
 
 setup_pip
 
