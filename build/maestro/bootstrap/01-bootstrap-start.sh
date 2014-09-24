@@ -27,7 +27,17 @@ Load_test-box_repos # Loading test-box information for external bootstrapping (d
 . /etc/environment
 _PROXY="$(GetJson /meta-boot.js webproxy)"
 
-apt-get purge -yq python-pip
-apt-get install git -yq
+case  "$(GetOs)" in
+  Ubuntu)
+    apt-get purge -yq python-pip
+    apt-get install git -yq
+    ;;
+  CentOS)
+    ln -s /usr/bin/ruby /usr/bin/ruby1.8
+    ln -s /usr/bin/gem /usr/bin/gem1.8
+    ;;
+  *)
+    ;;
+esac
 
 export HOME=/root
