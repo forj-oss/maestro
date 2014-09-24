@@ -141,5 +141,7 @@ eyaml encrypt -l 'mysql_root_password' -s $mysql_root_password | grep "mysql_roo
 eyaml encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
 eyaml encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
 
+rabbitmq_password='changeme'
+eyaml encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
 
 echo "################# Hiera eyaml Installation done, step 2/2 done  ###################"

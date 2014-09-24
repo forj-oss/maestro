@@ -125,7 +125,7 @@ class maestro (
   include maestro::ui::setup
   include maestro::backup::backup_server
   include maestro::app::tool_status
-
+  include rabbit
 
   # Fog file may not be installed, and following code may fails. But maestro ui should be already installed and configured, anyway.
   debug("instance_id is ${instance_id}")

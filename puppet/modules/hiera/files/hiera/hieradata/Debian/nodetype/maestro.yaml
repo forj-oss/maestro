@@ -119,3 +119,4 @@ sysadmin_config::manage_servers::iptables_public_tcp_ports:
   - 8080
   - 8139
   - 8140
+  - 15672

@@ -114,6 +114,7 @@ sysadmin_config::manage_servers::iptables_public_tcp_ports:
   - 636
   - 443
   - 3000
+  - 15672
   - 4505
   - 4506
   - 8080
