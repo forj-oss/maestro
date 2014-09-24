@@ -26,7 +26,6 @@ packages:
   - python-all-dev
   - curl
   - corkscrew
-  - puppet
   - make
 package_reboot_if_required: false
 output: {config: "| tee -a /var/log/cloud-init.log"}
