@@ -126,10 +126,11 @@ gpgcheck=1
 EOF
 
     if [ "$THREE" != 'yes' ]; then
-        echo 'exclude=puppet-2.8* puppet-2.9* puppet-3* facter-2*' >> /etc/yum.repos.d/puppetlabs.repo
+        echo 'exclude=puppet-2.8* puppet-2.9* puppet-3* facter-2* puppet-server-3* ' >> /etc/yum.repos.d/puppetlabs.repo
     fi
 
     yum update -y
+    yum install puppet-server -y
 }
 
 function setup_puppet_ubuntu {
