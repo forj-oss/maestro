@@ -32,5 +32,7 @@ class rabbit (
     configure_permission => '.*',
     read_permission      => '.*',
     write_permission     => '.*',
+  }->
+  class { 'erlang':
   }
 }
