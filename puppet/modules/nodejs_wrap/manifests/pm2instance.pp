@@ -102,12 +102,20 @@ define nodejs_wrap::pm2instance(
               # combine them all to make pm2instance_environment
               $pm2instance_environment = split(inline_template('<%= (@node_environment + @http_proxy_host + @http_proxy_port + @https_proxy_host + @https_proxy_port).join(\',\') %>'),',')
               debug("using environment for pm2instance => ${pm2instance_environment}")
+
+              exec {"npm install of ${pm2name}":
+                command => "/usr/bin/npm install",
+                environment => $pm2instance_environment,
+                path        => $::path,
+                cwd         => $script_dir,
+              }
+
               exec { "${ensure} pm2 script ${pm2name}":
                       command     => "pm2 start '${script}' -n ${pm2name} -u ${user} -i ${instance} --run-as-user ${user} --run-as-group ${user}",
                       cwd         => $script_dir,
                       environment => $pm2instance_environment,
                       path        => $::path,
-                      require     => [ Package['pm2'], File[$script_dir],],
+                      require     => [ Package['pm2'], File[$script_dir], Exec["npm install of ${pm2name}"]],
                       onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
                       logoutput   => true,
               }
