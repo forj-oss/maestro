@@ -19,7 +19,8 @@
 class jimador::requirements {
 
   tag 'jimador::requirements'
-  $package_data = parseyaml("
+  $package_data = $::operatingsystem ? {
+    Ubuntu => parseyaml("
   make:
     ensure: 'latest'
     require: 'Package[libxslt-dev]'
@@ -37,7 +38,46 @@ class jimador::requirements {
     require: 'Package[excon]'
   libxslt-dev:
     ensure: 'latest'
-")
+"),
+    CentOS => parseyaml("
+  make:
+    ensure: 'latest'
+    require: 'Package[libxslt-devel]'
+  mime-types:
+    ensure: '1.25.1'
+    provider: 'gem'
+    require: 'Package[make]'
+  excon:
+    ensure: '0.31.0'
+    provider: 'gem'
+    require: 'Package[mime-types]'
+  json:
+    ensure: 'latest'
+    provider: 'gem'
+    require: 'Package[excon]'
+  libxslt-devel:
+    ensure: 'latest'
+"),
+    default => parseyaml("
+  make:
+    ensure: 'latest'
+    require: 'Package[libxslt-dev]'
+  mime-types:
+    ensure: '1.25.1'
+    provider: 'gem18'
+    require: 'Package[make]'
+  excon:
+    ensure: '0.31.0'
+    provider: 'gem18'
+    require: 'Package[mime-types]'
+  json:
+    ensure: 'latest'
+    provider: 'gem18'
+    require: 'Package[excon]'
+  libxslt-dev:
+    ensure: 'latest'
+"),
+}
   $packages = keys($package_data)
   jimador::requirements_package { $packages:
       data => $package_data,

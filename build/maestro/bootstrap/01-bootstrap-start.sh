@@ -35,6 +35,10 @@ case  "$(GetOs)" in
   CentOS)
     ln -s /usr/bin/ruby /usr/bin/ruby1.8
     ln -s /usr/bin/gem /usr/bin/gem1.8
+    yum install httpd -y
+    ln -s /etc/httpd /etc/apache2
+    mkdir -p /etc/apache2/sites-available
+    mkdir -p /etc/apache2/sites-enabled
     ;;
   *)
     ;;
