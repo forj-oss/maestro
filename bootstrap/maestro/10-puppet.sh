@@ -70,16 +70,16 @@ puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/p
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap2.log
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite1.log
 service puppetmaster stop
-service apache2 restart
+service apache2 restart || service httpd restart
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite2.log
 service puppetmaster stop
-service apache2 restart
+service apache2 restart || service httpd restart
 # Added due to npm install sometimes throwing undefined install errors... clears up after subsequent runs.
 # TODO: find how we can delay maestro ui install till after base orchestration is running.... consideration for future release.
 puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite3.log
 # we run puppet with passenger, this service should not start
 service puppetmaster stop
-service apache2 restart
+service apache2 restart || service httpd restart
 service puppet-dashboard-workers restart
 }
 run1

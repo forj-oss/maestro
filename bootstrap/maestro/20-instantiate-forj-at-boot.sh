@@ -33,7 +33,7 @@ if [ "$BLUEPRINT" != "" ]
 then # TODO: Support to receive a different layout then default one.
 # restart puppet for install.pp
    service puppetmaster stop
-   service apache2 restart
+   service apache2 restart || service httpd restart
    service puppet-dashboard-workers restart
 # TODO: remove after we're done debuggin:
    find /etc/puppet/hieradata
@@ -57,13 +57,13 @@ then # TODO: Support to receive a different layout then default one.
    find /etc/puppet/hieradata
 # run standalone for MODPATH to update in puppet.conf
    service puppetmaster stop
-   service apache2 restart
+   service apache2 restart || service httpd restart
    service puppet-dashboard-workers restart
    puppet apply --debug --verbose --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
 
 # restart puppet so all new factors and hiera are loaded. 
    service puppetmaster stop
-   service apache2 restart
+   service apache2 restart || service httpd restart
    service puppet-dashboard-workers restart
 # re run manifest to get the latest changes from new facters
    export FACTERLIB="/var/lib/puppet/lib/facter"
