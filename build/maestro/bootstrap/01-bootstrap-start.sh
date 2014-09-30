@@ -31,6 +31,7 @@ case  "$(GetOs)" in
   Ubuntu)
     apt-get purge -yq python-pip
     apt-get install git -yq
+    add-apt-repository ppa:saltstack/salt
     ;;
   CentOS)
     ln -s /usr/bin/ruby /usr/bin/ruby1.8
