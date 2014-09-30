@@ -12,10 +12,13 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+
+# this sets up the repository and installs the erlang package.
+include 'erlang'
+
 #
 # Installs RabbitMQ
 #
-
 class rabbit (
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
@@ -32,7 +35,5 @@ class rabbit (
     configure_permission => '.*',
     read_permission      => '.*',
     write_permission     => '.*',
-  }->
-  class { 'erlang':
   }
 }
