@@ -14,7 +14,15 @@
 #    limitations under the License.
 
 # this sets up the repository and installs the erlang package.
-include 'erlang'
+case $operatingsystem {
+      'RedHat', 'CentOS': { include 'erlang'
+                            class { 'erlang': epel_enable => true }
+                          }
+      /^(Debian|Ubuntu)$/:{ include 'erlang'
+                            package { 'erlang-base': ensure => 'latest', }
+                          }
+      default:            { fail("Unsupported ${::operatingsystem}") }
+}
 
 #
 # Installs RabbitMQ
