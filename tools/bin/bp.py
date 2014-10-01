@@ -38,6 +38,7 @@ SOURCES = "modules"
 BRANCH = 'master'
 TEST_BOX = ''
 BLUEPRINT_REF_PATH = os.path.join(os.sep, 'usr', 'lib', 'forj', 'blueprints')
+BLUEPRINT_REPOS_DIR = os.path.join(os.sep, 'opt', 'config', 'production', 'blueprints')
 GIT_REPOS_DIR = os.path.join(os.sep, 'opt', 'config', 'production', 'git')
 
 
@@ -336,6 +337,10 @@ def install_bp(bp_element):
         sys.exit(2)
 
     BP_BootSeq = []
+
+    if not os.path.exists(BLUEPRINT_REPOS_DIR):
+        cmd_call('install_bp', ['mkdir', '-p', BLUEPRINT_REPOS_DIR])
+        logging.info('%s has been created.', BLUEPRINT_REPOS_DIR)
 
     if SOURCES in BP_yaml['locations']:
         dSource = BP_yaml['locations'][SOURCES]
