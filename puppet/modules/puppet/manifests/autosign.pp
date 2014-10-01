@@ -17,6 +17,7 @@
 # setup an autosign.conf based on hosts list
 class puppet::autosign (
   $nodes       = [$::fqdn],
+  $extra_nodes = hiera_array('puppet::autosign::nodes', [])
   ) {
   file { '/etc/puppet/autosign.conf':
       owner   => 'root',

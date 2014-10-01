@@ -13,3 +13,6 @@
 <%= "#{node_name}" %>
 <% end -%>
 <%= scope.lookupvar('fqdn') %>
+<% @extra_nodes.each do |node_name| -%>
+<%= "#{node_name}" %>
+<% end -%>
