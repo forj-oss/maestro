@@ -306,7 +306,7 @@ def git_clone(sRepo):
             cmd_call('git_clone: rm', ['rm', '-fr', os.path.join(sBlueprint_path, name)])
         cmd_call('git_clone: ln', ['ln', '-sf', mods, os.path.join(sBlueprint_path, name)])
     else:
-        logging.debug("mods empty, performing cmd: ln -sf '%s' '%s'", extra_mods, os.path.join(sAdd_mod_path, name)
+        logging.debug("mods empty, performing cmd: ln -sf '%s' '%s'", extra_mods, os.path.join(sAdd_mod_path, name))
         if os.path.lexists(os.path.join(sAdd_mod_path, name)):
             cmd_call('git_clone: rm', ['rm', '-fr', os.path.join(sAdd_mod_path, name)])
         cmd_call('git_clone: ln', ['ln', '-sf', extra_mods, os.path.join(sAdd_mod_path, name)])
