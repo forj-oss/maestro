@@ -15,7 +15,9 @@
 ---
 classes:
   - selinux
-  - config::yum
+  - jimador::manage
+
+maestro::backup::maestro_backup_server: '%{::eroip}'
 
 selinux::mode: 'permissive'
 
@@ -34,3 +36,9 @@ packages::install:
   - 'mailx'
   - 'vnstat'
   - 'nfs-utils'
+
+packages::latest:
+  - 'pyOpenSSL'
+  - 'pciutils'
+  - 'yum'
+  - 'yum-utils'
