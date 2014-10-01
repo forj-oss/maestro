@@ -22,6 +22,11 @@ class cacerts::params {
       $ssh_keys_dir      = "${ca_certs_root_dir}/ssh_keys"
       $os_home           = '/home'
     }
+    'RedHat': {
+      $ca_certs_root_dir = '/opt/config/cacerts'
+      $ssh_keys_dir      = "${ca_certs_root_dir}/ssh_keys"
+      $os_home           = '/home'
+    }
     default: {
       fail("Unsupported osfamily: ${::osfamily}
             The 'cacerts' module only supports os family Debian.")
