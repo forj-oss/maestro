@@ -138,6 +138,7 @@ def git_clone(sRepo):
     else:
         extra_mods = ''
         mods = os.path.join(to, name, 'puppet', 'modules')
+    logging.debug("extra_mods => '%s' , mods => '%s'", extra_mods, mods)
 
     sBlueprint_path = os.path.join(os.sep, 'opt', 'config', 'production', 'blueprints')
     sAdd_mod_path = os.path.join(os.sep, 'opt', 'config', 'production', 'puppet', 'modules')
@@ -300,10 +301,12 @@ def git_clone(sRepo):
 
     # Links managements to blueprints/ or puppet/modules/
     if mods != '' and os.path.exists(mods):
+        logging.debug("mods not empty, performing cmd: ln -sf '%s' '%s'", mods, os.path.join(sBlueprint_path, name))
         if os.path.lexists(os.path.join(sBlueprint_path, name)):
             cmd_call('git_clone: rm', ['rm', '-fr', os.path.join(sBlueprint_path, name)])
         cmd_call('git_clone: ln', ['ln', '-sf', mods, os.path.join(sBlueprint_path, name)])
     else:
+        logging.debug("mods empty, performing cmd: ln -sf '%s' '%s'", extra_mods, os.path.join(sAdd_mod_path, name)
         if os.path.lexists(os.path.join(sAdd_mod_path, name)):
             cmd_call('git_clone: rm', ['rm', '-fr', os.path.join(sAdd_mod_path, name)])
         cmd_call('git_clone: ln', ['ln', '-sf', extra_mods, os.path.join(sAdd_mod_path, name)])
