@@ -1,0 +1,231 @@
+<div class="row">
+  <div class="col-lg-12" style="padding-top: 30px;">
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="users">
+              <span id="number-admins" style="font-weight: bold;">0</span>
+              <span> Administrators</span>
+            </div>
+          </div>
+        </div>
+        <div id="container-admins" class="row">
+        </div>
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="users">
+              <span id="number-operators" style="font-weight: bold;">0</span>
+              <span> Operators</span>
+            </div>
+          </div>
+        </div>
+        <div id="container-operators" class="row">
+        </div>
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="users">
+              <span id="number-guest" style="font-weight: bold;">0</span>
+              <span> Guest</span>
+            </div>
+          </div>
+        </div>
+        <div id="container-guest" class="row">
+        </div>
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="users">
+              <span id="number-developers" style="font-weight: bold;">0</span>
+              <span> Developers</span>
+            </div>
+          </div>
+        </div>
+        <div id="container-developers" class="row">
+        </div>
+      </div>
+      <div class="col-md-3"></div>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function(){
+    get_users('admins');
+    get_users('operators');
+    get_users('guest');
+    get_users('developers');
+  });
+  function get_users(group){
+    $.ajax({
+      type: 'GET',
+      accept: 'json',
+      url: '/users/get_users?group='+group,
+      success: function(users){
+        $('#container-'+group).fadeOut(300).html('').fadeIn(300);
+        users.forEach(function(user){
+          if(group === 'guest'){
+            $('#container-'+group).append('<div class="col-sm-4" style="padding-top: 15px; display: none;"><div class="user"><div class="approve-message"><span>Do you approve?</span></div><img src="../images/User.png" title="User" /><label>'+user+'</label><div class="user-approve-controls"><a class="user-approve-button">Yes</a><a class="user-approve-button">No</a></div></div></div>');
+          }else{
+            if(group === 'developers'){
+              $('#container-'+group).append('<div class="col-sm-4" style="padding-top: 15px; display: none;"><div class="user"><div class="approve-message"><span>Move user to?</span></div><img src="../images/User.png" title="User" /><label>'+user+'</label><select data-group="Administrator"><option value="admins">Administrator</option><option value="operators">Operators</option><option value="developers" selected>Developers</option><option value="guest">Guest</option></select><div class="approve-controls"><a class="user-approve-button-thin">Move</a><a class="user-approve-button-thin">Cancel</a></div></div></div>');
+            }else if(group === 'operators'){
+              $('#container-'+group).append('<div class="col-sm-4" style="padding-top: 15px; display: none;"><div class="user"><div class="approve-message"><span>Move user to?</span></div><img src="../images/User.png" title="User" /><label>'+user+'</label><select data-group="Administrator"><option value="admins">Administrator</option><option value="operators" selected>Operators</option><option value="developers">Developers</option><option value="guest">Guest</option></select><div class="approve-controls"><a class="user-approve-button-thin">Move</a><a class="user-approve-button-thin">Cancel</a></div></div></div>');
+            }else if(group === 'admins'){
+              $('#container-'+group).append('<div class="col-sm-4" style="padding-top: 15px; display: none;"><div class="user"><div class="approve-message"><span>Move user to?</span></div><img src="../images/User.png" title="User" /><label>'+user+'</label><select data-group="Administrator"><option value="admins" selected>Administrator</option><option value="operators">Operators</option><option value="developers">Developers</option><option value="guest">Guest</option></select><div class="approve-controls"><a class="user-approve-button-thin">Move</a><a class="user-approve-button-thin">Cancel</a></div></div></div>');
+            }
+          }
+        });
+        if(users.length > 0 && group === 'guest'){
+          $('#container-guest .user').on('click', function(){
+            var controls = $(this).find('.user-approve-controls');
+            if($(controls).offset().top !== "128px"){
+              $(this).find('img').addClass('scale60');
+              $(controls).parent().find('.approve-message').animate({'top': '20px'}, 1000);
+              $(controls).animate({'top': '128px'}, 1000);
+              $(this).css('cursor', 'default');
+            }
+          });
+          $('.user-approve-button').on('click', function(e){
+            $(this).parent().off();
+            $(this).parent().parent().off();
+            
+            e.stopPropagation();
+            if($(this).text() === 'No'){
+              $(this).parent().parent().find('.approve-message').animate({'top': '-100px'}, 1000, function(){
+                $(this).parent().find('img').removeClass('scale60');
+              });
+              $(this).parent().animate({'top': '300px'}, 1000);
+              $(this).parent().parent().css('cursor', 'pointer');
+              enable_controls_guest($(this).parent().parent());
+            }else if($(this).text() === 'Yes'){
+              
+              var mail = $(this).parent().parent().find('label').text();
+              
+              $.ajax({
+                type: 'POST',
+                accept: 'json',
+                url: '/users/move_user',
+                data: { mail: mail, from: 'guest', to: 'developers' },
+                success: function(result){
+                  if(result === true){
+                    get_users('guest');
+                    get_users('developers');
+                  }
+                },
+                statusCode: {
+                  304: function() {
+                    //TODO: Not modified
+                  },
+                  500: function() {
+                    //TODO: Error
+                  },
+                  409: function(){
+                    //TODO: Conflict
+                  }
+                }
+              })
+              
+            }
+          });
+        }else{
+          $('#container-'+group+' .user').on('click', function(){
+            var controls = $(this).find('select');
+            if(controls.offset().top !== '110px'){
+              $(this).find('img').addClass('scale50');
+              $(controls).parent().find('label').animate({'top': '-12px'}, 1000);
+              $(controls).parent().find('.approve-message').animate({'top': '20px'}, 1000);
+              $(controls).parent().find('.approve-controls').animate({'top': '141px'}, 1200);
+              $(controls).animate({'top': '110px'}, 1000);
+              $(this).css('cursor', 'default');
+            }
+          });
+          $('.user-approve-button-thin').on('click', function(e){
+            $(this).parent().parent().off();
+            $(this).parent().parent().parent().off();
+            
+            e.stopPropagation();
+            if($(this).text() === 'Cancel'){
+              $(this).parent().parent().find('.approve-message').animate({'top': '-100px'}, 1000, function(){
+                $(this).parent().find('img').removeClass('scale50');
+                $(this).parent().find('label').animate({'top': '0px'}, 1000);
+              });
+              $(this).parent().animate({'top': '230px'}, 1000);
+              $(this).parent().parent().find('select').animate({'top': '200px'}, 1000, function(){
+                $(this).val($(this).attr('data-group'));
+              })
+              $(this).parent().parent().css('cursor', 'pointer');
+              enable_controls($(this).parent().parent());
+            }else if($(this).text() === 'Move'){
+              
+              var mail = $(this).parent().parent().find('label').text();
+              var to = $(this).parent().parent().find('select').val();
+              
+              $.ajax({
+                type: 'POST',
+                accept: 'json',
+                url: '/users/move_user',
+                data: { mail: mail, from: group, to: to },
+                success: function(result){
+                  if(result === true){
+                    get_users(group);
+                    get_users(to);
+                  }
+                },
+                statusCode: {
+                  304: function() {
+                    //TODO: Not modified
+                  },
+                  500: function() {
+                    //TODO: Error
+                  },
+                  409: function(){
+                    //TODO: Conflict
+                  }
+                }
+              })
+              
+            }
+          })
+        }
+        var $el = $('#number-'+group);
+        $({users_length: 0}).animate({users_length: users.length}, {
+            duration: 800,
+            easing:'swing',
+            step: function() {
+                $el.text(Math.round(this.users_length));
+            }
+        });
+        var _delay= 0;
+        $('#container-'+group+' .user').parent().delay(300).each(function() {
+          $(this).delay(_delay).animate({'opacity':'show', 'paddingTop': 0});
+          _delay += 170;
+        });
+      },
+      error: function(err){
+        console.log('error: '+error);
+      }
+    })
+  }
+  function enable_controls_guest(controls){
+    $(controls).on('click', function(){
+      if($(controls).find('.user-approve-controls').offset().top !== "128px"){
+        $(controls).parent().find('img').addClass('scale60');
+        $(controls).parent().find('.approve-message').animate({'top': '20px'}, 1000);
+        $(controls).find('.user-approve-controls').animate({'top': '128px'}, 1000);
+        $(controls).css('cursor', 'default');
+      }
+    });
+  }
+  function enable_controls(controls){
+    $(controls).on('click', function(){
+      if($(controls).find('select').offset().top !== "110px"){
+        $(controls).parent().find('img').addClass('scale50');
+        $(controls).parent().find('label').animate({'top': '-12px'}, 1000);
+        $(controls).parent().find('.approve-message').animate({'top': '20px'}, 1000);
+        $(controls).find('.approve-controls').animate({'top': '141px'}, 1000);
+        $(controls).parent().find('select').animate({'top': '110px'}, 1000);
+        $(controls).css('cursor', 'default');
+      }
+    });
+  }
+</script>

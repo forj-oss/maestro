@@ -23,9 +23,11 @@
     <script src="/linker/js/app.js"></script>
     <script src="/linker/js/modernizr.custom.js"></script>
     <script src="/linker/js/jquery.1.9.1.min.js"></script>
+    <script src="/linker/js/additional-methods.min.js"></script>
     <script src="/linker/js/bootstrap.js"></script>
     <script src="/linker/js/bootstrap.min.js"></script>
     <script src="/linker/js/dropdown.js"></script>
+    <script src="/linker/js/jquery.validate.min.js"></script>
     <script src="/linker/js/modal.js"></script>
     <script src="/linker/js/progress_bar.js"></script>
     <script src="/linker/js/tab.js"></script>
@@ -94,6 +96,9 @@
         }
         if($(this).attr('id')=='li-projects'){
           $('#container-tools').load('/project/index');
+        }
+        if($(this).attr('id')=='li-users'){
+          $('#container-tools').load('/users/index');
         }
       });
       $('.gravatar').click(function(){
