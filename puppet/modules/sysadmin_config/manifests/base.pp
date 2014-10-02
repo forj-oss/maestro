@@ -1,4 +1,4 @@
-# == Class: openstack_project::base
+# == Class: sysadmin_config::base
 # Copyright 2013 OpenStack Foundation.
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
 #
@@ -23,7 +23,7 @@ class sysadmin_config::base(
   if ($::osfamily == 'Debian') {
     include apt
   }
-  include openstack_project::params
+  include sysadmin_config::params
   include sysadmin_config::users
   include sudoers
 
@@ -63,7 +63,7 @@ class sysadmin_config::base(
 
   }
 
-  sysadmin_config::base_install_package{$::openstack_project::params::packages:}
+  sysadmin_config::base_install_package{$::sysadmin_config::params::packages:}
 
   include pip::python2
   $pip_provider = pip2
@@ -76,7 +76,7 @@ class sysadmin_config::base(
   }
 
   if ($install_users) {
-    package { $::openstack_project::params::user_packages:
+    package { $::sysadmin_config::params::user_packages:
       ensure => present
     }
   }
@@ -95,7 +95,7 @@ class sysadmin_config::base(
       owner   => 'root',
       group   => 'root',
       mode    => '0444',
-      source  => 'puppet:///modules/openstack_project/00-puppet.pref',
+      source  => 'puppet:///modules/sysadmin_config/00-puppet.pref',
       replace => true,
     }
 
@@ -107,7 +107,7 @@ class sysadmin_config::base(
       owner   => 'root',
       group   => 'root',
       mode    => '0444',
-      content => template('openstack_project/puppet.conf.erb'),
+      content => template('sysadmin_config/puppet.conf.erb'),
       replace => true,
     }
   }
