@@ -29,7 +29,7 @@ class sysadmin_config::template (
 ) {
   include ssh
   include snmpd
-  include openstack_project::automatic_upgrades
+  include sysadmin_config::automatic_upgrades
 
   class { 'iptables':
     public_tcp_ports => $iptables_public_tcp_ports,
