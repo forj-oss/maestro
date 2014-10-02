@@ -30,7 +30,7 @@ class sysadmin_config::params {
       $update_pkg_list_cmd = 'apt-get update >/dev/null 2>&1;'
     }
     default: {
-      fail("Unsupported osfamily: ${::osfamily} The 'openstack_project' module only supports osfamily Debian or RedHat (slaves only).")
+      fail("Unsupported osfamily: ${::osfamily} The 'sysadmin_config' module only supports osfamily Debian or RedHat (slaves only).")
     }
   }
 }

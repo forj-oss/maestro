@@ -59,7 +59,7 @@ class puppet::dashboard::configure(
   file { '/etc/mysql/conf.d/mysqld_innodb_fpt.cnf':
     ensure  => present,
     source  =>
-      'puppet:///modules/openstack_project/dashboard/mysqld_innodb_fpt.cnf',
+      'puppet:///modules/puppet/dashboard/mysqld_innodb_fpt.cnf',
     require => Class['mysql::server'],
   }
 

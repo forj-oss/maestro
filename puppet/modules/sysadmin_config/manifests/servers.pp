@@ -16,10 +16,10 @@
 #
 #
 # A module that deals with global sysadmin events.
-# For now we utilize openstack_project::server but will also replace cdk_project::server
-# We are currently doing several buried items here from openstack_project
+# For now we utilize sysadmin_config::server but will also replace cdk_project::server
+# We are currently doing several buried items here from sysadmin_config
 # so this class will attempt to clean some of the changes up so they are more generic.
-# as we understand it better, we may choose to drop the connection to openstack_project.
+# as we understand it better, we may choose to drop the connection to sysadmin_config.
 # iptable* specifies a list of ports and rules we will enforce
 # sysadmins specifies a list of local users to make administrators
 # certname specifies the server name to use as the /etc/puppet/puppet.conf user
@@ -58,7 +58,7 @@ class sysadmin_config::servers (
       group   => 'root',
       mode    => '0644',
       source  =>
-        'puppet:///modules/openstack_project/rsyslog.d_50-default.conf',
+        'puppet:///modules/sysadmin_config/rsyslog.d_50-default.conf',
       replace => true,
     }
     service { 'rsyslog':
