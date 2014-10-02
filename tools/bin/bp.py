@@ -349,9 +349,10 @@ def install_bp(bp_element):
                 if 'git' in vRepo:
                     git_clone(vRepo)
                     if 'install' in vRepo and 'puppet-apply' in vRepo['install']:
-                        modules_path = os.path.join(GIT_REPOS_DIR, vRepo['src-repo'], 'puppet', 'modules') + ':' + os.path.join(GIT_REPOS_DIR, 'maestro', 'puppet', 'modules')
+                        modules_path = os.path.join(GIT_REPOS_DIR, vRepo['src-repo'], 'puppet', 'modules') + ':' + os.path.join(GIT_REPOS_DIR, 'maestro', 'puppet', 'modules') + ':' + os.path.join('','etc','puppet','modules')
                         manifest_file = os.path.join(GIT_REPOS_DIR, vRepo['src-repo'], 'puppet', 'manifests', vRepo['install']['puppet-apply'] + '.pp')
-                        BP_BootSeq.append(['puppet', 'apply', '--modulepath=' + modules_path, manifest_file])
+                        BP_BootSeq.append(['puppet', 'apply', '--debug', '--verbose', '--modulepath=' + modules_path, manifest_file])
+                        BP_BootSeq.append(['puppet', 'apply', '--debug', '--verbose', '--modulepath=' + modules_path, manifest_file])
                 else:
                     logging.warning("repo-src: Missing 'git' protocol. Currently only supports 'git'.")
             else:
