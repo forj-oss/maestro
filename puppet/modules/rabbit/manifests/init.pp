@@ -30,9 +30,11 @@ case $operatingsystem {
 class rabbit (
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
+  $port     = hiera('rabbit::port','5672'),
 )
 {
   class { 'rabbitmq':
+    port => $port,
   }->
   rabbitmq_user { $admin:
     ensure   => present,
