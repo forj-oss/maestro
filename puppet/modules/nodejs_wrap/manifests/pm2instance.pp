@@ -39,14 +39,15 @@
 # Example run: puppet apply -e "nodejs_wrap::pm2instance{'kitops': ensure => 'present', user => 'puppet', script_dir => '/opt/config/production/app/forj.config', script => 'kitops.js', node_path => '/usr/lib/node_modules', }" --modulepath=/opt/config/production/git/maestro/puppet/modules:/etc/puppet/modules --verbose
 #
 define nodejs_wrap::pm2instance(
-  $script     = $title,
-  $pm2name       = $title,
-  $ensure     = hiera('nodejs_wrap::ensure', 'present'),
-  $user       = hiera('nodejs_wrap::user', 'puppet'),
-  $instance   = '1',
-  $script_dir = undef,
-  $node_path  = hiera('nodejs_wrap::node_path', '/usr/lib/node_modules'),
-  $node_env   = hiera('nodejs_wrap::node_env', 'development'),
+  $script               = $title,
+  $pm2name              = $title,
+  $ensure               = hiera('nodejs_wrap::ensure', 'present'),
+  $user                 = hiera('nodejs_wrap::user', 'puppet'),
+  $instance             = '1',
+  $script_dir           = undef,
+  $node_path            = hiera('nodejs_wrap::node_path', '/usr/lib/node_modules'),
+  $node_env             = hiera('nodejs_wrap::node_env', 'development'),
+  $do_local_npm_install = true,
 ) {
   require nodejs_wrap
   include nodejs_wrap::pm2service
@@ -56,12 +57,13 @@ define nodejs_wrap::pm2instance(
   }
   case $ensure {
       'present': {
-              file{$script_dir:
-                ensure  => directory,
-                owner   => $user,
-                group   => $user,
-                mode    => '0755',
-                recurse => true,
+              exec { "${script_dir}-chmod" :
+                command     => "chmod 0755 -R ${script_dir}",
+                path        => $::path,
+              }
+              exec { "${script_dir}-chown" :
+                command     => "chown -R ${user}:${user} ${script_dir}",
+                path        => $::path,
               }
               # handle the defaults
               $node_environment = ["NODE_PATH=${node_path}" , "NODE_ENV=${node_env}"]
@@ -103,21 +105,25 @@ define nodejs_wrap::pm2instance(
               $pm2instance_environment = split(inline_template('<%= (@node_environment + @http_proxy_host + @http_proxy_port + @https_proxy_host + @https_proxy_port).join(\',\') %>'),',')
               debug("using environment for pm2instance => ${pm2instance_environment}")
 
-              exec { "npm install of ${pm2name}":
-                      command     => '/usr/bin/npm install',
-                      environment => $pm2instance_environment,
-                      path        => $::path,
-                      cwd         => $script_dir,
+              if $do_local_npm_install == true {
+                $pm2_require = [ Package['pm2'], Exec["${script_dir}-chmod"], Exec["${script_dir}-chown"], Exec["npm install of ${pm2name}"] ]
+                exec { "npm install of ${pm2name}":
+                  command     => 'npm install',
+                  environment => $pm2instance_environment,
+                  path        => $::path,
+                  cwd         => $script_dir,
+                }
+              }else{
+                $pm2_require = [ Package['pm2'], Exec["${script_dir}-chmod"], Exec["${script_dir}-chown"] ]
               }
-
               exec { "${ensure} pm2 script ${pm2name}":
-                      command     => "pm2 start '${script}' -n ${pm2name} -u ${user} -i ${instance} --run-as-user ${user} --run-as-group ${user}",
-                      cwd         => $script_dir,
-                      environment => $pm2instance_environment,
-                      path        => $::path,
-                      require     => [ Package['pm2'], File[$script_dir], Exec["npm install of ${pm2name}"]],
-                      onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
-                      logoutput   => true,
+                command     => "pm2 start '${script}' -n ${pm2name} -u ${user} -i ${instance} --run-as-user ${user} --run-as-group ${user}",
+                cwd         => $script_dir,
+                environment => $pm2instance_environment,
+                path        => $::path,
+                require     => $pm2_require,
+                onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
+                logoutput   => true,
               }
 
               # pm2 0.8.2 issues with node 0.11.13
@@ -133,15 +139,17 @@ define nodejs_wrap::pm2instance(
       }
       'absent': {
               exec { "${ensure} pm2 script ${pm2name}":
-                      command     => "pm2 delete ${pm2name}",
-                      cwd         => $script_dir,
-                      environment => ["HOME=/home/${user}" , "NODE_PATH=${node_path}", "NODE_ENV=${node_env}"],
-                      path        => $::path,
-                      require     => [ Package['pm2']],
-                      onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
-                      user        => $user,
+                command     => "pm2 delete ${pm2name}",
+                cwd         => $script_dir,
+                environment => ["HOME=/home/${user}" , "NODE_PATH=${node_path}", "NODE_ENV=${node_env}"],
+                path        => $::path,
+                require     => [ Package['pm2']],
+                onlyif      => "test \$(pm2 status > /dev/null;pm2 list|grep ${pm2name}|grep online|wc -l) -eq 0",
+                user        => $user,
               }
       }
-      default:            { fail('pm2instance accepts ensure => present or absent.') }
+      default: {
+        fail('pm2instance accepts ensure => present or absent.')
+      }
   }
 }
