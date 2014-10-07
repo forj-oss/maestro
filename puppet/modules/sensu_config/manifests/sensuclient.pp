@@ -17,6 +17,7 @@
 #
 
 class sensu_config::sensuclient (
+  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','/sensu'),
   $password       = hiera('rabbit::password'),
   $rabbitmq_host  = hiera('rabbit::host',$::eroip),
   $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
@@ -41,5 +42,54 @@ class sensu_config::sensuclient (
     redis_host         => $redis_host,
     redis_port         => $redis_port,
     subscriptions      => $subscriptions,
+    rabbitmq_vhost     => $sensu_vhost,
+  }
+
+  file { '/etc/sensu/plugins/check-disk.rb':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/check-disk.rb',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/check-cpu.rb':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/check-cpu.rb',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/check-mem.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/check-mem.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  sensu::check{ 'check_disk':
+    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
+    subscribers  => $subscriptions,
+    interval     => '1',
+    require      => File['/etc/sensu/plugins/check-disk.rb'],
+  }
+
+  sensu::check{ 'check_cpu':
+    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
+    subscribers  => $subscriptions,
+    interval     => '1',
+    require      => File['/etc/sensu/plugins/check-cpu.rb'],
+  }
+
+  sensu::check{ 'check_mem':
+    command      => '/etc/sensu/plugins/check-mem.sh',
+    subscribers  => $subscriptions,
+    interval     => '1',
+    require      => File['/etc/sensu/plugins/check-mem.sh'],
   }
 }

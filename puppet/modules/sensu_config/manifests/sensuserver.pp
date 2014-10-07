@@ -66,5 +66,6 @@ class sensu_config::sensuserver (
     api               => true,
     rabbitmq_host     => $rabbitmq_host,
     rabbitmq_port     => $rabbitmq_port,
+    rabbitmq_vhost    => $sensu_vhost,
   }
 }
