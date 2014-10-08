@@ -31,10 +31,12 @@ class rabbit (
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
   $port     = hiera('rabbit::port','5672'),
+  $vhost    = hiera('rabbit::maestro_vhost','/maestro')
 )
 {
   class { 'rabbitmq':
-    port => $port,
+    port              => $port,
+    delete_guest_user => true,
   }->
   rabbitmq_user { $admin:
     ensure   => present,
@@ -42,6 +44,14 @@ class rabbit (
     password => $password,
   }->
   rabbitmq_user_permissions { "${admin}@/":
+    configure_permission => '.*',
+    read_permission      => '.*',
+    write_permission     => '.*',
+  }->
+  rabbitmq_vhost { $vhost:
+    ensure  => present,
+  }->
+  rabbitmq_user_permissions { "${admin}@${vhost}":
     configure_permission => '.*',
     read_permission      => '.*',
     write_permission     => '.*',
