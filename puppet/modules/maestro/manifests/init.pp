@@ -26,7 +26,7 @@ class maestro (
   $key_name_arg     = hiera('maestro::key_name', 'nova'),
   $network_name     = hiera('maestro::network_name', $::netname),
   $provision_set    = hiera('maestro::provision', $::provision),
-  $security_groups  = hiera('maestro::security_goups', 'default'),
+  $security_groups  = hiera('maestro::security_groups', 'default'),
   $meta_data        = hiera('maestro::meta_data',''),
   $environment      = $settings::environment,
 )
