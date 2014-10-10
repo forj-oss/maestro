@@ -68,4 +68,28 @@ class sensu_config::sensuserver (
     rabbitmq_port     => $rabbitmq_port,
     rabbitmq_vhost    => $sensu_vhost,
   }
+
+  sensu::check{ 'disk-metrics':
+    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+  }
+
+  sensu::check{ 'cpu-metrics':
+    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+  }
+
+  sensu::check{ 'memory-metrics':
+    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+  }
 }

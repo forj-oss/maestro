@@ -25,6 +25,7 @@ class sensu_config::sensuclient (
   $redis_port     = hiera('redis::params::port','6379'),
 )
 {
+  validate_string($sensu_vhost)
   validate_string($password)
   validate_string($rabbitmq_host)
   validate_string($subscriptions)
@@ -43,6 +44,33 @@ class sensu_config::sensuclient (
     redis_port         => $redis_port,
     subscriptions      => $subscriptions,
     rabbitmq_vhost     => $sensu_vhost,
+  }
+
+  file { '/etc/sensu/plugins/disk-metrics.rb':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/disk-metrics.rb',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/cpu-metrics.rb':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/cpu-metrics.rb',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/memory-metrics.rb':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/memory-metrics.rb',
+    require => File['/etc/sensu/plugins'],
   }
 
   file { '/etc/sensu/plugins/check-disk.rb':
@@ -75,21 +103,21 @@ class sensu_config::sensuclient (
   sensu::check{ 'check_disk':
     command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
     subscribers  => $subscriptions,
-    interval     => '1',
+    interval     => '60',
     require      => File['/etc/sensu/plugins/check-disk.rb'],
   }
 
   sensu::check{ 'check_cpu':
     command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
     subscribers  => $subscriptions,
-    interval     => '1',
+    interval     => '60',
     require      => File['/etc/sensu/plugins/check-cpu.rb'],
   }
 
   sensu::check{ 'check_mem':
     command      => '/etc/sensu/plugins/check-mem.sh',
     subscribers  => $subscriptions,
-    interval     => '1',
+    interval     => '60',
     require      => File['/etc/sensu/plugins/check-mem.sh'],
   }
 }
