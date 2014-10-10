@@ -123,3 +123,4 @@ sysadmin_config::manage_servers::iptables_public_tcp_ports:
   - 15672
   - 6379
   - 4567
+  - 3010

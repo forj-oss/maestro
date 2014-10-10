@@ -1,0 +1,21 @@
+{
+  "sensu": [
+    {
+      "name": "<%= @fqdn %>",
+      "host": "localhost",
+      "port": <%= @sensu_api_port %>,
+      "ssl": false,
+      "user": "",
+      "pass": "",
+      "path": "",
+      "timeout": 5000
+    }
+  ],
+  "uchiwa": {
+    "host": "0.0.0.0",
+    "port": <%= @uchiwa_port %>,
+    "user": "<%= @uchiwa_user %>",
+    "pass": "<%= @uchiwa_password %>",
+    "refresh": 10000
+  }
+}
