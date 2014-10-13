@@ -99,25 +99,4 @@ class sensu_config::sensuclient (
     source  => 'puppet:///modules/sensu_config/check-mem.sh',
     require => File['/etc/sensu/plugins'],
   }
-
-  sensu::check{ 'check_disk':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    require      => File['/etc/sensu/plugins/check-disk.rb'],
-  }
-
-  sensu::check{ 'check_cpu':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    require      => File['/etc/sensu/plugins/check-cpu.rb'],
-  }
-
-  sensu::check{ 'check_mem':
-    command      => '/etc/sensu/plugins/check-mem.sh',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    require      => File['/etc/sensu/plugins/check-mem.sh'],
-  }
 }
