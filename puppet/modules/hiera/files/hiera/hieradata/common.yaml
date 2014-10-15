@@ -37,9 +37,8 @@ packages::install:
   - 'bzip2'
   - 'wget'
   - 'nmap'
-  - 'mc'
+#  - 'mc'
   - 'lynx'
-  - 'logwatch'
   - 'traceroute'
   - 'bc'
   - 'xfsprogs'
@@ -52,6 +51,8 @@ packages::install:
   - 'lvm2'
   - 'numactl'
   - 'dos2unix'
+#Removed because installs postfix/exim
+#  - 'logwatch'
 
 packages::versioned:
   deep_merge:
