@@ -63,6 +63,7 @@ packages::install:
   - 'logwatch'
   - 'htop'
   - 'python-psutil'
+  - 'fail2ban'
 
 packages::remove:
   - 'apparmor'
