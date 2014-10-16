@@ -30,7 +30,7 @@ set +x
 
 SCRIPT_PWD=$(dirname $0)
 
-install -d -m 750 /opt/config/fog -o puppet -g puppet
+install -d -m 750 /opt/config/fog -o puppet -g puppet || mkdir -p /opt/config/fog
 
 HPCLOUD_PRIV="$(GetJson /meta-boot.js hpcloud_priv)"
 COMPUTE_TENANT_NAME="$(GetJson /meta-boot.js tenant_name)" # Used for Compute
