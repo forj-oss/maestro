@@ -8,7 +8,6 @@ var check_grav = require('../../../node_modules/check-grav/check-grav');
 var blueprint_utils = require('../../../node_modules/blueprint/blueprint');
 module.exports = {
   authenticate: function(req, callback){
-    //uid=test_mail@hp.com,ou=people,o=forj.io,dc=14m,dc=dev,dc=forj,dc=io
     
     //Username = email
     var user = req.body.username;
@@ -20,13 +19,14 @@ module.exports = {
           callback(err, null, null);
         }else{
           
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
           var client = ldap.createClient({
             url: account.server
           });
           
           async.series({
             authenticated: function(callback_){
-              client.bind('uid='+user+'ou=people,'+account.dit, password, function(err_bind){
+              client.bind('uid='+user+',ou=people,'+account.dit, password, function(err_bind){
                 if(err_bind){
                   callback_(null, false);
                 }else{
@@ -71,7 +71,8 @@ module.exports = {
                   if(members.length < 0){
                     callback_(null, false);
                   }else{
-                    callback(null, members.indexOf('uid=' + user + ',ou=people,' + account.dit));
+                    var is_adm = (members.indexOf(user) !== -1) ? true : false;
+                    callback_(null, is_adm);
                   }
                 }
               });
@@ -81,31 +82,18 @@ module.exports = {
             }
           }, function(async_err, async_result) {
             if (async_err) {
-              console.error(async_err.message)
+              console.error('Async error: ' + async_err.message);
+              callback(async_err, null, null);
             }else{
               if(async_result.kit_has_admin === false){
                 
-                // CREATE ADMIN
-                kit_ops.create_kit_admin(async_result.email, function(err_ca, result_ca){
-                  if(err_ca){
-                    async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
-                    callback(null, null, async_result);
-                  }else{
-                    if(result_ca){
-                      async_result.is_admin = true;
-                    }
-                    async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
-                    callback(null, null, async_result);
-                  }
-                });
-                //
+                async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
+                callback(null, null, async_result);
                 
               }else{
                 
-                //
                 async_result.project_visibility = projectsVisibility(async_result.is_admin, async_result.authenticated, req.session.global_manage_projects);
                 callback(null, null, async_result);
-                //
                 
               }
             }
@@ -115,11 +103,8 @@ module.exports = {
         }
       });
     }else{
-      
+      callback('Username has to be a valid email', null, null);
     }
-  },
-  verify: function(req, callback_verify){
-    
   }
 }
 function get_service_account(callback){
@@ -185,6 +170,8 @@ function get_members_of(group, callback){
     if(err){
       callback(err, null);
     }else{
+      
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
       var client = ldap.createClient({
         url: account.server
       })
