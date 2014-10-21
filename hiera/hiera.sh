@@ -53,7 +53,8 @@ function setup_hiera_rhel6 {
   puppet resource package libxml2-devel ensure=present
   puppet resource package libxslt-devel ensure=present
   puppet resource package hiera ensure=installed
-  puppet resource package hiera-puppet ensure=installed
+  #  puppet resource package hiera-puppet ensure=installed
+  gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
 
   }
 
@@ -68,6 +69,7 @@ function setup_hiera_rhel7 {
   puppet resource package libxslt-devel ensure=present
   puppet resource package hiera ensure=installed
   #  puppet resource package hiera-puppet ensure=installed
+  gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
 
   }
 

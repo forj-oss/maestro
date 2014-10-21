@@ -25,6 +25,7 @@ class hiera (
 
   package { 'hiera-puppet':
     ensure   => present,
+    provider => 'gem',
   }
 
   package { 'hiera-eyaml':
