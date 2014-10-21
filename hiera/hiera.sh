@@ -57,6 +57,20 @@ function setup_hiera_rhel6 {
 
   }
 
+function setup_hiera_rhel7 {
+  puppet resource package gcc ensure=present
+  puppet resource package gcc-c++ ensure=present
+  puppet resource package kernel-devel ensure=present
+  puppet resource package make ensure=present
+  puppet resource package ruby-devel ensure=present
+  puppet resource package rubygems ensure=present
+  puppet resource package libxml2-devel ensure=present
+  puppet resource package libxslt-devel ensure=present
+  puppet resource package hiera ensure=installed
+  #  puppet resource package hiera-puppet ensure=installed
+
+  }
+
 function setup_hiera_ubuntu {
   # package requirements
   puppet resource package build-essential ensure=present
@@ -83,6 +97,8 @@ mkdir -p /etc/puppet/hieradata
 
 if is_rhel6; then
     setup_hiera_rhel6
+elif is_rhel7; then
+    setup_hiera_rhel7
 elif is_ubuntu; then
     setup_hiera_ubuntu
 else
