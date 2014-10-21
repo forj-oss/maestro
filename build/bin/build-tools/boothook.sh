@@ -91,7 +91,7 @@ Acquire::https::proxy \"$_PROXY\";
 Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
       fi
       ;;
-    CentOS)
+    CentOS|'CentOS Linux')
       if [ -f /etc/yum.conf ]; then
         grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
         if [ ! $? -eq 0 ]; then
@@ -117,7 +117,7 @@ case  "$(GetOs)" in
                 }') 2>&1
    
    ;;
-   CentOS)
+   CentOS|'CentOS Linux')
    INST_TOOL="$(which yum)"
    exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
                  print POUT;
@@ -264,6 +264,12 @@ case  "$(GetOs)" in
     yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
     yum -y install git wget vim yum-utils
     #yum-config-manager --enable rhel-6-server-optional-rpms
+    # DO NOT RUN UPDATE, it will replace / destroy cloud-init making the machine useless/unaccessible
+    #yum -y update
+    ;;
+  'CentOS Linux')
+    yum -y install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
+    yum -y install git wget vim yum-utils
     # DO NOT RUN UPDATE, it will replace / destroy cloud-init making the machine useless/unaccessible
     #yum -y update
     ;;
