@@ -23,10 +23,10 @@ class maestro::ldap::ldapserver
 
   if $ssl_ca_file_contents != '' and $ssl_cert_file_contents != '' and $ssl_key_file_contents != '' {
     # split fqdn facter (ie. maestro.ys.dev.forj.io) into LDAP dc entries..
-    # result: dc=maestro,dc=ys,dc=dev,dc=forj,dc=io
+    # result: dc=ys
     $suffix = split($::fqdn,'.')
     class { 'ldap::server::master':
-      suffix           => "dc=${$suffix[0]},dc=${$suffix[1]},dc=${$suffix[2]},dc=${$suffix[3]},dc=${$suffix[4]}",
+      suffix           => "dc=${$suffix[1]}",
       rootpw           => '$Changeme01',
       ssl              => true,
       ssl_ca           => 'ca.pem',
