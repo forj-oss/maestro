@@ -42,18 +42,6 @@ class sensu_config::sensuserver (
     fail('ERROR! rabbit::sensuserver::password is required.')
   }
 
-  rabbitmq_vhost { $sensu_vhost:
-    ensure  => present,
-  }->
-  rabbitmq_user { $sensu_user:
-    ensure   => present,
-    password => $password,
-  }->
-  rabbitmq_user_permissions { "${sensu_user}@${sensu_vhost}":
-    configure_permission => '.*',
-    read_permission      => '.*',
-    write_permission     => '.*',
-  }->
   rabbitmq_user_permissions { "${rabbit_admin}@${sensu_vhost}":
     configure_permission => '.*',
     read_permission      => '.*',
