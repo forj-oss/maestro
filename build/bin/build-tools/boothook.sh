@@ -20,7 +20,7 @@ function GetJson
 import json
 import os.path
 import sys
- 
+
 if os.path.isfile('$1'):
    json_d=open('$1').read()
    data=json.loads(json_d)
@@ -52,86 +52,6 @@ def linux_distribution():
 print(str(platform.linux_distribution()[0]))
 "
 }
-# Proxy management
-# This has to happen before any install is attempted.
-_PROXY="$(GetJson $PREFIX/meta.js webproxy)"
-if [ -n "$_PROXY" ] ; then
-
-  if [ "$(grep  http_proxy /etc/environment)" = "" ] ; then
-    echo "export http_proxy=$_PROXY
-export https_proxy=$_PROXY
-export ftp_PROXY=$_PROXY" >> /etc/environment
-  fi
-  if  [ "$(grep  HTTP_PROXY /etc/environment)" = "" ] ; then
-    echo "export HTTP_PROXY=$_PROXY
-export HTTPS_PROXY=$_PROXY
-export FTP_PROXY=$_PROXY" >> /etc/environment
-  fi
-  if [ "$(grep  no_proxy /etc/environment)" = "" ] ; then
-    echo "
-export no_proxy=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
-  fi
-  if [ "$(grep  NO_PROXY /etc/environment)" = "" ] ; then
-    echo "
-export NO_PROXY=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
-  fi
-  # Need to set GIT_SSL_NO_VERIFY as the Forj ssl is self signed.
-  if [ "$(grep  GIT_SSL_NO_VERIFY /etc/environment)" = "" ] ; then
-    echo "
-export GIT_SSL_NO_VERIFY=true" >> /etc/environment
-  fi  
-source /etc/environment
-
-  case  "$(GetOs)" in
-    Ubuntu)
-
-      if [ ! -f /etc/apt/apt.conf ]; then
-      echo "Acquire::http::proxy \"$_PROXY\";
-Acquire::https::proxy \"$_PROXY\";
-Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
-      fi
-      ;;
-    CentOS|'CentOS Linux')
-      if [ -f /etc/yum.conf ]; then
-        grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
-        if [ ! $? -eq 0 ]; then
-          echo "proxy=$_PROXY" >>/etc/yum.conf
-        fi
-      fi
-      ;;
-    *)
-      ;;
-  esac
-  set +x
-fi
-
-
-# Install log requirement.
-case  "$(GetOs)" in
-  Ubuntu)
-   INST_TOOL="$(which apt-get)"
-   exec 6>&1 > >( awk '{ POUT=$0;
-                 print POUT;
-                 print POUT >> "/var/log/cloud-init.log"
-                 fflush("");
-                }') 2>&1
-   
-   ;;
-   CentOS|'CentOS Linux')
-   INST_TOOL="$(which yum)"
-   exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
-                 print POUT;
-                 print POUT >> "/var/log/cloud-init.log"
-                 fflush("");
-                }') 2>&1
-   ;;
-   *)
-   INST_TOOL="N/A"
-   ;;
-esac
-
-
-
 
 echo "################# 1st sequence : user_data BOOTHOOK Start #################"
 
@@ -179,12 +99,12 @@ fi
 _test_data="$(GetJson $PREFIX/meta.js cdksite)"
 if [ "$_test_data" = "" ]
 then
-  echo '{"network_name":"private","gitbranch":"master","eroip":"127.0.0.1","PUPPET_DEBUG":"True", 
-"image_name":"Ubuntu Precise 12.04.4 LTS Server 64-bit 20140414 (Rescue Image)","dns_tenantid":"10522083304212", 
-"cdkdomain":"dev.forj.io","key_name":"forj","blueprint":"redstone","hpcloud_os_region":"region-a.geo-1", 
-"erodomain":"dev.forj.io","erosite":"maestro.hard","cdksite":"maestro.hard","security_groups":"default","tenant_name":"Dev-V1-CDK", 
-"dns_zone":"region-a.geo-1", 
-"hpcloud_priv":"base-64 encoded credentials" 
+  echo '{"network_name":"private","gitbranch":"master","eroip":"127.0.0.1","PUPPET_DEBUG":"True",
+"image_name":"Ubuntu Precise 12.04.4 LTS Server 64-bit 20140414 (Rescue Image)","dns_tenantid":"10522083304212",
+"cdkdomain":"dev.forj.io","key_name":"forj","blueprint":"redstone","hpcloud_os_region":"region-a.geo-1",
+"erodomain":"dev.forj.io","erosite":"maestro.hard","cdksite":"maestro.hard","security_groups":"default","tenant_name":"Dev-V1-CDK",
+"dns_zone":"region-a.geo-1",
+"hpcloud_priv":"base-64 encoded credentials"
 }' > $PREFIX/meta.js
   echo "WARNING! $PREFIX/meta.js not found. HARDCODING DATA"
 fi
@@ -200,6 +120,85 @@ then
    echo "Boot image invalid. Cannot go on!"
    exit 1
 fi
+
+
+# Proxy management
+# This has to happen before any install is attempted.
+_PROXY="$(GetJson $PREFIX/meta.js webproxy)"
+if [ -n "$_PROXY" ] ; then
+
+  if [ "$(grep  http_proxy /etc/environment)" = "" ] ; then
+    echo "export http_proxy=$_PROXY
+export https_proxy=$_PROXY
+export ftp_PROXY=$_PROXY" >> /etc/environment
+  fi
+  if  [ "$(grep  HTTP_PROXY /etc/environment)" = "" ] ; then
+    echo "export HTTP_PROXY=$_PROXY
+export HTTPS_PROXY=$_PROXY
+export FTP_PROXY=$_PROXY" >> /etc/environment
+  fi
+  if [ "$(grep  no_proxy /etc/environment)" = "" ] ; then
+    echo "
+export no_proxy=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
+  fi
+  if [ "$(grep  NO_PROXY /etc/environment)" = "" ] ; then
+    echo "
+export NO_PROXY=localhost,127.0.0.1,10.0.0.0/16,169.254.169.254" >> /etc/environment
+  fi
+  # Need to set GIT_SSL_NO_VERIFY as the Forj ssl is self signed.
+  if [ "$(grep  GIT_SSL_NO_VERIFY /etc/environment)" = "" ] ; then
+    echo "
+export GIT_SSL_NO_VERIFY=true" >> /etc/environment
+  fi
+source /etc/environment
+
+  case  "$(GetOs)" in
+    Ubuntu)
+
+      if [ ! -f /etc/apt/apt.conf ]; then
+      echo "Acquire::http::proxy \"$_PROXY\";
+Acquire::https::proxy \"$_PROXY\";
+Acquire::ftp::proxy \"$_PROXY\";"  >/etc/apt/apt.conf
+      fi
+      ;;
+    CentOS|'CentOS Linux')
+      if [ -f /etc/yum.conf ]; then
+        grep "proxy=$_PROXY" /etc/yum.conf > /dev/null 2<&1
+        if [ ! $? -eq 0 ]; then
+          echo "proxy=$_PROXY" >>/etc/yum.conf
+        fi
+      fi
+      ;;
+    *)
+      ;;
+  esac
+  set +x
+fi
+
+
+# Install log requirement.
+case  "$(GetOs)" in
+  Ubuntu)
+   INST_TOOL="$(which apt-get)"
+   exec 6>&1 > >( awk '{ POUT=$0;
+                 print POUT;
+                 print POUT >> "/var/log/cloud-init.log"
+                 fflush("");
+                }') 2>&1
+
+   ;;
+   CentOS|'CentOS Linux')
+   INST_TOOL="$(which yum)"
+   exec 6>&1 > >( awk '{ POUT=sprintf("%s - %s",strftime("%F %X %Z",systime()),$0);
+                 print POUT;
+                 print POUT >> "/var/log/cloud-init.log"
+                 fflush("");
+                }') 2>&1
+   ;;
+   *)
+   INST_TOOL="N/A"
+   ;;
+esac
 
 
 # hostname, and domain settings have to be fixed to make puppet master/agent running together.
