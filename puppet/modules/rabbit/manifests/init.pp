@@ -28,15 +28,29 @@ case $operatingsystem {
 # Installs RabbitMQ
 #
 class rabbit (
+  $version  = hiera('rabbit::version','3.4.0'),
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
   $port     = hiera('rabbit::port','5672'),
-  $vhost    = hiera('rabbit::maestro_vhost','/maestro')
+  $vhost    = hiera('rabbit::maestro_vhost','maestro')
 )
 {
+  validate_string($version)
+  validate_string($admin)
+  validate_string($password)
+  validate_string($vhost)
+
+  if !is_integer($port) { fail('rabbit::port must be an integer') }
+
+  if $password == '' {
+    fail('ERROR! rabbit::password is required.')
+  }
+
   class { 'rabbitmq':
     port              => $port,
     delete_guest_user => true,
+    package_ensure    => $version,
+    version           => $version,
   }->
   rabbitmq_user { $admin:
     ensure   => present,
