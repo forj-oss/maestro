@@ -16,7 +16,7 @@
 classes:
   - selinux
   - jimador::manage
-# - sensu_config::sensuclient
+  - sensu_config::sensuclient
 
 maestro::backup::maestro_backup_server: '%{::eroip}'
 

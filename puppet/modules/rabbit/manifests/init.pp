@@ -28,7 +28,7 @@ case $operatingsystem {
 # Installs RabbitMQ
 #
 class rabbit (
-  $version  = hiera('rabbit::version','3.4.0'),
+  $version  = hiera('rabbit::version','3.4.0-1'),
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
   $port     = hiera('rabbit::port','5672'),
