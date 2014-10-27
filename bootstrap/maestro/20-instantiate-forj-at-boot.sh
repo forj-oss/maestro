@@ -25,6 +25,7 @@ else
 fi
 
 BLUEPRINT="$(GetJson /meta-boot.js blueprint)"
+GITBRANCH="$(GetJson /meta-boot.js gitbranch master)"
 
 declare -A TEST_BOX_REPOS
 Load_test-box_repos
@@ -41,11 +42,11 @@ then # TODO: Support to receive a different layout then default one.
    if [ "${TEST_BOX_REPOS[$BLUEPRINT]}" = "" ]
    then
       echo "Call of : bp.py --install \"$BLUEPRINT\" -v"
-      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v
+      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" --branch $GITBRANCH -v
    else
       # TODO: Be able to pass all TEST_BOX list to bp.py and wait if needed.
       echo "Test-box: use bp.py with test-box '$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}'"
-      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" -v --test-box "$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}"
+      /opt/config/production/git/maestro/tools/bin/bp.py --install "$BLUEPRINT" --branch $GITBRANCH -v --test-box "$BLUEPRINT:${TEST_BOX_REPOS[$BLUEPRINT]}"
    fi
    #puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test4.log
    MODPATH="$(grep modulepath /etc/puppet/puppet.conf | sed 's/\$environment/production/g

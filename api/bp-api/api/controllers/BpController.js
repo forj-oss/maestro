@@ -34,9 +34,6 @@
   var config_module = require('config_module/config_module');
   
 module.exports = {
-    
-  
-
 
   /**
    * Overrides for the settings in `config/controllers.js`
