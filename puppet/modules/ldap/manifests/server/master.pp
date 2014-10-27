@@ -56,10 +56,10 @@ class ldap::server::master(
   }
 
   service { $ldap::params::service:
-    ensure     => running,
-    enable     => true,
-    pattern    => $ldap::params::server_pattern,
-    require    => [
+    ensure  => running,
+    enable  => true,
+    pattern => $ldap::params::server_pattern,
+    require => [
       Package[$ldap::params::server_package],
       File["${ldap::params::prefix}/${ldap::params::server_config}"],
       ]

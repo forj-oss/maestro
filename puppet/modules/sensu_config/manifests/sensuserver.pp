@@ -70,48 +70,48 @@ class sensu_config::sensuserver (
   }
 
   sensu::check{ 'disk-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
   }
 
   sensu::check{ 'cpu-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
   }
 
   sensu::check{ 'memory-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
   }
 
   sensu::check{ 'check-disk':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
   }
 
   sensu::check{ 'check-cpu':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
   }
 
   sensu::check{ 'check-mem':
-    command      => '/etc/sensu/plugins/check-mem.sh',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
+    command     => '/etc/sensu/plugins/check-mem.sh',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
   }
 
 }
