@@ -17,7 +17,7 @@
 #
 
 class sensu_config::sensuclient (
-  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','/sensu'),
+  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
   $password       = hiera('rabbit::password'),
   $rabbitmq_host  = hiera('rabbit::host',$::eroip),
   $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
