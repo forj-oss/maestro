@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+usage() {
+    echo "Usage: $0 root_password" 1>&2
+    exit 1
+}
+
+main() {
+  root_pwd=$1
+  if [ -z "$root_pwd" ] ; then
+    usage
+  fi
+
+  slappasswd_cmd=$(which slappasswd)
+  if [ -z "$slappasswd_cmd" ] ; then
+    echo "Error: slappasswd is not installed."
+    exit 1
+  fi
+
+  pwd=$("$slappasswd_cmd" -h '{SHA}' -s "$root_pwd")
+
+  if [ -z "$pwd" ] ; then
+    echo "Error: slapppasswd cmd failed"
+    exit 1
+  fi
+
+  echo "dn: olcDatabase={1}hdb,cn=config" > <%= @pwdldif %>
+  echo "replace: olcRootPW" >> <%= @pwdldif %>
+  echo "olcRootPW: ${pwd}" >> <%= @pwdldif %>
+  ldapmodify -Y EXTERNAL -H ldapi:/// -f <%= @pwdldif %>
+}
+
+main "$@"

@@ -26,7 +26,7 @@ classes:
   - maestro::node_vhost_lookup
   - gardener
   - sysadmin_config::manage_servers
-  - maestro::ldap::ldapserver
+  - ldap_config
   - maestro::redis::redisserver
   - rabbit
   - sensu_config::sensuserver
@@ -102,7 +102,6 @@ maestro::key_name: '%{::key_name}'
 maestro::network_name: '%{::network_name}'
 maestro::security_groups: '%{::security_groups}'
 maestro::meta_data: 'http_proxy=%{::webproxy}'
-maestro::ldap::ldapserver::certs_dir: '/opt/config/cacerts'
 
 # maestro ui /app configuration
 maestro::app::setup::revision: '%{::gitbranch}'

@@ -175,4 +175,8 @@ mysql_root_password='changeme'
 rabbitmq_password='changeme'
 /usr/local/bin/eyaml encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
 
+ldap_password='changeme'
+/usr/local/bin/eyaml encrypt -l 'ldap_config::rootpw' -s $ldap_password | grep "ldap_config::rootpw: ENC" >> $eyaml_file
+
+
 echo "################# Hiera eyaml Installation done, step 2/2 done  ###################"
