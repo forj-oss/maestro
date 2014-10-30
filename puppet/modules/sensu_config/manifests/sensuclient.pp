@@ -102,4 +102,31 @@ class sensu_config::sensuclient (
     source  => 'puppet:///modules/sensu_config/check-mem.sh',
     require => File['/etc/sensu/plugins'],
   }
+
+  file { '/etc/sensu/plugins/memory-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/memory-usage.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/disk-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/disk-usage.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/cpu-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/cpu-usage.sh',
+    require => File['/etc/sensu/plugins'],
+  }
 }

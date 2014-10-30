@@ -145,4 +145,31 @@ class sensu_config::sensuserver (
     handlers     => 'redis-handler',
   }
 
+  sensu::check{ 'disk-usage':
+    command      => '/etc/sensu/plugins/disk-usage.sh',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+    handlers     => 'redis-handler',
+  }
+
+  sensu::check{ 'cpu-usage':
+    command      => '/etc/sensu/plugins/cpu-usage.sh',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+    handlers     => 'redis-handler',
+  }
+
+  sensu::check{ 'memory-usage':
+    command      => '/etc/sensu/plugins/memory-usage.sh',
+    subscribers  => $subscriptions,
+    interval     => '10',
+    standalone   => false,
+    type         => 'metric',
+    handlers     => 'redis-handler',
+  }
+
 }

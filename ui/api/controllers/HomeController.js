@@ -35,6 +35,7 @@
  var kit_ops = require('kit-ops/kit-ops');
  var backup_utils = require('backup/backup');
  var jsonPath = require('JSONPath');
+ var metrics = require('metrics/metrics');
 
 module.exports = {
 
@@ -114,6 +115,33 @@ module.exports = {
           jsonPath: function(callback){
             var jsonPath = require('JSONPath');
             callback(null, jsonPath); // Telling async that we are done
+          },
+          cpu: function(callback){  // Cpu Metrics
+            metrics.getCpu(app, function (error, data) {
+              if(error){
+                callback(error); //Error
+              } else {
+                callback(null, data); //Success
+              }
+            });
+          },
+          memory: function(callback){  // Cpu Metrics
+            metrics.getMemory(app, function (error, data) {
+              if(error){
+                callback(error); //Error
+              } else {
+                callback(null, data); //Success
+              }
+            });
+          },
+          disk: function(callback){  // Cpu Metrics
+            metrics.getDisk(app, function (error, data) {
+              if(error){
+                callback(error); // Error
+              } else {
+                callback(null, data); //Success
+              }
+            });
           },
           backupInfo: function(callback){  // App yaml with backup information
             backup_utils.getBackupInfo(app, function (error, data) {

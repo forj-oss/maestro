@@ -318,9 +318,9 @@
 
 
   $(document).ready(function(){
-    progress('service_cpu', 90, 'new');
-    progress('service_mem', 65, 'new');
-    progress('service_disk', 45, 'new');
+    progress('service_cpu', <%=cpu%>, 'new');
+    progress('service_mem', <%=memory%>, 'new');
+    progress('service_disk', <%=disk%>, 'new');
 
     $('#backup-now-btn').click(function(){
       backup('<%=app%>');
