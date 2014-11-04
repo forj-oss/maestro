@@ -59,5 +59,8 @@ module.exports.env = {
     },
     fog: {
       path: process.env['FOG_RC'] !== undefined ? process.env['FOG_RC'] : '/opt/config/fog/cloud.fog'
+    },
+    config: {
+        location: '/opt/config/production/config.json'
     }
 };
