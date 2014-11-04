@@ -513,6 +513,7 @@ git show 6687e07c859e2d3ff6136a5745d8932fe441a60a</pre>
                     <pre>wget --no-check-certificate -e use_proxy=yes -e https_proxy=https://web-proxy:8080  https://<%=gerrit_ip%>/tools/hooks/commit-msg -O .git/hooks/commit-msg</pre>
                     <p>Finalize the configuration by making the commit hook executable and setup the email address</p>
                     <pre>chmod u+x .git/hooks/commit-msg
+                    <p>Change your user and email to match your <a href="https://<%=gerrit_ip%>/#/settings">gerrit settings</a></p>
 git config user.email "demouser@localhost"</pre>
                 </div>
             </div>
