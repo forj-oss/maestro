@@ -318,9 +318,9 @@
 
 
   $(document).ready(function(){
-    progress('service_cpu', <%=cpu%>, 'new');
-    progress('service_mem', <%=memory%>, 'new');
-    progress('service_disk', <%=disk%>, 'new');
+    <% if (cpu && cpu!='-1'){ %>progress('service_cpu', <%=cpu%>, 'new');<% } %>
+    <% if (memory && memory!='-1'){ %>progress('service_mem', <%=memory%>, 'new');<% } %>
+    <% if (disk && disk!='-1'){ %>progress('service_disk', <%=disk%>, 'new');<% } %>
 
     $('#backup-now-btn').click(function(){
       backup('<%=app%>');
