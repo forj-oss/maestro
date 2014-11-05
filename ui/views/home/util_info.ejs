@@ -127,18 +127,24 @@
             <a href="#">Monitoring Page</a>
           </div>
           <div class="row">
+            <% if (cpu!= undefined) { %>
             <div style="display: inline-block;margin-right: 5px;">
               <span style="display: block;">CPU</span>
               <canvas id="service_cpu" data-current="90" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
             </div>
+            <% } %>
+            <% if (memory!= undefined) { %>
             <div style="display: inline-block;margin-right: 5px;">
               <span style="display: block;">Memory</span>
               <canvas id="service_mem" data-current="65" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
             </div>
+            <% } %>
+            <% if (disk!= undefined) { %>
             <div style="display: inline-block;margin-right: 5px;">
               <span style="display: block;">Disk</span>
               <canvas id="service_disk" data-current="45" data-bg-color="#415b6c" data-font-color="#FFFFFF" width="75" height="75"></canvas>
             </div>
+            <% } %>
           </div>
           <div class="row">
             <h5 class="service-details">Details</h5>
@@ -318,9 +324,10 @@
 
 
   $(document).ready(function(){
-    <% if (cpu && cpu!='-1'){ %>progress('service_cpu', <%=cpu%>, 'new');<% } %>
-    <% if (memory && memory!='-1'){ %>progress('service_mem', <%=memory%>, 'new');<% } %>
-    <% if (disk && disk!='-1'){ %>progress('service_disk', <%=disk%>, 'new');<% } %>
+    <% if (cpu!== undefined) { %> progress('service_cpu', <%= cpu %>, 'new'); <% } %>
+    <% if (memory!== undefined) { %> progress('service_mem', <%= memory %>, 'new'); <% } %>
+    <% if (disk!== undefined) { %> progress('service_disk', <%= disk %>, 'new'); <% } %>
+
 
     $('#backup-now-btn').click(function(){
       backup('<%=app%>');
