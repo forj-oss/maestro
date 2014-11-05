@@ -14,5 +14,5 @@
 #    limitations under the License.
 #
 #
-# Memory Usage percentage.
-top -bn 2 -d 0.01 | grep 'Cpu.s.' | tail -n 1 | gawk '{print $2+$4+$6}'
+# CPU Usage percentage.
+top -bn `nproc` -d 0.01 | grep 'Cpu.s.' | tail -n 1 | gawk '{print $2+$4+$6}'
