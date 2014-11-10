@@ -1,0 +1,26 @@
+{
+  "name": "maestro-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node maestro-api",
+    "test": "make test"
+  },
+  "dependencies": {
+    "acl": "0.4.x",
+    "util": "0.10.3",
+    "bunyan": "1.0.x",
+    "lodash": "*",
+    "nconf": "0.6.x",
+    "request": "2.42.x",
+    "restify": "2.8.x",
+    "redis": "~0.12.1"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-apidoc": "^0.7.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "mocha": "^1.17.1",
+    "supertest": "^0.13.0"
+  }
+}
