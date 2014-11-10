@@ -31,33 +31,20 @@
 
 class maestro::app::setup(
   $user     = hiera('maestro::app::user','puppet'),
-  $app_dir  = undef,
+  $app_dir  = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
   $revision = hiera('maestro::app::setup::revision','master'),
 ){
   require maestro::app::kits_db
   require maestro::requirements
 
-  if $app_dir == undef
-  {
-    $app_dir_use = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app")
-  } else
-  {
-    $app_dir_use = $app_dir
-  }
+  validate_string($user)
+  validate_string($app_dir)
+  validate_string($revision)
 
-  if $revision == '' or $revision == undef
-  {
-    $vcs_revision = 'master'
-    warning('Revision is not configured, defaulting to master.  Please set maestro::app::setup::revision')
-  } else
-  {
-    $vcs_revision = $revision
-  }
-
-  vcsrepo {"${app_dir_use}/forj.config":
+  vcsrepo {"${app_dir}/forj.config":
     ensure   => latest,
     provider => 'git',
-    revision => $vcs_revision,
+    revision => $revision,
     source   => 'https://review.forj.io/p/forj-ui/forj.config',
     require  => [ Package['optimist'],
                   Package['restify'],
@@ -68,17 +55,17 @@ class maestro::app::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'kitops.js':
-    script_dir => "${app_dir_use}/forj.config",
+    script_dir => "${app_dir}/forj.config",
     user       => $user,
     require    => [  Nodejs_wrap::Pm2instance['mon-api.js'],
                       Nodejs_wrap::Pm2instance['app.js'],
                       Nodejs_wrap::Pm2instance['bp-app.js']
                     ],
   }
-  vcsrepo {"${app_dir_use}/forj.mon":
+  vcsrepo {"${app_dir}/forj.mon":
     ensure   => latest,
     provider => 'git',
-    revision => $vcs_revision,
+    revision => $revision,
     source   => 'https://review.forj.io/p/forj-ui/forj.mon',
     require  => [ Package['optimist'],
                   Package['restify'],
@@ -89,7 +76,7 @@ class maestro::app::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'mon-api.js':
-    script_dir => "${app_dir_use}/forj.mon",
+    script_dir => "${app_dir}/forj.mon",
     user       => $user,
   }
 }

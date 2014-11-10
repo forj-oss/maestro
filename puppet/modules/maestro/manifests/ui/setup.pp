@@ -29,33 +29,20 @@
 
 class maestro::ui::setup(
   $user        = hiera('maestro::ui::setup::user','puppet'),
-  $app_dir     = undef,
+  $app_dir     = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
   $revision    = hiera('maestro::ui::setup::revision','master'),
 ){
   require maestro::app::kits_db
   require maestro::requirements
 
-  if $app_dir == undef
-  {
-    $app_dir_use = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app")
-  } else
-  {
-    $app_dir_use = $app_dir
-  }
+  validate_string($user)
+  validate_string($app_dir)
+  validate_string($revision)
 
-  if $revision == '' or $revision == undef
-  {
-    $vcs_revision = 'master'
-    warning('Revision is not configured, defaulting to master.  Please set maestro::ui::setup::revision')
-  } else
-  {
-    $vcs_revision = $revision
-  }
-
-  vcsrepo {"${app_dir_use}/maestro":
+  vcsrepo {"${app_dir}/maestro":
     ensure   => latest,
     provider => 'git',
-    revision => $vcs_revision,
+    revision => $revision,
     source   => 'https://review.forj.io/p/forj-oss/maestro',
     require  => [ Package['JSONPath'],
                   Package['optimist'],
@@ -69,11 +56,15 @@ class maestro::ui::setup(
                 ]
   } ->
   nodejs_wrap::pm2instance{'app.js':
-    script_dir => "${app_dir_use}/maestro/ui/",
+    script_dir => "${app_dir}/maestro/ui/",
+    user       => $user,
+  } ->
+  nodejs_wrap::pm2instance{'maestro-api.js':
+    script_dir => "${app_dir}/maestro/api/maestro-api/",
     user       => $user,
   } ->
   nodejs_wrap::pm2instance{'bp-app.js':
-      script_dir => "${app_dir_use}/maestro/api/bp-api/",
+      script_dir => "${app_dir}/maestro/api/bp-api/",
       user       => $user,
   } ->
   a2mod { ['proxy_http','proxy']:
@@ -86,7 +77,7 @@ class maestro::ui::setup(
         template   => 'maestro/maestro_vhost.erb',
         servername => 'localhost',
   } ->
-  file { "${app_dir_use}/maestro/api/bp-api/config/config.json":
+  file { "${app_dir}/maestro/api/bp-api/config/config.json":
     ensure => 'link',
     target => "/opt/config/${::settings::environment}/config.json",
     owner  => $user,

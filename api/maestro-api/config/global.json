@@ -16,7 +16,7 @@
     "db": 1
   },
   "Server": {
-    "Port": 8080,
+    "Port": 8087,
     "Name": "maestro-api",
     "DefaultVersion": "1.0.0",
     "Acceptable": [ "application/json" ],
