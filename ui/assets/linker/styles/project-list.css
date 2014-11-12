@@ -1,0 +1,64 @@
+.project{
+  margin-bottom: 15px;
+  text-align: center;
+  vertical-align: bottom;
+  min-height: 175px;
+  max-width: 175px;
+  min-width: 175px;
+  overflow: hidden;
+  background-color: #1D4E6F;
+  float: left;
+  color: #FFFFFF;
+  margin-right: 15px;
+}
+.project label{
+  line-height: 175px;
+  font-weight: 400;
+  color: #FFFFFF;
+  vertical-align: bottom;
+}
+.projects_list{
+  margin-left: -10px;
+  color: #FFFFFF;
+  vertical-align: bottom;
+}
+.hastip + .tooltip > .tooltip-inner {
+    background-color: #34546b;
+    color: #fff;
+    border: 1px solid #1d4e6f;
+    padding: 10px;
+    border-radius: 0em;
+}
+
+.hastip + .tooltip.top > .tooltip-arrow{
+    bottom:0;
+    left:50%;
+    margin-left:-5px;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:5px solid #1d4e6f;
+}
+.hastip + .tooltip.left > .tooltip-arrow{
+    top:50%;
+    right:0;
+    margin-top:-5px;
+    border-top:5px solid transparent;
+    border-bottom:5px solid transparent;
+    border-left:5px solid #1d4e6f;
+}
+.hastip + .tooltip.bottom > .tooltip-arrow{
+    top:0;
+    left:50%;
+    margin-left:-5px;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-bottom:5px solid #1d4e6f;
+}
+.hastip + .tooltip.right > .tooltip-arrow{
+    top:50%;
+    left:0;
+    margin-top:-5px;
+    border-top:5px solid transparent;
+    border-bottom:5px solid transparent;
+    border-right:5px solid #1d4e6f;
+}

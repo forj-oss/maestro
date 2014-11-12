@@ -24,19 +24,54 @@
       <li>The person reviewing and approving the project creation must be part of the 'forj-core' Gerrit group; Please go to Gerrit >Admin > Groups > forj-core and add your user to the forj-core group</li>
     </ul>
   </div>
+    <% if (projects_list && projects_list.length > 0){ %>
+      <div class="row">
+        <div style="margin-top: 20px; margin-left: 30px; font-size: 16px; font-family: 'Open Sans', sans-serif !important; !important;"><b><%= projects_list.length-1 %></b> Projects</div>
+      </div>
+    <% } %>
   <ul id="og-grid" class="og-grid">
-    <li>
+    <li style="display:none;">
       <a class="tool-view" href="#" data-largesrc="/images/new_project.png" data-tool-dname="Create Project" data-tool="create project" style="background-color: #FFFFFF !important;">
         <img src="/images/new_project.png"/>
       </a>
       <span class="tool-desc-name" href="#" style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;">Create Project</span>
     </li>
+    <% if (gerritIp != null){ %>
+      <% for (i=0; i<projects_list.length-1; i++){ %>
+        <% if (projects_list[i].length > 17) { %>
+          <li style="display:none;">
+            <a class="hastip" href="https://<%=gerritIp%>/#/admin/projects/<%= projects_list[i] %>" style="background-color: #FFFFFF !important;" data-toggle="tooltip" title data-original-title="<%= projects_list[i] %>">
+              <img src="/images/project1_png.png"/>
+            </a>
+            <span style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%= projects_list[i].substr(0, 14) %>...</span>
+          </li>
+        <% } else { %>
+          <li style="display:none;">
+            <a href="https://<%=gerritIp%>/#/admin/projects/<%= projects_list[i] %>" style="background-color: #FFFFFF !important;">
+              <img src="/images/project1_png.png"/>
+            </a>
+            <span style="float: left;margin-top: -25px;margin-left: 10px;color: white;position: relative; width: auto !important; z-index: 100;"><%= projects_list[i] %></span>
+          </li>
+        <% } %>
+      <% } %>
+    <% } %>
   </ul>
 </div>
 <script src="../js/grid_projects.js"></script>
 <script>
   $(document).ready(function(){
     Grid.init();
+
+    //FadeIn tools on secuence
+    var _delay= 0;
+    $('#og-grid > li').delay(400).each(function() {
+      $(this).delay(_delay).animate({'opacity':'show', 'paddingTop': 10});
+      _delay += 170;
+    });
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
   });
 </script>
 <% } %>
