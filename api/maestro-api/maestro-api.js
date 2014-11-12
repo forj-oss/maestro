@@ -175,9 +175,9 @@ var listen = function( done ) {
   });
 };
 
-if ( !module.parent ) {
-  listen();
-}
+
+listen();
+
 
 /**
  * Export
