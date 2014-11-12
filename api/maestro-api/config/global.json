@@ -59,12 +59,6 @@
         "role": "admin",
         "key": "af7cab0c18e3c3d82b977bcd667d1aeb70ada9fd",
         "secret": "22yrDBjjw9grl3vNZn0a63Ctqf1"
-      },
-      {
-        "name": "miqui2",
-        "role": "user",
-        "key": "qf7cab0c18e3c3d82b977bcd667d1aeb70ada9fd",
-        "secret": "22yrDBjjw9grl3vNZn0a63Ctqf1"
       }
     ],
     "ACL": {
@@ -74,7 +68,7 @@
           "allows": [
             {
               "resources": [
-                "/api/v1.0/metric/:host/:metric#1.0"
+                ""
               ],
               "permissions": "get"
             }
@@ -85,7 +79,8 @@
           "allows": [
             {
               "resources": [
-                "/api/v1.0/ping#1.0.0"
+                "/api/v1.0/ping#1.0",
+                "/api/v1.0/metric/:host/:metric#1.0"
               ],
               "permissions": "get"
             }
