@@ -61,5 +61,11 @@ module.exports.env = {
     },
     config: {
         location: '/opt/config/production/config.json'
+    },
+    api: {
+      metric: {
+        endpoint: 'http://localhost:8087/api/v1.0',
+        max_retry: '4'
+      }
     }
 };
