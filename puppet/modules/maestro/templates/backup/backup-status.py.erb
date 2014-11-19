@@ -38,6 +38,8 @@ import logging
 import logging.handlers
 import yaml
 import os
+import pwd
+import grp
 from datetime import date, datetime
 
 
@@ -274,6 +276,9 @@ def build_backup_status(bck_path, bck_file):
             yaml.dump(ybck_status, stream)
             stream.close()
             oLogging.info('\'%s\' written.', os.path.join(bck_path, bck_file))
+        uid = pwd.getpwnam("<%= @backup_user %>").pw_uid
+        gid = grp.getgrnam("<%= @backup_user %>").gr_gid
+        os.chown(os.path.join(bck_path, bck_file), uid, gid)
 
 
 def UpdateStatus(yStatus, iStatus, sMsg):

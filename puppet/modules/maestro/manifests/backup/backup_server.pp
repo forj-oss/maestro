@@ -20,6 +20,7 @@ class maestro::backup::backup_server (
 {
   include maestro::backup::params
   include maestro::backup::cdn_upload
+  $backup_user = $maestro::backup::params::backup_user
   ## Prepares user
   $home = "${::maestro::backup::params::backup_home}/${::maestro::backup::params::backup_user}"
   user { $::maestro::backup::params::backup_user:
@@ -55,7 +56,7 @@ class maestro::backup::backup_server (
   file { "${maestro::backup::params::box_backup_path}/sbin/backup-status.py":
     ensure  => present,
     owner   => $::maestro::backup::params::backup_user,
-    source  => 'puppet:///modules/maestro/backup/backup-status.py',
+    content => template('maestro/backup/backup-status.py.erb'),
     mode    => '0555',
     require => File[$home],
   }
