@@ -74,10 +74,10 @@ class sensu_config::sensuserver (
   }
 
   exec { 'gem-install-redis':
-    command     => '/opt/sensu/embedded/bin/gem install redis -v 3.1.0',
-    path        => $::path,
-    creates     => '/opt/sensu/embedded/lib/ruby/gems/2.0.0/gems/redis-3.1.0/lib',
-    require     => Package['sensu'],
+    command => '/opt/sensu/embedded/bin/gem install redis -v 3.1.0',
+    path    => $::path,
+    creates => '/opt/sensu/embedded/lib/ruby/gems/2.0.0/gems/redis-3.1.0/lib',
+    require => Package['sensu'],
   }
 
   file { '/etc/sensu/handlers/redis-handler.rb':
@@ -95,81 +95,81 @@ class sensu_config::sensuserver (
   }
 
   sensu::check{ 'disk-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'cpu-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'memory-metrics':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-disk':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
-    handlers     => 'redis-handler',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-cpu':
-    command      => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
-    handlers     => 'redis-handler',
+    command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-mem':
-    command      => '/etc/sensu/plugins/check-mem.sh',
-    subscribers  => $subscriptions,
-    interval     => '60',
-    standalone   => false,
-    handlers     => 'redis-handler',
+    command     => '/etc/sensu/plugins/check-mem.sh',
+    subscribers => $subscriptions,
+    interval    => '60',
+    standalone  => false,
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'disk-usage':
-    command      => '/etc/sensu/plugins/disk-usage.sh',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/etc/sensu/plugins/disk-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'cpu-usage':
-    command      => '/etc/sensu/plugins/cpu-usage.sh',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/etc/sensu/plugins/cpu-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'memory-usage':
-    command      => '/etc/sensu/plugins/memory-usage.sh',
-    subscribers  => $subscriptions,
-    interval     => '10',
-    standalone   => false,
-    type         => 'metric',
-    handlers     => 'redis-handler',
+    command     => '/etc/sensu/plugins/memory-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
 }

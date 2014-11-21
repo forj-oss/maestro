@@ -40,12 +40,12 @@ class sensu_config::sensuclient (
   # Installs on all nodes except on maestro node
   if $::fqdn!='' and $::fqdn !~ /^maestro/{
     class { 'sensu':
-      rabbitmq_password  => $password,
-      rabbitmq_host      => $rabbitmq_host,
-      redis_host         => $redis_host,
-      redis_port         => $redis_port,
-      subscriptions      => $subscriptions,
-      rabbitmq_vhost     => $sensu_vhost,
+      rabbitmq_password => $password,
+      rabbitmq_host     => $rabbitmq_host,
+      redis_host        => $redis_host,
+      redis_port        => $redis_port,
+      subscriptions     => $subscriptions,
+      rabbitmq_vhost    => $sensu_vhost,
     }
   }
 

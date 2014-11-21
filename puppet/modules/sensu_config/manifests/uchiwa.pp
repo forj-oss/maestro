@@ -57,10 +57,10 @@ class sensu_config::uchiwa (
     require    => File["${app_dir}/config.json"],
   }
   exec { 'uchiwa-npm-run-postinstall':
-    command     => 'npm run postinstall',
-    path        => $::path,
-    cwd         => $app_dir,
-    require     => Exec['npm install of uchiwa.js'],
-    creates     => "${app_dir}/public/bower_components",
+    command => 'npm run postinstall',
+    path    => $::path,
+    cwd     => $app_dir,
+    require => Exec['npm install of uchiwa.js'],
+    creates => "${app_dir}/public/bower_components",
   }
 }

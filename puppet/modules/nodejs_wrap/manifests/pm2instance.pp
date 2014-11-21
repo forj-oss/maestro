@@ -58,12 +58,12 @@ define nodejs_wrap::pm2instance(
   case $ensure {
       'present': {
               exec { "${script_dir}-chmod" :
-                command     => "chmod 0755 -R ${script_dir}",
-                path        => $::path,
+                command => "chmod 0755 -R ${script_dir}",
+                path    => $::path,
               }
               exec { "${script_dir}-chown" :
-                command     => "chown -R ${user}:${user} ${script_dir}",
-                path        => $::path,
+                command => "chown -R ${user}:${user} ${script_dir}",
+                path    => $::path,
               }
               # handle the defaults
               $node_environment = ["NODE_PATH=${node_path}" , "NODE_ENV=${node_env}"]

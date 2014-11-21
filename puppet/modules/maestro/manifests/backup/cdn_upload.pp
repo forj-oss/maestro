@@ -26,16 +26,16 @@ class maestro::backup::cdn_upload (
     repeat => 1,
   }
   exec {'tar-mnt-backups':
-    cwd      => $maestro::backup::params::backup_fullpath,
-    command  => "/bin/tar cvf ${maestro::backup::params::maestro_tar_file} ${maestro::backup::params::backup_fullpath}/*",
-    onlyif   => "/usr/bin/test -e ${maestro::backup::params::backup_fullpath}"
+    cwd     => $maestro::backup::params::backup_fullpath,
+    command => "/bin/tar cvf ${maestro::backup::params::maestro_tar_file} ${maestro::backup::params::backup_fullpath}/*",
+    onlyif  => "/usr/bin/test -e ${maestro::backup::params::backup_fullpath}"
   }
   pinascdn {'pinas-upload':
-    ensure      => present,
-    file_name   => $maestro::backup::params::maestro_tar_file,
-    remote_dir  => $::domain,
-    local_dir   => $maestro::backup::params::backup_fullpath,
-    schedule    => 'backup-schedule',
-    subscribe   => Exec['tar-mnt-backups'],
+    ensure     => present,
+    file_name  => $maestro::backup::params::maestro_tar_file,
+    remote_dir => $::domain,
+    local_dir  => $maestro::backup::params::backup_fullpath,
+    schedule   => 'backup-schedule',
+    subscribe  => Exec['tar-mnt-backups'],
   }
 }
