@@ -23,9 +23,10 @@ class unattended_upgrades(
     ensure => $ensure,
   }
 
-  package { 'mailutils':
-    ensure => $ensure,
-  }
+  #This package installs postfix if exim is not installed
+  #package { 'mailutils':
+  #  ensure => $ensure,
+  #}
 
   file { '/etc/apt/apt.conf.d/10periodic':
     ensure  => $ensure,

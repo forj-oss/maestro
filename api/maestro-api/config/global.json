@@ -1,0 +1,92 @@
+{
+  "App": {
+    "Name": "maestro-api"
+  },
+  "API": {
+    "Prefix": "api",
+    "ver1": "1.0",
+    "DefaultVersion": "1.0"
+  },
+  "Data" : {
+    "Flavor": "redis"
+  },
+  "redis": {
+    "port": 6379,
+    "host": "127.0.0.1",
+    "db": 1
+  },
+  "Server": {
+    "Port": 8087,
+    "Name": "maestro-api",
+    "DefaultVersion": "1.0.0",
+    "Acceptable": [ "application/json" ],
+    "ThrottleRate": 50,
+    "ThrottleBurst": 100
+  },
+  "Logging": {
+    "Name": "AuditLogging",
+    "Dir": "./logs/",
+    "Loggly": {
+      "Enabled": false,
+      "Tags": [ "maestro-api" ],
+      "Endpoint": ""
+    }
+  },
+  "CORS": {
+    "Credentials": false,
+    "Origins": [],
+    "Headers": []
+  },
+  "Security": {
+    "UseAuth": true,
+    "UseACL": true,
+    "Scheme": "Custom",
+    "StringToSign": "X-Custom-Date",
+    "AllowAnonymous": true,
+    "Users": [
+      {
+        "name": "anonymous",
+        "role": "anonymous"
+      },
+      {
+        "name": "admin",
+        "role": "admin",
+        "key": "df7cab0c18e3c3d82b977bcd667d1aeb70ada9fd",
+        "secret": "33yrDBjjw9grl3vNZn0a63Ctqf0="
+      },
+      {
+        "name": "miqui",
+        "role": "admin",
+        "key": "af7cab0c18e3c3d82b977bcd667d1aeb70ada9fd",
+        "secret": "22yrDBjjw9grl3vNZn0a63Ctqf1"
+      }
+    ],
+    "ACL": {
+      "Rules": [
+        {
+          "roles": ["admin","user"],
+          "allows": [
+            {
+              "resources": [
+                ""
+              ],
+              "permissions": "get"
+            }
+          ]
+        },
+        {
+          "roles": ["anonymous"],
+          "allows": [
+            {
+              "resources": [
+                "/api/v1.0/ping#1.0",
+                "/api/v1.0/metric/:host/:metric#1.0"
+              ],
+              "permissions": "get"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

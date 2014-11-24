@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Gruntfile
  *
@@ -55,9 +57,9 @@ module.exports = function (grunt) {
     // A simpler boilerplate library for getting you up and running w/ an
     // automatic listener for incoming messages from Socket.io.
     'linker/js/app.js',
-    
+
     'linker/js/modernizr.custom.js',
-    
+
     //We have to load JQuery before bootstrap
     'linker/js/jquery.1.9.1.min.js',
 
@@ -119,8 +121,8 @@ module.exports = function (grunt) {
   jsFilesToInject = jsFilesToInject.map(function (path) {
     return '.tmp/public/' + path;
   });
-  
-  
+
+
   templateFilesToInject = templateFilesToInject.map(function (path) {
     return 'assets/' + path;
   });
@@ -138,6 +140,9 @@ module.exports = function (grunt) {
   grunt.loadTasks(depsPath + '/grunt-contrib-cssmin/tasks');
   grunt.loadTasks(depsPath + '/grunt-contrib-less/tasks');
   grunt.loadTasks(depsPath + '/grunt-contrib-coffee/tasks');
+
+  // custom plugins
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // Project configuration.
   grunt.initConfig({
@@ -206,7 +211,7 @@ module.exports = function (grunt) {
         ]
       }
     },
-    
+
     coffee: {
       dev: {
         options:{
@@ -229,7 +234,10 @@ module.exports = function (grunt) {
         ]
       }
     },
-
+    jshint: {
+      files: ['Gruntfile.js', 'plugins/**/*.js'],
+      options: { jshintrc: '.jshintrc' }
+    },
     concat: {
       js: {
         src: jsFilesToInject,
@@ -416,6 +424,9 @@ module.exports = function (grunt) {
       }
     }
   });
+
+  //custom
+  grunt.registerTask('lint', ['jshint']);
 
   // When Sails is lifted:
   grunt.registerTask('default', [

@@ -33,7 +33,7 @@ case  "$(GetOs)" in
     apt-get install git -yq
     add-apt-repository ppa:saltstack/salt
     ;;
-  CentOS)
+  CentOS|'CentOS Linux')
     ln -s /usr/bin/ruby /usr/bin/ruby1.8
     ln -s /usr/bin/gem /usr/bin/gem1.8
     yum install httpd -y

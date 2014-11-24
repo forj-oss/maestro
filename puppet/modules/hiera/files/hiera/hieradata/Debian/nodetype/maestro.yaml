@@ -28,6 +28,9 @@ classes:
   - sysadmin_config::manage_servers
   - maestro::ldap::ldapserver
   - maestro::redis::redisserver
+  - rabbit
+  - sensu_config::sensuserver
+  - sensu_config::uchiwa
 
 # swap location and default config
 sysadmin_config::swap::swap_file: '/mnt/swapfile'
@@ -116,6 +119,7 @@ sysadmin_config::manage_servers::iptables_public_tcp_ports:
   - 3000
   - 4505
   - 4506
+  - 8087
   - 8080
   - 8139
   - 8140

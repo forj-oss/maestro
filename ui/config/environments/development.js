@@ -58,5 +58,14 @@ module.exports.env = {
     },
     fog: {
       path: process.env['FOG_RC'] !== undefined ? process.env['FOG_RC'] : '/opt/config/fog/cloud.fog'
+    },
+    config: {
+        location: '/opt/config/production/config.json'
+    },
+    api: {
+      metric: {
+        endpoint: 'http://localhost:8087/api/v1.0',
+        max_retry: '4'
+      }
     }
 };

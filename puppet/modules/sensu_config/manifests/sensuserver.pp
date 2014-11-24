@@ -15,15 +15,16 @@
 #
 # Installs SensuServer
 #
-
 class sensu_config::sensuserver (
   $sensu_user     = hiera('sensu_config::sensuserver::sensu_user','sensu'),
-  $sensu_vhost    = hiera('sensu_config::sensuserver::sensu_vhost','/sensu'),
+  $sensu_vhost    = hiera('sensu_config::sensuserver::sensu_vhost','sensu'),
   $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
   $rabbitmq_host  = hiera('rabbit::host','localhost'),
   $rabbitmq_port  = hiera('rabbit::port','5672'),
   $rabbit_admin   = hiera('rabbit::admin','admin'),
   $password       = hiera('rabbit::password'),
+  $redis_port     = hiera('redis::params::port','6379'),
+  $redis_db       = hiera('sensu_config::sensuserver::redis_db','1'),
 )
 {
   require rabbit
@@ -35,8 +36,11 @@ class sensu_config::sensuserver (
   validate_string($rabbitmq_host)
   validate_string($rabbit_admin)
   validate_string($password)
+  validate_string($redis_db)
 
   if !is_integer($rabbitmq_port) { fail('sensu_config::sensuserver::rabbitmq_port must be an integer') }
+
+  if !is_integer($redis_port) { fail('sensu_config::sensuserver::redis_port must be an integer') }
 
   if $password == '' {
     fail('ERROR! rabbit::sensuserver::password is required.')
@@ -69,12 +73,34 @@ class sensu_config::sensuserver (
     rabbitmq_vhost    => $sensu_vhost,
   }
 
+  exec { 'gem-install-redis':
+    command => '/opt/sensu/embedded/bin/gem install redis -v 3.1.0',
+    path    => $::path,
+    creates => '/opt/sensu/embedded/lib/ruby/gems/2.0.0/gems/redis-3.1.0/lib',
+    require => Package['sensu'],
+  }
+
+  file { '/etc/sensu/handlers/redis-handler.rb':
+    ensure  => file,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    content => template('sensu_config/handlers/redis-handler.rb.erb'),
+    require => File['/etc/sensu/handlers'],
+  }
+
+  sensu::handler { 'redis-handler':
+    command => '/opt/sensu/embedded/bin/ruby /etc/sensu/handlers/redis-handler.rb',
+    require => [ File['/etc/sensu/handlers/redis-handler.rb'], Exec['gem-install-redis'] ],
+  }
+
   sensu::check{ 'disk-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
     subscribers => $subscriptions,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'cpu-metrics':
@@ -83,6 +109,7 @@ class sensu_config::sensuserver (
     interval    => '10',
     standalone  => false,
     type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'memory-metrics':
@@ -91,6 +118,7 @@ class sensu_config::sensuserver (
     interval    => '10',
     standalone  => false,
     type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-disk':
@@ -98,6 +126,7 @@ class sensu_config::sensuserver (
     subscribers => $subscriptions,
     interval    => '60',
     standalone  => false,
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-cpu':
@@ -105,6 +134,7 @@ class sensu_config::sensuserver (
     subscribers => $subscriptions,
     interval    => '60',
     standalone  => false,
+    handlers    => 'redis-handler',
   }
 
   sensu::check{ 'check-mem':
@@ -112,6 +142,34 @@ class sensu_config::sensuserver (
     subscribers => $subscriptions,
     interval    => '60',
     standalone  => false,
+    handlers    => 'redis-handler',
+  }
+
+  sensu::check{ 'disk-usage':
+    command     => '/etc/sensu/plugins/disk-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
+  }
+
+  sensu::check{ 'cpu-usage':
+    command     => '/etc/sensu/plugins/cpu-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
+  }
+
+  sensu::check{ 'memory-usage':
+    command     => '/etc/sensu/plugins/memory-usage.sh',
+    subscribers => $subscriptions,
+    interval    => '10',
+    standalone  => false,
+    type        => 'metric',
+    handlers    => 'redis-handler',
   }
 
 }

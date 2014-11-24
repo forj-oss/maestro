@@ -18,6 +18,7 @@
 ---
 classes:
   - jimador::manage
+  - sensu_config::sensuclient
 
 maestro::backup::maestro_backup_server: '%{::eroip}'
 
@@ -44,9 +45,7 @@ packages::install:
   - 'bash-completion'
   - 'netcat'
   - 'moreutils'
-  - 'logcheck'
   - 'augeas-tools'
-  - 'apticron'
   - 'git-core'
   - 'nfs-common'
   - 'locate'
@@ -60,9 +59,12 @@ packages::install:
   - 'libruby1.8'
   - 'timelimit'
   - 'vnstat'
-  - 'logwatch'
   - 'htop'
   - 'python-psutil'
+  - 'fail2ban'
+#Removed because installs postfix/exim
+#  - 'logwatch'
+#  - 'logcheck'
 
 packages::remove:
   - 'apparmor'

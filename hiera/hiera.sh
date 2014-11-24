@@ -53,7 +53,23 @@ function setup_hiera_rhel6 {
   puppet resource package libxml2-devel ensure=present
   puppet resource package libxslt-devel ensure=present
   puppet resource package hiera ensure=installed
-  puppet resource package hiera-puppet ensure=installed
+  #  puppet resource package hiera-puppet ensure=installed
+  gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
+
+  }
+
+function setup_hiera_rhel7 {
+  puppet resource package gcc ensure=present
+  puppet resource package gcc-c++ ensure=present
+  puppet resource package kernel-devel ensure=present
+  puppet resource package make ensure=present
+  puppet resource package ruby-devel ensure=present
+  puppet resource package rubygems ensure=present
+  puppet resource package libxml2-devel ensure=present
+  puppet resource package libxslt-devel ensure=present
+  puppet resource package hiera ensure=installed
+  #  puppet resource package hiera-puppet ensure=installed
+  gem install --include-dependencies --no-rdoc --no-ri hiera-puppet
 
   }
 
@@ -83,6 +99,8 @@ mkdir -p /etc/puppet/hieradata
 
 if is_rhel6; then
     setup_hiera_rhel6
+elif is_rhel7; then
+    setup_hiera_rhel7
 elif is_ubuntu; then
     setup_hiera_ubuntu
 else
@@ -95,9 +113,22 @@ fi
 echo "################# Hiera Installation done, step 1/2 ###################"
 
 #install hiera-eyaml
-gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
-gem install --include-dependencies --no-rdoc --no-ri deep_merge
-gem install --include-dependencies --no-rdoc --no-ri json
+if is_ubuntu; then
+    gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
+    gem install --include-dependencies --no-rdoc --no-ri deep_merge
+    gem install --include-dependencies --no-rdoc --no-ri json -v '~>1.7.5' 
+elif is_rhel6; then
+    gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
+    gem install --include-dependencies --no-rdoc --no-ri deep_merge
+    gem install --include-dependencies --no-rdoc --no-ri json  -v '~>1.7.5'
+elif is_rhel7; then
+    gem install  hiera-eyaml
+    gem install  deep_merge
+    gem install  json  -v '~>1.7.5'
+else
+    echo "*** Can not setup hiera: distribution not recognized"
+    exit 1
+fi
 
 
 
@@ -114,7 +145,7 @@ if [ -f /etc/puppet/secure/keys/private_key.pkcs7.pem ] ; then
 fi
 
 #create keys
-eyaml createkeys
+/usr/local/bin/eyaml createkeys
 
 # set permissions to folders and keys
 chown -R puppet:puppet /etc/puppet/secure/keys
@@ -135,13 +166,13 @@ eyaml_file="/etc/puppet/hieradata/common.eyaml"
 
 #Add encrypted parameters
 mysql_root_password='changeme'
-eyaml encrypt -l 'mysql_password' -s $mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
-eyaml encrypt -l 'mysql_root_password' -s $mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'mysql_password' -s $mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'mysql_root_password' -s $mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
 
-eyaml encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
-eyaml encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
 
 rabbitmq_password='changeme'
-eyaml encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
 
 echo "################# Hiera eyaml Installation done, step 2/2 done  ###################"

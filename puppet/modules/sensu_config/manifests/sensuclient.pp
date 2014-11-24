@@ -17,7 +17,7 @@
 #
 
 class sensu_config::sensuclient (
-  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','/sensu'),
+  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
   $password       = hiera('rabbit::password'),
   $rabbitmq_host  = hiera('rabbit::host',$::eroip),
   $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
@@ -37,13 +37,16 @@ class sensu_config::sensuclient (
     fail('ERROR! rabbit::sensuclient::password is required.')
   }
 
-  class { 'sensu':
-    rabbitmq_password => $password,
-    rabbitmq_host     => $rabbitmq_host,
-    redis_host        => $redis_host,
-    redis_port        => $redis_port,
-    subscriptions     => $subscriptions,
-    rabbitmq_vhost    => $sensu_vhost,
+  # Installs on all nodes except on maestro node
+  if $::fqdn!='' and $::fqdn !~ /^maestro/{
+    class { 'sensu':
+      rabbitmq_password => $password,
+      rabbitmq_host     => $rabbitmq_host,
+      redis_host        => $redis_host,
+      redis_port        => $redis_port,
+      subscriptions     => $subscriptions,
+      rabbitmq_vhost    => $sensu_vhost,
+    }
   }
 
   file { '/etc/sensu/plugins/disk-metrics.rb':
@@ -97,6 +100,33 @@ class sensu_config::sensuclient (
     owner   => 'sensu',
     group   => 'sensu',
     source  => 'puppet:///modules/sensu_config/check-mem.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/memory-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/memory-usage.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/disk-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/disk-usage.sh',
+    require => File['/etc/sensu/plugins'],
+  }
+
+  file { '/etc/sensu/plugins/cpu-usage.sh':
+    ensure  => present,
+    mode    => '0555',
+    owner   => 'sensu',
+    group   => 'sensu',
+    source  => 'puppet:///modules/sensu_config/cpu-usage.sh',
     require => File['/etc/sensu/plugins'],
   }
 }

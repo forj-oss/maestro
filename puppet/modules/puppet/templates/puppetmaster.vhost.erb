@@ -26,7 +26,7 @@ Listen <%= @puppetmaster_port %>
         RailsAutoDetect Off
 
         SSLEngine on
-        SSLProtocol -ALL +SSLv3 +TLSv1
+        SSLProtocol -ALL -SSLv3 +TLSv1
         SSLCipherSuite ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP
 
         SSLCertificateFile      <%= @puppet_ssl_dir %>/certs/<%= @certname %>.pem
