@@ -28,14 +28,12 @@ case $operatingsystem {
 # Installs RabbitMQ
 #
 class rabbit (
-  $version  = hiera('rabbit::version','3.4.1-1'),
   $admin    = hiera('rabbit::admin','admin'),
   $password = hiera('rabbit::password'),
   $port     = hiera('rabbit::port','5672'),
   $vhost    = hiera('rabbit::maestro_vhost','maestro')
 )
 {
-  validate_string($version)
   validate_string($admin)
   validate_string($password)
   validate_string($vhost)
@@ -49,8 +47,6 @@ class rabbit (
   class { 'rabbitmq':
     port              => $port,
     delete_guest_user => true,
-    package_ensure    => $version,
-    version           => $version,
   }->
   rabbitmq_user { $admin:
     ensure   => present,
