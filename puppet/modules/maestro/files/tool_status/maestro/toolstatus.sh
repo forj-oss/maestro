@@ -27,12 +27,30 @@ puppet() {
   echo $RETVAL
 }
 
+rabbitmq() {
+  sudo -i service rabbitmq-server status > /dev/null 2>&1
+  RETVAL=$?
+  echo $RETVAL
+}
+
+uchiwa() {
+  sudo -i pm2 list|grep uchiwa.js|grep online
+  RETVAL=$?
+  echo $RETVAL
+}
+
 case "$1" in
   puppet)
     puppet
-   ;;
+    ;;
+  rabbitmq)
+    rabbitmq
+    ;;
+  uchiwa)
+    uchiwa
+    ;;
   *)
-  echo "Usage: {puppet}"
+  echo "Usage: {puppet|rabbitmq|uchiwa}"
   ;;
 esac
 exit $RETVAL

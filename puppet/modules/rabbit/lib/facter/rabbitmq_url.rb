@@ -1,4 +1,4 @@
-# == Class: jimador::discover
+# == jimador::puppet_url
 # (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,17 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+#
 
-define jimador::discover (
-  $node          = $title,
-  $tools        = ['gerrit','pastebin','jenkins','zuul','puppet','graphite','status','uchiwa','rabbitmq'],
-  $tools_filter = [],
-  $tools_data   = undef,
-)
-{
-  include jimador::requirements   # this will install json for us
-  if $tools_data != undef
-  {
-    jimador::manage_config { $tools:
-      tools_hash    => $tools_data,
-      node_name     => $node,
-      default_tools => $tools,
-      filter_tools  => $tools_filter,
-    }
-  }
-}
+Facter.add("rabbitmq_url") do
+ confine :kernel => "Linux"
+ setcode do
+   begin
+     http_name = Facter.value("helion_public_ipv4")
+     Facter::Util::Resolution.exec("echo http://#{http_name}:15672")
+   rescue Exception => e
+     Facter.warn("Error at rabbitmq_url facter: #{e}")
+     Facter::Util::Resolution.exec("echo #")
+   end
+ end
+end
