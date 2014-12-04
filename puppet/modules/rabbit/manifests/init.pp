@@ -28,15 +28,31 @@ case $operatingsystem {
 # Installs RabbitMQ
 #
 class rabbit (
-  $admin    = hiera('rabbit::admin','admin'),
-  $password = hiera('rabbit::password'),
-  $port     = hiera('rabbit::port','5672'),
-  $vhost    = hiera('rabbit::maestro_vhost','maestro')
+  $admin         = hiera('rabbit::admin','admin'),
+  $password      = hiera('rabbit::password'),
+  $port          = hiera('rabbit::port','5672'),
+  $vhost         = hiera('rabbit::vhost','maestro'),
+  $exchange      = hiera('rabbit::exchange','maestro_exch'),
+  $exchange_type = hiera('rabbit::exchange_type','topic'),
+  $queues        = hiera('rabbit::queues','project user task backup notification'),
+  $durable       = hiera('rabbit::durable', true),
+  $sh            = hiera('rabbit::sh', '/usr/lib/forj/rabbit_topology.sh'),
+  $sh_user       = hiera('rabbit::sh_user','puppet'),
+  $sh_group      = hiera('rabbit::sh_group','puppet'),
+  $sh_mode       = hiera('rabbit::sh_mode','0755'),
 )
 {
   validate_string($admin)
   validate_string($password)
   validate_string($vhost)
+  validate_string($exchange)
+  validate_string($exchange_type)
+  validate_string($queues)
+  validate_string($durable)
+  validate_string($sh)
+  validate_string($sh_user)
+  validate_string($sh_group)
+  validate_string($sh_mode)
 
   if !is_integer($port) { fail('rabbit::port must be an integer') }
 
@@ -65,5 +81,17 @@ class rabbit (
     configure_permission => '.*',
     read_permission      => '.*',
     write_permission     => '.*',
+  }->
+  file { $sh:
+    ensure  => 'present',
+    content => template('rabbit/rabbit_topology.sh.erb'),
+    owner   => $sh_user,
+    group   => $sh_group,
+    mode    => $sh_mode,
+  }
+  exec { 'rabbit_topology_exec':
+    command => "${sh} '${admin}' '${password}'",
+    path    => $::path,
+    require => File[$sh],
   }
 }
