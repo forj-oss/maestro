@@ -68,5 +68,15 @@ module.exports.env = {
         max_retry: '4',
         timeout: 100
       }
+    },
+    backend: {
+      db : {
+        flavor: "redis"
+        redis: {
+          ip: '127.0.0.1',
+          port: '6379',
+          id: 1
+        }
+      }
     }
 };
