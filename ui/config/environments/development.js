@@ -71,7 +71,7 @@ module.exports.env = {
     },
     backend: {
       db : {
-        flavor: "redis"
+        flavor: "redis",
         redis: {
           ip: '127.0.0.1',
           port: '6379',
