@@ -68,8 +68,8 @@ class maestro (
   # requirements
   include maestro::requirements
 
-  # Install nodejs and pm2
-  class {'nodejs_wrap':  }
+  # Install nodejs (note: now installed on all nodes)
+  #class {'nodejs_wrap':  }
   # we don't want this passed to us any other way.
   $env_dir          = hiera('maestro::app::app_dir',"/opt/config/${::environment}")
   $app_dir          = "${env_dir}/app"

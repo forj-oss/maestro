@@ -67,9 +67,9 @@ jimador::discover:
     icon: true
     visible: true
 
-# nodejs wrap global defaults
-nodejs_wrap::node_env: "%{::maestro::params::node_env}"
-nodejs_wrap::manage_repo: true
+# nodejs wrap global defaults (note: moved to common.yaml)
+#nodejs_wrap::node_env: "%{::maestro::params::node_env}"
+#nodejs_wrap::manage_repo: true
 
 # Should never be defined here, but in a forj instance.
 # maestro::nodes:

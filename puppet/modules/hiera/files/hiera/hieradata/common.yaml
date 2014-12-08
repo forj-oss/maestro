@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-# this file contains class, configuration, packages that will be 
+# this file contains class, configuration, packages that will be
 # installed on all servers regardless of platform.
 # DO NOT ADD any classes/configurations which are OS dependent or server/role dependent.
 ---
@@ -21,6 +21,7 @@ classes:
   - puppet
   - pip::python2
   - salt
+  - nodejs_wrap
 
 # Parameters for packages::manage class
 packages::install:
@@ -66,4 +67,6 @@ packages::latest:
 
 salt::salt_master: "%{::erosite}.%{::erodomain}"
 
-
+# nodejs wrap global defaults
+nodejs_wrap::node_env: "%{::maestro::params::node_env}"
+nodejs_wrap::manage_repo: true
