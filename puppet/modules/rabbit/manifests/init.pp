@@ -48,7 +48,7 @@ class rabbit (
   validate_string($exchange)
   validate_string($exchange_type)
   validate_string($queues)
-  validate_string($durable)
+  validate_bool($durable)
   validate_string($sh)
   validate_string($sh_user)
   validate_string($sh_group)
