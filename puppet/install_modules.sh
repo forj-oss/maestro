@@ -89,6 +89,7 @@ if [ "${DEFAULT_MODULES}" = "1" ] ; then
   MODULES["stankevich-python"]="1.6.6"
   MODULES["garethr-erlang"]="0.3.0"
   MODULES["sensu-sensu"]="1.2.1"
+  MODULES["camptocamp-openldap"]="0.4.0"
   MODULES["stahnma-epel"]="1.0.0"
   MODULES["nanliu-staging"]="0.3.1"
   # MODULES["puppetlabs-rabbitmq"]="4.0.0"
