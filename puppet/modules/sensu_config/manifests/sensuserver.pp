@@ -18,7 +18,7 @@
 class sensu_config::sensuserver (
   $sensu_user     = hiera('sensu_config::sensuserver::sensu_user','sensu'),
   $sensu_vhost    = hiera('sensu_config::sensuserver::sensu_vhost','sensu'),
-  $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
+  $subscriptions  = hiera('rabbit::subscriptions','forj-basic'),
   $rabbitmq_host  = hiera('rabbit::host','localhost'),
   $rabbitmq_port  = hiera('rabbit::port','5672'),
   $rabbit_admin   = hiera('rabbit::admin','admin'),

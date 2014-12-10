@@ -20,7 +20,7 @@ class sensu_config::sensuclient (
   $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
   $password       = hiera('rabbit::password'),
   $rabbitmq_host  = hiera('rabbit::host',$::eroip),
-  $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
+  $subscriptions  = hiera('rabbit::subscriptions','forj-basic'),
   $redis_host     = hiera('redis::params::host',$::eroip),
   $redis_port     = hiera('redis::params::port','6379'),
 )
