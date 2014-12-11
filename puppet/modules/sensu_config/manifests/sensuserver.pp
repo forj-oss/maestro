@@ -16,15 +16,15 @@
 # Installs SensuServer
 #
 class sensu_config::sensuserver (
-  $sensu_user     = hiera('sensu_config::sensuserver::sensu_user','sensu'),
-  $sensu_vhost    = hiera('sensu_config::sensuserver::sensu_vhost','sensu'),
-  $subscriptions  = hiera('rabbit::subscriptions','forj-basic'),
-  $rabbitmq_host  = hiera('rabbit::host','localhost'),
-  $rabbitmq_port  = hiera('rabbit::port','5672'),
-  $rabbit_admin   = hiera('rabbit::admin','admin'),
-  $password       = hiera('rabbit::password'),
-  $redis_port     = hiera('redis::params::port','6379'),
-  $redis_db       = hiera('sensu_config::sensuserver::redis_db','1'),
+  $sensu_user    = hiera('sensu_config::sensuserver::sensu_user','sensu'),
+  $sensu_vhost   = hiera('sensu_config::sensuserver::sensu_vhost','sensu'),
+  $forj_basic    = hiera('sensu_config::sensuserver::forj_basic','forj-basic'),
+  $rabbitmq_host = hiera('rabbit::host','localhost'),
+  $rabbitmq_port = hiera('rabbit::port','5672'),
+  $rabbit_admin  = hiera('rabbit::admin','admin'),
+  $password      = hiera('rabbit::password'),
+  $redis_port    = hiera('redis::params::port','6379'),
+  $redis_db      = hiera('sensu_config::sensuserver::redis_db','1'),
 )
 {
   require rabbit
@@ -32,15 +32,23 @@ class sensu_config::sensuserver (
 
   validate_string($sensu_user)
   validate_string($sensu_vhost)
-  validate_string($subscriptions)
+  validate_string($forj_basic)
   validate_string($rabbitmq_host)
   validate_string($rabbit_admin)
   validate_string($password)
   validate_string($redis_db)
 
-  if !is_integer($rabbitmq_port) { fail('sensu_config::sensuserver::rabbitmq_port must be an integer') }
+  if ($::hostname == undef or $::hostname == '') {
+    fail('ERROR! hostname facter is required.')
+  }
 
-  if !is_integer($redis_port) { fail('sensu_config::sensuserver::redis_port must be an integer') }
+  if !is_integer($rabbitmq_port) {
+    fail('sensu_config::sensuserver::rabbitmq_port must be an integer')
+  }
+
+  if !is_integer($redis_port) {
+    fail('sensu_config::sensuserver::redis_port must be an integer')
+  }
 
   if $password == '' {
     fail('ERROR! rabbit::sensuserver::password is required.')
@@ -66,7 +74,7 @@ class sensu_config::sensuserver (
   class { 'sensu':
     server            => true,
     rabbitmq_password => $password,
-    subscriptions     => $subscriptions,
+    subscriptions     => [$forj_basic, $::hostname],
     api               => true,
     rabbitmq_host     => $rabbitmq_host,
     rabbitmq_port     => $rabbitmq_port,
@@ -96,7 +104,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'disk-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
@@ -105,7 +113,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'cpu-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
@@ -114,7 +122,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'memory-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
@@ -123,7 +131,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-disk':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '60',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -131,7 +139,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-cpu':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '60',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -139,7 +147,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-mem':
     command     => '/etc/sensu/plugins/check-mem.sh',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '60',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -147,7 +155,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'disk-usage':
     command     => '/etc/sensu/plugins/disk-usage.sh',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
@@ -156,7 +164,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'cpu-usage':
     command     => '/etc/sensu/plugins/cpu-usage.sh',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
@@ -165,7 +173,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'memory-usage':
     command     => '/etc/sensu/plugins/memory-usage.sh',
-    subscribers => $subscriptions,
+    subscribers => $forj_basic,
     interval    => '10',
     standalone  => false,
     type        => 'metric',
