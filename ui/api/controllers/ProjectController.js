@@ -34,9 +34,11 @@
  *
  * @type {{create: create, _config: {}}}
  */
- var maestro_exec = require('maestro-exec/maestro-exec');
-  var blueprint_utils = require('blueprint/blueprint');
-  var project_utils = require('projects/projects');
+var blueprint_utils = require('blueprint/blueprint');
+var project_utils = require('projects/projects');
+var msg = require('msg-util/msg-util').Message;
+var queue_util = require('queue-util/queue-util').Queue;
+
 module.exports = {
   /**
    * Action blueprints:
@@ -44,9 +46,39 @@ module.exports = {
    */
   create: function (req, res) {
     if(req.session.project_visibility){
-      maestro_exec.createProject(req.body.project_name, function(data){
-       res.json(data);
-      });
+      var options = {
+        ctx: 'project.create.' + req.body.project_name.replace(' ',''),
+        name: req.body.project_name,
+        desc: req.body.project_name,
+        id: 'undefined',
+        user: 'undefined@hp.com',
+        role: 'undefined',
+        debug: true,
+        log: {
+          enable: true,
+          level: 'info',
+          target: 'undefined'
+          },
+        origin: 'maestro'
+      };
+
+      if (msg.isValid(options)){
+        var rabbitmqConnectionOptions = sails.config.env.rabbitmq.connection;
+        var rabbitmqImplOptions = { defaultExchangeName: sails.config.env.rabbitmq.exchange_name, reconnect: false };
+        var exchangeName = sails.config.env.rabbitmq.exchange_name;
+        var exchangeOptions = sails.config.env.rabbitmq.exchange_options;
+        var payload = msg.getJSON(options);
+        var routingKey = 'project.create.' + req.body.project_name.replace(' ','');
+
+        queue_util.publish(rabbitmqConnectionOptions, rabbitmqImplOptions, exchangeName, exchangeOptions, payload, routingKey, function(error) {
+          if (error){
+            console.error(error);
+            res.json(error);
+          }else{
+            res.json(null);
+          }
+        });
+      }
     }else{
       res.view('403', { layout: null });
     }
