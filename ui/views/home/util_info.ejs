@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="/linker/styles/backup.css">
 <div id="backupPanel" style="display:none;">
   <span class="og-close"></span>
+  <span class="og-back"></span>
   <div class="row">
     <div class="col-md-2"></div>
     <div class="col-md-8">
@@ -27,6 +28,7 @@
 
 <div id="progressPanel" style="display:none;">
 <span class="og-close"></span>
+<span class="og-back"></span>
 <div class="row">
   <div class="col-md-2"></div>
   <div class="col-md-8">
@@ -66,6 +68,7 @@
 
 <div id="confirmationPanel" style="display:none;">
 <span class="og-close"></span>
+<span class="og-back"></span>
 <div class="row">
   <div class="col-md-2"></div>
   <div class="col-md-8">
@@ -354,6 +357,11 @@
     $('#confirmationPanelCancel').click(function(){
       showPanel('mainPanel');
     });
+
+    $('.og-back').click(function(){
+      showPanel('mainPanel');
+    });
+
   });
 
 
