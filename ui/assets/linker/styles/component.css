@@ -101,6 +101,44 @@
 	background: #FFFFFF;
 }
 
+.og-back {
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	top: 20px;
+	right: 80px;
+	cursor: pointer;
+	z-index: 111;
+	/*color: #8295a3;*/
+}
+
+.og-back::before,
+.og-back::after {
+	content: '';
+	position: absolute;
+	width: 100%;
+	top: 50%;
+	height: 1px;
+	background: #8295a3;
+	-webkit-transform: rotate(22deg);
+	-moz-transform: rotate(22deg);
+	transform: rotate(22deg);
+        transform-origin: left;
+}
+
+.og-back::after {
+	-webkit-transform: rotate(-22deg);
+	-moz-transform: rotate(-22deg);
+	transform: rotate(-22deg);
+        transform-origin: left;
+}
+
+.og-back:hover::before,
+.og-back:hover::after {
+	background: #FFFFFF;
+}
+
+
 .og-fullimg,
 .og-details {
 	width: 50%;
