@@ -40,10 +40,16 @@ class maestro::ui::setup(
   validate_string($revision)
 
   vcsrepo {"${app_dir}/node-common":
-    ensure   => latest,
+    ensure   => present,
     provider => 'git',
     revision => $revision,
     source   => 'https://review.forj.io/p/forj-oss/node-common',
+  } ->
+  vcsrepo {"${app_dir}/broker-projects":
+    ensure   => present,
+    provider => 'git',
+    revision => $revision,
+    source   => 'https://review.forj.io/p/forj-oss/broker-projects',
   } ->
   vcsrepo {"${app_dir}/maestro":
     ensure   => latest,
@@ -60,6 +66,10 @@ class maestro::ui::setup(
                   Package['pm2'],
                   Package['sails'],
                 ]
+  } ->
+  nodejs_wrap::pm2instance{'projects-broker.js':
+    script_dir => "${app_dir}/broker-projects/projects-broker/",
+    user       => $user,
   } ->
   nodejs_wrap::pm2instance{'app.js':
     script_dir => "${app_dir}/maestro/ui/",
@@ -97,7 +107,19 @@ class maestro::ui::setup(
   } ->
   file { "${app_dir}/maestro/ui/node_modules/msg-util":
     ensure => 'link',
+    target => "${app_dir}/node-common/msg-util",
+    owner  => $user,
+    group  => $user,
+  } ->
+  file { "${app_dir}/broker-projects/projects-broker/node_modules/queue-util":
+    ensure => 'link',
     target => "${app_dir}/node-common/queue-util",
+    owner  => $user,
+    group  => $user,
+  } ->
+  file { "${app_dir}/broker-projects/projects-broker/node_modules/msg-util":
+    ensure => 'link',
+    target => "${app_dir}/node-common/msg-util",
     owner  => $user,
     group  => $user,
   }

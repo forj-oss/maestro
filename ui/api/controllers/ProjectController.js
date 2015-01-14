@@ -36,8 +36,8 @@
  */
 var blueprint_utils = require('blueprint/blueprint');
 var project_utils = require('projects/projects');
-var msg = require('msg-util/msg-util').Message;
-var queue_util = require('queue-util/queue-util').Queue;
+var msg = require('msg-util').Message;
+var queue_util = require('queue-util').Queue;
 
 module.exports = {
   /**
