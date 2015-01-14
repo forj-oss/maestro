@@ -39,12 +39,6 @@ class maestro::ui::setup(
   validate_string($app_dir)
   validate_string($revision)
 
-  vcsrepo {"${app_dir}/node-common":
-    ensure   => latest,
-    provider => 'git',
-    revision => $revision,
-    source   => 'https://review.forj.io/p/forj-oss/node-common',
-  } ->
   vcsrepo {"${app_dir}/maestro":
     ensure   => latest,
     provider => 'git',
@@ -86,18 +80,6 @@ class maestro::ui::setup(
   file { "${app_dir}/maestro/api/bp-api/config/config.json":
     ensure => 'link',
     target => "/opt/config/${::settings::environment}/config.json",
-    owner  => $user,
-    group  => $user,
-  } ->
-  file { "${app_dir}/maestro/ui/node_modules/queue-util":
-    ensure => 'link',
-    target => "${app_dir}/node-common/queue-util",
-    owner  => $user,
-    group  => $user,
-  } ->
-  file { "${app_dir}/maestro/ui/node_modules/msg-util":
-    ensure => 'link',
-    target => "${app_dir}/node-common/queue-util",
     owner  => $user,
     group  => $user,
   }
