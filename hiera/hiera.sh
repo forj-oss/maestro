@@ -166,8 +166,10 @@ eyaml_file="/etc/puppet/hieradata/common.eyaml"
 
 #Add encrypted parameters
 mysql_root_password='changeme'
-/usr/local/bin/eyaml encrypt -l 'mysql_password' -s $mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
-/usr/local/bin/eyaml encrypt -l 'mysql_root_password' -s $mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
+gerrit_mysql_root_password=$(openssl rand -hex 10)
+
+/usr/local/bin/eyaml encrypt -l 'mysql_password' -s $gerrit_mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
+/usr/local/bin/eyaml encrypt -l 'mysql_root_password' -s $gerrit_mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
 
 /usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
 /usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
