@@ -42,8 +42,10 @@ class sysadmin_config::base(
       require => Apt::Ppa['ppa:git-core/ppa'],
     }
   } else {
-    package { 'git':
-      ensure => present,
+    if ! defined(Package['git']) {
+      package { 'git':
+        ensure => present,
+      }
     }
   }
 
