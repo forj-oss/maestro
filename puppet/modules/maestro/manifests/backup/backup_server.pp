@@ -19,6 +19,7 @@ class maestro::backup::backup_server (
 )
 {
   include maestro::backup::params
+  include maestro::backup::clean_backups
   include maestro::backup::cdn_upload
   $backup_user = $maestro::backup::params::backup_user
   ## Prepares user

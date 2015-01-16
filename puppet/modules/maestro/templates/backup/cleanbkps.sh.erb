@@ -1,0 +1,302 @@
+#!/usr/bin/env bash
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# This script will remove old backups stored in a determined folder.
+# The folder name format of the backups must be "%Y-%W".
+#
+# Arguments:
+#    $1 - Number (integer) of backups to keep. Must be greater than 1.
+#    $2 - (OPTIONAL) Path to the folder that you want to clean up. Basically
+#         where the backups are stored. If no directory is provided
+#         it will use the current working directory.
+#
+#
+# Notes:
+#    - If the format of the folders name changed, you only need to change
+#      'folderNameToDate' and 'dateTofolderName' functions.
+
+
+
+declare HOSTNAMES   # Array with all the hostnames.
+declare RES         # Used to store data that will be used in another function.
+# Also the variable $RES is used to print error info.
+
+# Ensures that the path always there's a / at the end. If no path provided
+# it will return an empty string.
+# $1 - Path to normalize.
+function normalizeDirectoryPath() {
+  if [ -z "$1" ]; then
+    RES=""
+    return 0
+  fi
+
+  declare -i local lastPos=${#1}-1
+
+  if [ "${1:$lastPos:1}" != "/" ]; then
+    RES="$1/"
+  else
+    RES="$1"
+  fi
+}
+
+# Returns a date object in a specified format.
+# $1 - Year.
+# $2 - Week of the year.
+# $3 - Desire format for the output.
+function weekToDate() {
+  local year=$1
+  local week=$2
+  local date_fmt=$3
+  local week_num_of_Mon_1
+  local week_day_of_Mon_1
+  local first_Mon
+
+  week_num_of_Mon_1=$(date -d "$year"-01-01 +%W)
+  week_day_of_Mon_1=$(date -d "$year"-01-01 +%u)
+
+  if ((week_num_of_Mon_1)); then
+    first_Mon="$year-01-01"
+  else
+    first_Mon="$year-01-$((01 + (7 - week_day_of_Mon_1 + 1) ))"
+  fi
+
+  RES="$(date -d "$first_Mon +$((week - 1)) week" "$date_fmt")"
+  if [ $? -ne 0 ]; then
+    RES="Couldn't parse date. Not a backup folder?."
+    return 1
+  fi
+
+  return 0
+}
+
+
+# Receives a string in the '%Y-%W' format and
+# returns a date in the given format.
+# $1 - String to parse.
+# $2 - Desire date format for the output. (Don't use a '+' charater
+#      at the beginning).
+function folderNameToDate() {
+  local string=$1
+  local date_fmt="+$2"
+  declare -i local year
+  declare -i local week
+
+  if ! [[ "$string" =~ ^[0-9]{4}-[0-9]{2}$ ]]; then
+    RES="Bad folder name format. Not a backup folder?."
+    return 1
+  fi
+
+  year=${string:0:4}
+  week=${string:5:2}
+  weekToDate "$year" "$week" "$date_fmt"
+}
+
+
+# This function receives a string in the '%Y%m%d' format
+# and returns a string in the format %Y-%W.
+# $1 - String to parse.
+function dateTofolderName() {
+  RES="$(date -d "$1" "+%Y-%W")"
+
+  if [ $? -ne 0 ]; then
+    RES="Something went really wrong."
+    return 1
+  fi
+}
+
+
+# Returns the folder names ordered by date (newest first).
+# The date is obtained by parsing the folder name.
+# $1 - Path where all the folders are stored.
+function getFoldersOrderedByParsedDate() {
+  declare -a local list
+  local temp
+
+
+  list=("$1"*/)
+  if [ $? -ne 0 ]; then
+    RES="The path provided couldn't be reached."
+    return 1
+  fi
+
+
+  # Parses the folder names into a date object for easy sort
+  for ((i=0; i<${#list[@]}; i++));
+  do
+    folderNameToDate "$(basename "${list[$i]}")" "%Y%m%d"
+    if [ $? -ne 0 ]; then
+      return 1
+    fi
+
+    list[$i]="$RES"
+  done
+
+
+  # Sorts the list
+  list=($(
+  for item in "${list[@]}"; do
+    echo "$item ";
+  done | sort -r))
+
+
+  # Transform date strings into original folder format
+  for ((i=0; i<${#list[@]}; i++));
+  do
+    dateTofolderName "${list[$i]}"
+    if [ $? -ne 0 ]; then
+      return 1
+    fi
+
+    list[$i]="$RES"
+  done
+
+  RES=("${list[@]}")
+}
+
+# Gets just the folders that gonna be removed.
+# $1 - Number of backups to keep.
+# $2 - Path to where the backups are stored.
+function getDirNamesToDelete() {
+  declare -a local list
+  declare -i local qty
+
+  getFoldersOrderedByParsedDate "$2"
+  if [ $? -ne 0 ]; then
+    return 1
+  fi
+
+  list=("${RES[@]}")
+  qty=${#list[@]}
+
+  if [ "$qty" -gt "$1" ];then
+    RES=("${list[@]:$1:$qty-$1}")
+  else
+    RES=()
+  fi
+}
+
+# Removes the specified folders.
+# $1 - Normalized path to where the backups are stored.
+# $@ - Names of the folders that gonna be removed.
+function removeDirectories() {
+
+  declare local bkpPath="$1"
+  declare -a local list=("${@:2}")
+  local temp
+
+  for current in "${list[@]}"; do
+
+    if [ x"$bkpPath$current" != x ] && [ "$bkpPath$current" != "/" ]; then
+      rm -rf --preserve-root "$bkpPath$current"
+      if [ $? -eq 0 ]; then
+        echo "$bkpPath$current deleted"
+      else
+        RES="Cannot remove folder '$bkpPath$current'"
+        return 1
+      fi
+    else
+      RES="- Critical - Tried to delete '$bkpPath$current'" 1>&2
+      return 1
+    fi
+
+  done;
+  echo "Total backups removed: ${#list[@]}"
+}
+
+function usage() {
+  echo "Usage: $0 NUMBER_OF_BACKUPS_TO_KEEP [DIRECTORY]"
+  echo "Will remove old backups."
+  echo ""
+  echo "Note that If no directory is specified it will use"
+  echo "the current Working directory."
+}
+
+function errorMsg() {
+  echo "$0: Stopped due to an error. See the details below."
+  echo "$0: ERROR - $RES"
+}
+
+# $1 - Number of backups to keep.
+# $2 - (OPTIONAL) Path to clean up. Basically where the backups are stored.
+#      If no directory is provided it will use the current.
+function main() {
+  local dir="$2"
+  local bkpsToKeep="$1"
+  local temp
+  local aux
+
+  if [ $# -eq 0 ]; then
+    usage
+    exit 1
+  fi
+
+  if [ $# -gt 1 ] && [ -z "$2" ] ; then
+    dir="" #"$PWD"
+  else
+    dir="$2"
+  fi
+
+  if [ "$bkpsToKeep" -eq "0" ]; then
+    echo "$0: The number of backups cannot be 0."
+    exit 1
+  fi
+
+
+
+  normalizeDirectoryPath "$dir"
+  dir="$RES"
+
+  if [ ! -d "$dir" ]; then
+    echo "The directory provided doesn't exist."
+    exit 1
+  fi
+
+
+  for hostname in "${HOSTNAMES[@]}"; do
+    # Looking into hosts folders.
+
+    if [ -d "$dir$hostname" ]; then
+      temp=($dir$hostname/*/)
+
+      for lvl2 in "${temp[@]}"; do
+        # Lookin into apps folders. The app folders.
+
+        aux=($lvl2*/)
+        if [ "$bkpsToKeep" -ge ${#aux[@]}  ]; then
+          # Enters here when there's no need of a clean up.
+          continue
+        fi
+
+        echo "Cleaning backups of app '$(basename "$lvl2")' in host '$hostname'"
+
+        getDirNamesToDelete "$bkpsToKeep" "$lvl2"
+        if [ $? -ne 0 ]; then
+          errorMsg
+          exit 1
+        fi
+
+        removeDirectories "$lvl2" "${RES[@]}"
+        if [ $? -ne 0 ]; then
+          errorMsg
+          exit 1
+        fi
+
+      done; # End apps folders
+    fi
+  done; # End hosts folders
+}
+
+HOSTNAMES=( <% @nodes.each do |val| -%>"<%= val %>.<%= domain %>" <% end -%>)
+main "$@"
