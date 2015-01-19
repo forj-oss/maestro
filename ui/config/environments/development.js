@@ -78,5 +78,31 @@ module.exports.env = {
           id: 1
         }
       }
+    },
+    rabbitmq: {
+      connection: {
+        host: 'localhost',
+        port: 5672,
+        login: 'admin',
+        password: 'changeme',
+        vhost: 'maestro'
+      },
+      exchange_name: 'maestro_exch',
+      exchange_options: {
+        type: 'topic',
+        passive: 'true',
+        durable: 'true',
+        autodelete: false,
+        noDeclare: false,
+        comfirm: false
+      },
+      queues: {
+        project: 'project',
+        backup: 'backup',
+        notification: 'notification',
+        project: 'project',
+        task: 'task',
+        user: 'user'
+      }
     }
 };

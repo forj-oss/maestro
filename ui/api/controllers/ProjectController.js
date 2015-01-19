@@ -34,9 +34,13 @@
  *
  * @type {{create: create, _config: {}}}
  */
- var maestro_exec = require('maestro-exec/maestro-exec');
-  var blueprint_utils = require('blueprint/blueprint');
-  var project_utils = require('projects/projects');
+var blueprint_utils = require('blueprint/blueprint');
+var project_utils = require('projects/projects');
+var configJson = require('config-json-helper');
+var msg = require('msg-util').Message;
+var queue_util = require('queue-util').Queue;
+
+
 module.exports = {
   /**
    * Action blueprints:
@@ -44,9 +48,44 @@ module.exports = {
    */
   create: function (req, res) {
     if(req.session.project_visibility){
-      maestro_exec.createProject(req.body.project_name, function(data){
-       res.json(data);
-      });
+      // Message to be published in Rabbitmq
+      var options = {
+        ctx: 'project.create.' + req.body.project_name.replace(' ',''),
+        name: req.body.project_name,
+        desc: req.body.project_name,
+        id: configJson.get('site:id'),
+        user: req.session.email,
+        role: 'admins',
+        debug: true,
+        log: {
+          enable: true,
+          level: 'info',
+          target: ''
+          },
+        origin: 'maestro',
+        time_stamp: new Date().toISOString()
+      };
+
+      if (msg.isValid(options)){
+        var rabbitmqConnectionOptions = sails.config.env.rabbitmq.connection;
+        var rabbitmqImplOptions = { defaultExchangeName: sails.config.env.rabbitmq.exchange_name, reconnect: false };
+        var exchangeName = sails.config.env.rabbitmq.exchange_name;
+        var exchangeOptions = sails.config.env.rabbitmq.exchange_options;
+        var payload = msg.getJSON(options);
+        var routingKey = 'project.create.' + req.body.project_name.replace(' ','');
+
+        queue_util.publish(rabbitmqConnectionOptions, rabbitmqImplOptions, exchangeName, exchangeOptions, payload, routingKey, function(error) {
+          if (error){
+            console.error(error);
+            res.json(error);
+          }else{
+            res.json(null);
+          }
+        });
+      }else {
+        console.error('ProjectController error, msg is not valid: ' + options);
+        res.json(new Error('Project is not valid!'));
+      }
     }else{
       res.view('403', { layout: null });
     }
