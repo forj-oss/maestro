@@ -236,6 +236,7 @@ function main() {
   local bkpsToKeep="$1"
   local temp
   local aux
+  local -i cleaned=0
 
   if [ $# -eq 0 ]; then
     usage
@@ -253,15 +254,15 @@ function main() {
     exit 1
   fi
 
+  if [ -n "$dir" ] && [ ! -d "$dir" ]; then
+    echo "The directory provided doesn't exist."
+    exit 1
+  fi
 
 
   normalizeDirectoryPath "$dir"
   dir="$RES"
 
-  if [ ! -d "$dir" ]; then
-    echo "The directory provided doesn't exist."
-    exit 1
-  fi
 
 
   for hostname in "${HOSTNAMES[@]}"; do
@@ -269,6 +270,7 @@ function main() {
 
     if [ -d "$dir$hostname" ]; then
       temp=($dir$hostname/*/)
+      cleaned=1
 
       for lvl2 in "${temp[@]}"; do
         # Lookin into apps folders. The app folders.
@@ -296,6 +298,10 @@ function main() {
       done; # End apps folders
     fi
   done; # End hosts folders
+
+  if [ $cleaned -eq 0 ]; then
+    echo "There are no backup folders to clean."
+  fi
 }
 
 HOSTNAMES=( <% @nodes.each do |val| -%>"<%= val %>.<%= domain %>" <% end -%>)
