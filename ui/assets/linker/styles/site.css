@@ -1,3 +1,19 @@
+/**
+(c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 .general-status{
   margin-bottom: 0;
   font-family: 'Open Sans', sans-serif;
@@ -55,7 +71,7 @@
   padding: 10px;
   font-size: 1em;
   font-family: 'Open Sans', sans-serif;
-  
+
   -webkit-transition: all 0.3s ease;
   /*-moz-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -69,7 +85,7 @@
   position: relative;
   min-height: 100px;
   padding: 0px 25px 0px 25px;
-  
+
   background-image: url('/images/header_bg.png');
   background-repeat: no-repeat;
   color: #FFFFFF;
@@ -140,16 +156,18 @@
   background-repeat: no-repeat;
   cursor: pointer;
 }
-.notifications .number{
-  height: 20px;
-  width: 20px;
-  text-align: center;
-  border-radius: 50%;
-  background-color: #cb0000;
+.notifications .count{
   position: relative;
-  top: -9px;
-  left: 8px;
-  font-family: "Open Sans Regular", "Open Sans Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+  top: -14px;
+  left: 4px;
+  background-color: #901717;
+}
+.notifications.li{
+  height: auto;
+  border: 1px solid white;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
 }
 .help{
   width: 21px;
@@ -213,7 +231,7 @@
   margin-bottom: 0 !important;
 }
 .ops-backup{
-  
+
 }
 .ops-admin{
   background-color: #1D4E6F !important;
@@ -258,7 +276,7 @@
   color: #D6332C;
 }
 /*------NAV-------*/
-  
+
 #navcontainer
 {
   margin-left: 15px;
@@ -465,21 +483,22 @@
 }
 .notifications-show{
   cursor: default;
-  height: 440px;
   width: 340px;
   position: absolute;
   top: 100px;
-  right: 0;
+  right: 40px;
   background-color: #123146;
   z-index: 999;
 }
-.notifications-show #viewport{
-    height: 100%;
+.notifications-show .notifications-viewport{
+  height: 100%;
+  max-height: 440px;
   width: 100%;
-  padding: 20px;
-  position: relative;
+  margin-top: 10px;
+  position: static;
+  overflow: auto;
 }
-.notifications-show #viewport:before{
+.notifications-show .notifications-viewport:before{
   top: auto;
   border: solid transparent;
   content: " ";
@@ -489,9 +508,82 @@
   pointer-events: none;
   border-bottom-color: #123146;
   border-width: 15px;
-  right: 110px;
-  margin: -50px 0 0 0;
+  right: 72px;
+  margin: -40px 0 0 0;
 }
+.notifications-show .notification-msg{
+  font-size: 0.8em;
+  border-top: 0px;
+  border-right: 0px;
+  border-bottom: 1px solid #8B9CB8;
+  border-left: 0px;
+  margin-bottom: 0.9em;
+
+  -webkit-transition:opacity linear 0.2s;
+  transition:opacity linear 0.2s;
+}
+.notification-msg .critical{
+  color: red;
+}
+.notification-msg .warning{
+  color: yellow;
+}
+.notification-msg:hover{
+  background-color: rgba(255, 255, 255, 0.07);
+}
+.notification-msg.ng-leave.ng-leave-active{
+  opacity:0;
+}
+.notification-msg.ng-leave{
+  opacity:1;
+}
+.notification-msg .notification-title{
+  font-size: 1.3em;
+}
+.notification-msg .notification-description{
+  font-style: italic;
+  margin-top: 0.3em;
+}
+.notifications-show .notifications-wrapper{
+  margin: 0.8em;
+}
+.notification-msg:hover .notification-dismiss{
+  display: inherit;
+}
+.notification-msg .notification-dismiss{
+  display: none;
+}
+
+.bounce-anim{
+  -moz-animation:bounceOut .4s linear;
+  -webkit-animation:bounceOut .4s linear;
+  animation:bounceOut .4s linear;
+}
+
+@-moz-keyframes bounceOut {
+  0%   { top: -14px }
+  25%  { top: -30px }
+  50%  { top: -14px }
+  75%  { top: -20px }
+  100% { top: -14px }
+}
+
+@-webkit-keyframes bounceOut {
+  0%   { top: -14px }
+  25%  { top: -25px }
+  50%  { top: -14px }
+  75%  { top: -18px }
+  100% { top: -14px }
+}
+
+@keyframes bounceOut {
+  0%   { top: -14px }
+  25%  { top: -30px }
+  50%  { top: -14px }
+  75%  { top: -20px }
+  100% { top: -14px }
+}
+
 .help-title{
   color:white;
   font-size: 24px;
@@ -510,7 +602,7 @@
 .register-bar .bar{
   background-color: #0096d6;
   height: 100%;
-  
+
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -597,8 +689,9 @@
 .auth-form{
   height: 30px;
   margin-bottom: 3px;
-  
+
   font-family: 'Open Sans', sans-serif;
+
 }
 .auth-form label{
   width: 120px;
@@ -615,7 +708,7 @@
   outline: 0;
   color: #428bca;
   background: transparent;
-  
+
   padding-left: 2px;
   font-size: 12px;
   font-weight: 600;
@@ -624,23 +717,23 @@
 .user{
   margin: auto;
   margin-bottom: 15px;
-  
+
   text-align: center;
   min-height: 175px;
   max-width: 175px;
   min-width: 175px;
   overflow: hidden;
-  
+
   cursor: pointer;
-  
+
   background-color: #1D4E6F;
   color: #FFF;
-  
+
   position: relative;
 }
 .user label{
   position: relative;
-  
+
   display: block;
   font-size: 12px;
   font-weight: 400;
@@ -772,7 +865,7 @@
   line-height: 28px;
   padding: 7px 15px;
   background-color: #1d4e70;
-  
+
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;

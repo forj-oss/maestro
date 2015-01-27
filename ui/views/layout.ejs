@@ -1,82 +1,121 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%- sails.config.appName %></title>
+<html ng-app="forjApp">
+<head>
+  <!--
+  (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
 
-    <!-- Viewport mobile tag for sensible mobile support -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-    <!--STYLES-->
-    <link rel="stylesheet" href="/linker/styles/backup.css">
-    <link rel="stylesheet" href="/linker/styles/bootstrap-theme.css">
-    <link rel="stylesheet" href="/linker/styles/bootstrap.css">
-    <link rel="stylesheet" href="/linker/styles/component.css">
-    <link rel="stylesheet" href="/linker/styles/project-list.css">
-    <link rel="stylesheet" href="/linker/styles/site.css">
-    <link rel="stylesheet" href="/linker/styles/vtabs.css">
-    <!--STYLES END-->
+  http://www.apache.org/licenses/LICENSE-2.0
 
-    <!--SCRIPTS-->
-    <script src="/linker/js/socket.io.js"></script>
-    <script src="/linker/js/sails.io.js"></script>
-    <script src="/linker/js/app.js"></script>
-    <script src="/linker/js/modernizr.custom.js"></script>
-    <script src="/linker/js/jquery.1.9.1.min.js"></script>
-    <script src="/linker/js/additional-methods.min.js"></script>
-    <script src="/linker/js/bootstrap.js"></script>
-    <script src="/linker/js/bootstrap.min.js"></script>
-    <script src="/linker/js/dropdown.js"></script>
-    <script src="/linker/js/jquery.validate.min.js"></script>
-    <script src="/linker/js/modal.js"></script>
-    <script src="/linker/js/progress_bar.js"></script>
-    <script src="/linker/js/tab.js"></script>
-    <!--SCRIPTS END-->
-  </head>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+  <title><%- sails.config.appName %></title>
 
-  <body>
-    <section class="container-fluid">
-      <div id="header" class="row">
-        <div class="header-logo">
-          <div class="forj-log"></div>
-          <% if(req.session.blueprint_name){ %>
-            <h5><%=req.session.blueprint_name%> Forj</h5>
+  <!-- Viewport mobile tag for sensible mobile support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <!--STYLES-->
+  <link rel="stylesheet" href="/linker/styles/backup.css">
+  <link rel="stylesheet" href="/linker/styles/bootstrap-theme.css">
+  <link rel="stylesheet" href="/linker/styles/bootstrap.css">
+  <link rel="stylesheet" href="/linker/styles/component.css">
+  <link rel="stylesheet" href="/linker/styles/project-list.css">
+  <link rel="stylesheet" href="/linker/styles/site.css">
+  <link rel="stylesheet" href="/linker/styles/vtabs.css">
+  <!--STYLES END-->
+
+  <script src="/js/angular.v1.3.10.min.js"></script>
+  <script src="/js/angular-animate.v1.3.10.min.js"></script>
+  <!--SCRIPTS-->
+  <script src="/linker/js/modernizr.custom.js"></script>
+  <script src="/linker/js/jquery.1.9.1.min.js"></script>
+  <script src="/linker/js/bootstrap.js"></script>
+  <script src="/linker/js/bootstrap.min.js"></script>
+  <script src="/linker/js/dropdown.js"></script>
+  <script src="/linker/js/modal.js"></script>
+  <script src="/linker/js/progress_bar.js"></script>
+  <script src="/linker/js/tab.js"></script>
+  <script src="/linker/js/header_utils.js"></script>
+  <!--SCRIPTS END-->
+</head>
+
+<body>
+  <section class="container-fluid">
+    <div id="header" class="row" ng-controller="headerController">
+      <div class="header-logo">
+        <div class="forj-log"></div>
+        <% if(req.session.blueprint_name){ %>
+          <h5><%=req.session.blueprint_name%> Forj</h5>
           <% }else {%>
             <h5>Forj Setup In Progress</h5>
-          <% } %>
-        </div>
-        <div class="header-options">
-          <ul class="options">
-            <% if (req.session.show_welcome_message == true || req.session.show_welcome_message == 'true'){ %>
-               <li><div class="notifications"><div class="number">1</div></div></li>
             <% } %>
-            <li><div class="help">?</div></li>
-            <span style="clear:both;"></span>
-          </ul>
-          <% if(req.session.email){ %>
-            <% if(req.session.has_gravatar){ %>
-              <div class="gravatar" style="background-image: url('http://www.gravatar.com/avatar/<%=req.session.gravatar_hash%>?s=55')"></div>
-            <% }else{ %>
-              <div class="gravatar guest"></div>
-            <% } %>
-          <% }else{ %>
-            <div class="gravatar guest"></div>
-          <% } %>
-        </div>
-      </div>
-      <div id="menu" class="row">
+          </div>
+          <div class="header-options">
+            <ul class="options">
+              <% if(req.session.email){ %>
+                <li>
+                  <div class="notifications" data-ng-click="notificationClick()">
+                    <span class="badge count" data-ng-hide="notifications.length < 1" data-new-notification-bounce>{{ notifications.length }}</span>
+                  </div>
+                  <div class="notifications-show hide" data-show-panel-anim="showNotificationsPanel">
+                    <div class="notifications-viewport">
+                      <div class="notifications-wrapper container-fluid">
+                        <h4 data-ng-hide="notifications.length > 0" style="text-align: center;">You don't have notifications</h4>
+                        <div class="notification-msg row container-fluid" data-ng-repeat="notification in notifications">
+                          <div class="row warning" data-ng-show="notification.message.log.level === 'warning'">
+                            <span class="col-xs-12 glyphicon glyphicon-alert text-right" title="Warning"></span>
+                          </div>
+                          <div class="row critical" data-ng-show="notification.message.log.level === 'critical'">
+                            <span class="col-xs-12 glyphicon glyphicon-exclamation-sign text-right" title="Critical!"></span>
+                          </div>
+                          <div class="row">
+                            <span class="notification-title col-xs-8">{{ notification.message.action.ctx_data.name }}</span>
+                            <a href="#" class="notification-dismiss col-xs-4 text-right" data-ng-click="removeNotification(notification)">dismiss</a>
+                          </div>
+                          <div class="row">
+                            <p class="notification-description col-xs-12">{{ notification.message.action.ctx_data.description }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <% } %>
+                <li><div class="help">?</div></li>
+                <span style="clear:both;"></span>
+              </ul>
+              <% if(req.session.email){ %>
+                <% if(req.session.has_gravatar){ %>
+                  <div class="gravatar" style="background-image: url('http://www.gravatar.com/avatar/<%=req.session.gravatar_hash%>?s=55')"></div>
+                  <% }else{ %>
+                    <div class="gravatar guest"></div>
+                    <% } %>
+                    <% }else{ %>
+                      <div class="gravatar guest"></div>
+                      <% } %>
+                    </div>
+                  </div>
+    <div id="menu" class="row">
 
-        <div id="navcontainer">
-          <ul id="navlist">
-            <li id="li-home" class="active"><a href="#">Home</a></li>
-            <% if(req.session.projects && req.session.project_visibility){ %>
-            <li id="li-projects"><a href="#">Projects</a></li>
-            <% } %>
-            <% if(req.session.users && req.session.is_admin){ %>
-            <li id="li-users"><a href="#">Users</a></li>
-            <% } %>
-          </ul>
-        </div>
+      <div id="navcontainer">
+        <ul id="navlist">
+          <li id="li-home" class="active"><a href="#">Home</a></li>
+        <% if(req.session.projects && req.session.project_visibility){ %>
+          <li id="li-projects"><a href="#">Projects</a></li>
+        <% } %>
+        <% if(req.session.users && req.session.is_admin){ %>
+          <li id="li-users"><a href="#">Users</a></li>
+        <% } %>
+        </ul>
+      </div>
 
       </div>
       <div id="body" class="row">
@@ -86,85 +125,4 @@
     <footer>
     </footer>
   </body>
-  <script>
-    $(document).ready(function(){
-      $('#navlist li').click(function(){
-        $('#navlist li').removeClass('active');
-        $(this).addClass('active');
-        if($(this).attr('id')=='li-home'){
-          $('#body').load('/home/index');
-        }
-        if($(this).attr('id')=='li-projects'){
-          $('#container-tools').load('/project/index');
-        }
-        if($(this).attr('id')=='li-users'){
-          $('#container-tools').load('/users/index');
-        }
-      });
-      $('.gravatar').click(function(){
-        if( $(this).children('div.user-options').length === 0 ){
-          $('.preview').remove();
-          $(this).append("<div class='user-options preview'><div id='viewport'></div></div>");
-          $(this).children('div.user-options').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
-          $('div.user-options').children('#viewport').append("<span class='loading-span'>Loading...</span>");
-          $('div.user-options').children('#viewport').load('../home/user_options', function(response, status, xhr){
-            if (status == 'error') {
-              $('.loading-span').fadeOut(300, function(){
-                $(this).text('Unable to load the user panel.');
-              }).fadeIn(300);
-            }else{
-              $(this).html(response);
-            }
-          });
-        }else{
-          $(this).children('div.user-options').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function(){
-            $('div.user-options').remove();
-          });
-        }
-      });
-      $('.help').click(function(){
-        if( $(this).children('div.help-docs').length === 0 ){
-          $('.preview').remove();
-          $(this).append("<div class='help-docs preview'><div id='viewport'></div></div>");
-          $(this).children('div.help-docs').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
-          $('div.help-docs').children('#viewport').append("<span class='loading-span'>Loading...</span>");
-          $('div.help-docs').children('#viewport').load('../docs/index', function(response, status, xhr){
-            if (status == 'error') {
-              $('.loading-span').fadeOut(300, function(){
-                $(this).text('Unable to load help section.');
-              }).fadeIn(300);
-            }else{
-              $(this).html(response);
-            }
-          });
-        }else{
-          $(this).children('div.help-docs').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function(){
-            $('div.help-docs').remove();
-          });
-        }
-      });
-
-      $('.notifications').click(function(){
-        if( $(this).children('div.notifications-show').length === 0 ){
-           $('.preview').remove();
-           $(this).append("<div class='notifications-show preview'><div id='viewport'></div></div>");
-           $(this).children('div.notifications-show').css('opacity', 0).slideDown(400).animate({ opacity: 1 }, { queue: false, duration: 550 });
-           $('div.notifications-show').children('#viewport').append("<span class='loading-span'>Loading...</span>");
-           $('div.notifications-show').children('#viewport').load('../notifications/index', function(response, status, xhr){
-             if (status == 'error') {
-               $('.loading-span').fadeOut(300, function(){
-                 $(this).text('Unable to load notification section.');
-               }).fadeIn(300);
-             }else{
-               $(this).html(response);
-             }
-           });
-         }else{
-          $(this).children('div.notifications-show').css('opacity', 1).slideUp(400).animate({ opacity: 0 }, { queue: false, duration: 550 }).delay(1000, function()    {
-             $('div.notifications-show').remove();
-           });
-         }
-      });
-   });
-  </script>
 </html>
