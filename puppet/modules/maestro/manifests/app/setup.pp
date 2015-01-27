@@ -57,26 +57,8 @@ class maestro::app::setup(
   nodejs_wrap::pm2instance{'kitops.js':
     script_dir => "${app_dir}/forj.config",
     user       => $user,
-    require    => [  Nodejs_wrap::Pm2instance['mon-api.js'],
-                      Nodejs_wrap::Pm2instance['app.js'],
+    require    => [   Nodejs_wrap::Pm2instance['app.js'],
                       Nodejs_wrap::Pm2instance['bp-app.js']
                     ],
-  }
-  vcsrepo {"${app_dir}/forj.mon":
-    ensure   => latest,
-    provider => 'git',
-    revision => $revision,
-    source   => 'https://review.forj.io/p/forj-ui/forj.mon',
-    require  => [ Package['optimist'],
-                  Package['restify'],
-                  Package['path'],
-                  Package['mysql'],
-                  Package['js-yaml'],
-                  Package['pm2'],
-                ]
-  } ->
-  nodejs_wrap::pm2instance{'mon-api.js':
-    script_dir => "${app_dir}/forj.mon",
-    user       => $user,
   }
 }
