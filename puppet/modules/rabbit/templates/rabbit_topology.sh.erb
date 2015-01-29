@@ -19,6 +19,9 @@ DURABLE="<%= @durable %>"
 ROUTING_SUFFIX=".*.*"
 RABBIT_MQ_ADMIN_CMD="";
 
+NOTIF_QUEUE="<%= @notif_queue %>"
+NOTIF_BINDING="<%= @notif_binding %>"
+
 QUEUES=(<%= @queues %>)
 
 usage() {
@@ -134,6 +137,10 @@ main() {
     # Creation of the exchange
     create_exchange "$user" "$pwd"
 
+    # Creation of notification_queue
+    create_queue "$user" "$pwd" "$NOTIF_QUEUE"
+    create_binding "$user" "$pwd" "$NOTIF_QUEUE" "$NOTIF_BINDING"
+    
     # Creation of queues and bindings
     for i in "${QUEUES[@]}"; do
         create_queue "$user" "$pwd" "$i"
