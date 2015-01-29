@@ -42,6 +42,9 @@ if [ ! "${GITBRANCH}" = "" ] && [ ! "${GITBRANCH}" = "master" ] ; then
   export MODULE_FILE=modules.$GITBRANCH.env
 fi
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
+# Adding passenger module installation out of the box because we need it installed before isntall openstaci-dashboard until defect is closed.
+# Defect: https://tickets.puppetlabs.com/browse/MODULES-1725
+puppet module install puppetlabs-passenger --version 0.3.0
 bash /opt/config/production/git/maestro/puppet/install_modules.sh
 bash /opt/config/production/git/maestro/hiera/hiera.sh
 
