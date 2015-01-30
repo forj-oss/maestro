@@ -105,7 +105,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'disk-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '1800',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
@@ -114,7 +114,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'cpu-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '1800',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
@@ -123,7 +123,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'memory-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '1800',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
@@ -132,7 +132,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'check-disk':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
     subscribers => $forj_basic,
-    interval    => '60',
+    interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
   }
@@ -140,7 +140,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'check-cpu':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
     subscribers => $forj_basic,
-    interval    => '60',
+    interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
   }
@@ -148,7 +148,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'check-mem':
     command     => '/etc/sensu/plugins/check-mem.sh',
     subscribers => $forj_basic,
-    interval    => '60',
+    interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
   }
@@ -156,7 +156,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'disk-usage':
     command     => '/etc/sensu/plugins/disk-usage.sh',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '300',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
@@ -165,7 +165,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'cpu-usage':
     command     => '/etc/sensu/plugins/cpu-usage.sh',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '300',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
@@ -174,7 +174,7 @@ class sensu_config::sensuserver (
   sensu::check{ 'memory-usage':
     command     => '/etc/sensu/plugins/memory-usage.sh',
     subscribers => $forj_basic,
-    interval    => '10',
+    interval    => '300',
     standalone  => false,
     type        => 'metric',
     handlers    => 'redis-handler',
