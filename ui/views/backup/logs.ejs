@@ -1,9 +1,43 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><%=app%> logs, week: <%=week%></title>
-</head>
-<body>
-  <p><%-logs.replace(/\n/g,'<br>')%><p>
-</body>
-</html>
+<%if(success==='success'){%>
+<table>
+<%if(!!logs['last_update']){%><tr>
+	<td>Backup Update: </td>
+	<td><%-logs['last_update'].match(/(\d{4}-\d{2}-\d{2})/)[1]%></td>
+</tr><%}%>
+<%if(logs['errors']!==undefined || logs['warnings']!==undefined){%><tr>
+	<td>Log Message:  </td>
+	<td>
+		<%if(logs['errors']!==undefined){%>
+			<span <%if(parseInt(logs['errors'])>0){%>class="highlight"<%}%>  ><%-logs['errors']%> Error</span> 
+        <%}%>,
+        <%if(logs['warnings']!==undefined){%>
+			<span <%if(parseInt(logs['warnings'])>0){%>class="highlight"<%}%> ><%-logs['warnings']%> Warning <span>
+		<%}%>	
+	</td>	
+</tr><%}%>
+<%if(!!logs['bup_name']){%><tr>
+	<td>Bup Name:  </td>
+	<td><%-logs['bup_name']%> </td>
+</tr><%}%>
+<%if(!!logs['source_folder']){%><tr>
+	<td>Source Folder:  </td>
+	<td><%-logs['source_folder']%></td>
+</tr><%}%>
+<%if(!!logs['number_of_files']){%><tr>
+	<td>Number of Files:  </td>
+	<td><%-logs['number_of_files']%></td>
+</tr><%}%>
+<%if(!!logs['db_backup_tool']){%><tr>
+	<td>DB Backup Tool:  </td>
+	<td><%-logs['db_backup_tool']%></td>
+</tr><%}%>
+<%if(!!logs['databases']){%><tr>
+	<td>Database: 
+	<td><%-logs['databases']%>
+</tr><%}%>
+</table>
+<%}else{%>
+	<%-logs%>
+<%}%>
+
+

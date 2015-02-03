@@ -103,9 +103,9 @@ module.exports = {
     backup_utils.getLogs(app, week, function (error, logs){
       if(error){
         console.error(error);
-        res.view({ layout: null, 'logs': error.toString(), 'week': week, 'app': app });
+        res.view({layout:null, success: 'failed','logs':error.toString(),'week':week,'app':app});
       } else {
-        res.view({ layout: null, 'logs': logs, 'week': week, 'app': app });
+        res.view({layout:null, success: 'success', 'logs':logs,'week':week,'app':app});
       }
     });
   }

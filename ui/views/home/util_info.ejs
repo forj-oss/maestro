@@ -11,11 +11,28 @@
         <br>
         <% for (i=0; i<backupList.length; i++){ %>
           <div class="div-outline" style="width: 300px; line-height: 34px; display: table-cell; vertical-align: middle;">
-            <div class="backup-cell" style="float: left;"><%=backupList[i]%></div>
+            <div class="backup-cell" style="float: left;"><%=backupList[i].latestLogDate%></div>
             <div style="float:right;">
-              <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: confirmRestore('<%=service%>', '<%=app%>', '<%=backupList[i]%>');">Restore</a>&nbsp;&nbsp;</div>
+              <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="#" onclick="javascript: confirmRestore('<%=service%>', '<%=app%>', '<%=backupList[i].week%>');">Restore</a>&nbsp;&nbsp;</div>
               <div class="backup-cell" style="float: left;">|</div>
-              <div class="backup-cell backup-hover" style="float: left;">&nbsp;&nbsp;<a href="backup/logs?app=<%=app%>&week=<%=backupList[i]%>" target="_blank">Backup Log</a>&nbsp;&nbsp;</div>
+              <%
+                  var iconStyle = 'ops-critical';
+                  var iconPosition = '';
+                  if(backupList[i].status  == sails.config.env.backups.ok){
+                    iconStyle = 'ops-ok';
+                  }
+                  if(backupList[i].status  == sails.config.env.backups.warning){
+                    iconStyle = 'ops-warning';
+                  }
+                  if(backupList[i].status  == sails.config.env.backups.error){
+                    iconStyle = 'ops-critical';
+                    iconPosition = "background-position:4px 5px";
+                  }
+              %>
+                <div class="backup-cell backup-hover" style="float: left;" onclick="javascript: loadBackupLogInfo('<%=service%>', '<%=app%>', '<%=backupList[i].week%>');">
+                    <span class="ops <%=iconStyle%>" style="width: 26px; height:26px;float:left;margin-right:10px;<%=iconPosition%>" ></span>
+                    <a href="#">Backup Log</a>
+                </div>
             </div>
           </div>
           <div style="clear: both;"/>
@@ -25,6 +42,22 @@
     </div>
   </div>
 </div>
+
+<div id="backupLogInfoPanel" style="display:none;">
+  <span class="og-close"></span>
+  <span class="og-back"></span>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="row">
+        <h4 class="service-name"><%=service%> - Backup Information</h4>
+        <div style="width: 450px; height: 250px; overflow: auto;" id="backup-info">                  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div id="progressPanel" style="display:none;">
 <span class="og-close"></span>
@@ -185,7 +218,7 @@
             <div style="float:left;padding-right: 5px;"><a href="#" id="backup-now-btn">Backup Now</a></div>
             <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#" id="backup-sets-btn">Backup Sets</a></div>
             <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#" id="restore-btn">Restore</a></div>
-            <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="../backup/logs?app=<%=app%>" target="_blank">Download Backup Log</a></div>
+            <div style="float:left;border-left: 1px solid #FFFFFF;padding-right: 5px; padding-left: 5px;"><a href="#" onclick="javascript: loadBackupLogInfo('<%=service%>', '<%=app%>');">Download Backup Log</a></div>
           </div>
           <div class="row">
             <div>
@@ -208,6 +241,7 @@
     $('#backupPanel').hide();
     $('#progressPanel').hide();
     $('#confirmationPanel').hide();
+    $('#backupLogInfoPanel').hide();
     $('#'+id).show();
   }
 
@@ -257,7 +291,13 @@
     showPanel('confirmationPanel');
   }
 
-
+  function loadBackupLogInfo(service, app, week){
+    if(!week) week='';
+    $('#backup-info').load('../backup/logs?app=' + app + '&week=' + week, function() {
+      showPanel('backupLogInfoPanel');
+    });
+   }
+ 
   function restore(app, week){
     showPanel('progressPanel');
     setupProgressPanel(false, 'Running ' + app + ' Restore', 'This may take up to 5 minutes...', 'Checking service', '25%');

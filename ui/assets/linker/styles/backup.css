@@ -32,3 +32,11 @@
   -ms-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
+
+#backup-info table tr{
+  width: 50%;
+}
+
+#backup-info .highlight{
+  color : #F09101;
+}
