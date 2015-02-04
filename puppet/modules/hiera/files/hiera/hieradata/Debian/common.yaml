@@ -75,4 +75,4 @@ packages::latest:
   - 'apt'
   - 'apt-utils'
   - 'aptitude'
-
+  - 'libc6'

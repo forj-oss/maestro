@@ -43,3 +43,4 @@ packages::latest:
   - 'pciutils'
   - 'yum'
   - 'yum-utils'
+  - 'libc6'
