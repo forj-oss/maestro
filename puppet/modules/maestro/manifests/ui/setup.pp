@@ -108,7 +108,7 @@ class maestro::ui::setup(
       script_dir => "${app_dir}/maestro/api/bp-api/",
       user       => $user,
   } ->
-  nodejs_wrap::pm2instance{'app.js':
+  nodejs_wrap::pm2instance{'maestro-app.js':
     script_dir => "${app_dir}/maestro/ui/",
     user       => $user,
   } ->

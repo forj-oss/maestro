@@ -57,7 +57,7 @@ class maestro::app::setup(
   nodejs_wrap::pm2instance{'kitops.js':
     script_dir => "${app_dir}/forj.config",
     user       => $user,
-    require    => [   Nodejs_wrap::Pm2instance['app.js'],
+    require    => [   Nodejs_wrap::Pm2instance['maestro-app.js'],
                       Nodejs_wrap::Pm2instance['bp-app.js']
                     ],
   }

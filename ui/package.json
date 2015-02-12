@@ -21,8 +21,8 @@
     "sails-redis": "0.9"
   },
   "scripts": {
-    "start": "node app.js",
-    "debug": "node debug app.js"
+    "start": "node maestro-app.js",
+    "debug": "node debug maestro-app.js"
   },
   "jshintConfig": {
     "boss": false,
@@ -38,7 +38,7 @@
     "indent": 2,
     "curly": true
   },
-  "main": "app.js",
+  "main": "maestro-app.js",
   "repository": "",
   "author": "",
   "license": "",
