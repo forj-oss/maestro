@@ -116,10 +116,8 @@ maestro::app::redis_db::keys:
   ldap_server: 'ldap://localhost'
   ldap_dit: 'o=%{::maestro_id}.%{::erodomain},dc=%{::maestro_id}'
   agm_enabled: false
-  agm_tenant_id: ''
   bugzilla_enabled: false
   launchpad_enabled: false
-  agm_defect_url: ''
   launchpad_defect_url: 'https://code.launchpad.net/bugs/$2'
   bugzilla_defect_url: 'http://bugs.example.com/show_bug.cgi?id=$2'
   openid_provider: 'launchpad'
