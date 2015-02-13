@@ -31,5 +31,6 @@ class maestro::backup::params (
   $logrotate_create_owner = hiera('maestro::backup::logrotate_create_owner', 'root'),
   $logrotate_create_group = hiera('maestro::backup::logrotate_create_group', 'root'),
   $logrotate_rotate_every = hiera('maestro::backup::logrotate_rotate_every', 'monthly'),
+  $number_of_backups_to_retain = hiera('maestro::backup::number_of_backups_to_retain', 4),
 ) {
 }

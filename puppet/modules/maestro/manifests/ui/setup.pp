@@ -39,8 +39,29 @@ class maestro::ui::setup(
   validate_string($app_dir)
   validate_string($revision)
 
-  vcsrepo {"${app_dir}/maestro":
+  vcsrepo {"${app_dir}/node-common":
     ensure   => latest,
+    provider => 'git',
+    revision => $revision,
+    source   => 'https://review.forj.io/p/forj-oss/node-common',
+  } ->
+  exec { 'npm install of msg-util':
+    command => 'npm install',
+    path    => $::path,
+    cwd     => "${app_dir}/node-common/msg-util",
+  } ->
+  exec { 'npm install of queue-util':
+    command => 'npm install',
+    path    => $::path,
+    cwd     => "${app_dir}/node-common/queue-util",
+  } ->
+  exec { 'npm install of crypto-util':
+    command => 'npm install',
+    path    => $::path,
+    cwd     => "${app_dir}/node-common/crypto-util",
+  } ->
+  vcsrepo {"${app_dir}/maestro":
+    ensure   => present,
     provider => 'git',
     revision => $revision,
     source   => 'https://review.forj.io/p/forj-oss/maestro',
@@ -55,9 +76,29 @@ class maestro::ui::setup(
                   Package['sails'],
                 ]
   } ->
-  nodejs_wrap::pm2instance{'app.js':
-    script_dir => "${app_dir}/maestro/ui/",
-    user       => $user,
+  file { "${app_dir}/maestro/ui/node_modules/queue-util":
+    ensure => 'link',
+    target => "${app_dir}/node-common/queue-util",
+    owner  => $user,
+    group  => $user,
+  } ->
+  file { "${app_dir}/maestro/ui/node_modules/msg-util":
+    ensure => 'link',
+    target => "${app_dir}/node-common/msg-util",
+    owner  => $user,
+    group  => $user,
+  } ->
+  file { "${app_dir}/maestro/ui/node_modules/crypto-util":
+    ensure => 'link',
+    target => "${app_dir}/node-common/crypto-util",
+    owner  => $user,
+    group  => $user,
+  } ->
+  file { "${app_dir}/maestro/api/bp-api/config/config.json":
+    ensure => 'link',
+    target => "/opt/config/${::settings::environment}/config.json",
+    owner  => $user,
+    group  => $user,
   } ->
   nodejs_wrap::pm2instance{'maestro-api.js':
     script_dir => "${app_dir}/maestro/api/maestro-api/",
@@ -66,6 +107,10 @@ class maestro::ui::setup(
   nodejs_wrap::pm2instance{'bp-app.js':
       script_dir => "${app_dir}/maestro/api/bp-api/",
       user       => $user,
+  } ->
+  nodejs_wrap::pm2instance{'maestro-app.js':
+    script_dir => "${app_dir}/maestro/ui/",
+    user       => $user,
   } ->
   a2mod { ['proxy_http','proxy']:
     ensure  => present,
@@ -76,11 +121,5 @@ class maestro::ui::setup(
         priority   => '70',
         template   => 'maestro/maestro_vhost.erb',
         servername => 'localhost',
-  } ->
-  file { "${app_dir}/maestro/api/bp-api/config/config.json":
-    ensure => 'link',
-    target => "/opt/config/${::settings::environment}/config.json",
-    owner  => $user,
-    group  => $user,
   }
 }

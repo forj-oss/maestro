@@ -38,10 +38,6 @@
  var metrics = require('metrics/metrics');
 
 module.exports = {
-
-
-
-
   /**
    * Overrides for the settings in `config/controllers.js`
    * (specific to HomeController)

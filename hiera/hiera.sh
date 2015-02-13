@@ -93,6 +93,14 @@ function setup_hiera_ubuntu {
 
 }
 
+function eyaml_bin {
+  if [ -f /usr/local/bin/eyaml ] ; then
+    /usr/local/bin/eyaml $@
+  else
+    /usr/bin/eyaml $@
+  fi
+}
+
 # Create the folder for the hiera data
 mkdir -p /etc/puppet/hieradata
 
@@ -116,7 +124,7 @@ echo "################# Hiera Installation done, step 1/2 ###################"
 if is_ubuntu; then
     gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
     gem install --include-dependencies --no-rdoc --no-ri deep_merge
-    gem install --include-dependencies --no-rdoc --no-ri json -v '~>1.7.5' 
+    gem install --include-dependencies --no-rdoc --no-ri json -v '~>1.7.5'
 elif is_rhel6; then
     gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
     gem install --include-dependencies --no-rdoc --no-ri deep_merge
@@ -145,7 +153,7 @@ if [ -f /etc/puppet/secure/keys/private_key.pkcs7.pem ] ; then
 fi
 
 #create keys
-/usr/local/bin/eyaml createkeys
+eyaml_bin createkeys
 
 # set permissions to folders and keys
 chown -R puppet:puppet /etc/puppet/secure/keys
@@ -166,13 +174,19 @@ eyaml_file="/etc/puppet/hieradata/common.eyaml"
 
 #Add encrypted parameters
 mysql_root_password='changeme'
-/usr/local/bin/eyaml encrypt -l 'mysql_password' -s $mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
-/usr/local/bin/eyaml encrypt -l 'mysql_root_password' -s $mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
+gerrit_mysql_root_password=$(openssl rand -hex 10)
 
-/usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
-/usr/local/bin/eyaml encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
+eyaml_bin encrypt -l 'mysql_password' -s $gerrit_mysql_root_password | grep "mysql_password: ENC" >> $eyaml_file
+eyaml_bin encrypt -l 'mysql_root_password' -s $gerrit_mysql_root_password | grep "mysql_root_password: ENC" >> $eyaml_file
+
+eyaml_bin encrypt -l 'maestro::app::mysql_root_password' -s $mysql_root_password | grep "maestro::app::mysql_root_password: ENC" >> $eyaml_file
+eyaml_bin encrypt -l 'maestro::app::mysql_password' -s '$Changeme01' | grep "maestro::app::mysql_password: ENC" >> $eyaml_file
 
 rabbitmq_password='changeme'
-/usr/local/bin/eyaml encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
+eyaml_bin encrypt -l 'rabbit::password' -s $rabbitmq_password | grep "rabbit::password: ENC" >> $eyaml_file
+
+ldap_password='changeme'
+eyaml_bin encrypt -l 'ldap_config::rootpw' -s $ldap_password | grep "ldap_config::rootpw: ENC" >> $eyaml_file
+
 
 echo "################# Hiera eyaml Installation done, step 2/2 done  ###################"

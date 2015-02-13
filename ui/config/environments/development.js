@@ -65,7 +65,18 @@ module.exports.env = {
     api: {
       metric: {
         endpoint: 'http://localhost:8087/api/v1.0',
-        max_retry: '4'
+        max_retry: '4',
+        timeout: 100
+      }
+    },
+    backend: {
+      db : {
+        flavor: "redis",
+        redis: {
+          ip: '127.0.0.1',
+          port: '6379',
+          id: 1
+        }
       }
     }
 };

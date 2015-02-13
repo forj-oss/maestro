@@ -26,8 +26,9 @@ classes:
   - maestro::node_vhost_lookup
   - gardener
   - sysadmin_config::manage_servers
-  - maestro::ldap::ldapserver
+  - ldap_config
   - maestro::redis::redisserver
+  - maestro::app::redis_db
   - rabbit
   - sensu_config::sensuserver
   - sensu_config::uchiwa
@@ -67,9 +68,9 @@ jimador::discover:
     icon: true
     visible: true
 
-# nodejs wrap global defaults
-nodejs_wrap::node_env: "%{::maestro::params::node_env}"
-nodejs_wrap::manage_repo: true
+# nodejs wrap global defaults (note: moved to common.yaml)
+#nodejs_wrap::node_env: "%{::maestro::params::node_env}"
+#nodejs_wrap::manage_repo: true
 
 # Should never be defined here, but in a forj instance.
 # maestro::nodes:
@@ -102,11 +103,28 @@ maestro::key_name: '%{::key_name}'
 maestro::network_name: '%{::network_name}'
 maestro::security_groups: '%{::security_groups}'
 maestro::meta_data: 'http_proxy=%{::webproxy}'
-maestro::ldap::ldapserver::certs_dir: '/opt/config/cacerts'
 
 # maestro ui /app configuration
 maestro::app::setup::revision: '%{::gitbranch}'
 maestro::ui::setup::revision: '%{::gitbranch}'
+
+# Redis configuration
+maestro::redis::db_name: '1'
+
+maestro::app::redis_db::keys:
+  ldap_sa_user: 'cn=admin,dc=%{::maestro_id}'
+  ldap_server: 'ldap://localhost'
+  ldap_dit: 'o=%{::maestro_id}.%{::erodomain},dc=%{::maestro_id}'
+  agm_enabled: false
+  bugzilla_enabled: false
+  launchpad_enabled: false
+  launchpad_defect_url: 'https://code.launchpad.net/bugs/$2'
+  bugzilla_defect_url: 'http://bugs.example.com/show_bug.cgi?id=$2'
+  openid_provider: 'launchpad'
+  openid_url: 'https://login.launchpad.net/'
+  show_welcome_notification: false
+  keystone_identity: 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/'
+  keystone_compute: 'https://region-a.geo-1.compute.hpcloudsvc.com/v2/'
 
 salt::salt_master: "%{::erosite}.%{::erodomain}"
 

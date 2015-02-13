@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+VHOST="<%= @vhost %>"
+EXCHANGE_NAME="<%= @exchange %>"
+EXCHANGE_TYPE="<%= @exchange_type %>"
+DURABLE="<%= @durable %>"
+ROUTING_SUFFIX=".*.*"
+RABBIT_MQ_ADMIN_CMD="";
+
+NOTIF_QUEUE="<%= @notif_queue %>"
+NOTIF_BINDING="<%= @notif_binding %>"
+
+QUEUES=(<%= @queues %>)
+
+usage() {
+    echo "Usage: $0 rabbitmq_user password" 1>&2
+    exit 1
+}
+
+
+die(){
+    local msg=$1
+    local logfile=$2
+    [ -n "$msg" ] && echo "$msg" 1>&2
+    [ -n "$logfile" ] && echo "$msg" >> "$logfile"
+    exit 1
+}
+
+
+set_rabbitmqadmin_cmd(){
+    which rabbitmqadmin 2>/dev/null | grep -q rabbitmqadmin
+
+    if [ $? -eq 0 ]; then
+        RABBIT_MQ_ADMIN_CMD=$(which rabbitmqadmin)
+    else
+        die "rabbitmqadmin is not installed";
+    fi
+}
+
+
+# Needs 2 params: user, password
+create_exchange() {
+    local user=$1
+    local pwd=$2
+
+    if [ $# != 2 ] ; then
+        die "create_exchange() needs 2 params: user, password"
+    fi
+
+    "$RABBIT_MQ_ADMIN_CMD" list exchanges --user="$user" --password="$pwd" --vhost="$VHOST" 2>/dev/null | grep -w -q "$EXCHANGE_NAME"
+    if [ $? -ne 0 ] ; then
+        "$RABBIT_MQ_ADMIN_CMD" declare exchange name="$EXCHANGE_NAME" type="$EXCHANGE_TYPE" --user="$user" --password="$pwd" --vhost="$VHOST"
+    else
+        echo "$EXCHANGE_NAME already exists"
+    fi
+}
+
+
+# Needs 3 params: user, password and queue_name
+create_queue() {
+    local user=$1
+    local pwd=$2
+    local queue_name=$3
+
+    if [ $# != 3 ] ; then
+        die "create_queue() needs 3 params: user, password and queue_name"
+    fi
+
+    "$RABBIT_MQ_ADMIN_CMD" list queues name --user="$user" --password="$pwd" --vhost="$VHOST" 2>/dev/null | grep -w -q "$queue_name"
+    if [ $? -ne 0 ] ; then
+        "$RABBIT_MQ_ADMIN_CMD" declare queue name="$queue_name" durable="$DURABLE" --user="$user" --password="$pwd" --vhost="$VHOST"
+    else
+        echo "$queue_name already exists"
+    fi
+}
+
+
+# Needs 4 params: user, password, queue_name, routing_key
+create_binding() {
+    local user=$1
+    local pwd=$2
+    local queue_name=$3
+    local routing_key=$4
+
+    if [ $# != 4 ] ; then
+        die "create_binding() needs 4 params: user, password, queue_name and routing_key"
+    fi
+
+    "$RABBIT_MQ_ADMIN_CMD" list bindings --user="$user" --password="$pwd" --vhost="$VHOST" 2>/dev/null | grep -w "$EXCHANGE_NAME" | grep -w "$queue_name" | grep -w -q "$routing_key"
+    if [ $? -ne 0 ] ; then
+        "$RABBIT_MQ_ADMIN_CMD" declare binding source="$EXCHANGE_NAME" destination="$queue_name" routing_key="$routing_key" --user="$user" --password="$pwd" --vhost="$VHOST"
+    else
+        echo "$routing_key already exists."
+    fi
+}
+
+
+main() {
+    user=$1
+    pwd=$2
+
+    # Validations
+    if [ $# != 2 ] ; then
+        usage
+    fi
+
+    if [ -z "$VHOST" ] ; then
+        die "VHOST is required"
+    fi
+
+    if [ -z "$EXCHANGE_NAME" ] ; then
+        die "EXCHANGE_NAME is required"
+    fi
+
+    if [ -z "$EXCHANGE_TYPE" ] ; then
+        die "EXCHANGE_TYPE is required"
+    fi
+
+    if [ -z "$DURABLE" ] ; then
+        die "DURABLE is required"
+    fi
+
+    set_rabbitmqadmin_cmd
+
+    # Creation of the exchange
+    create_exchange "$user" "$pwd"
+
+    # Creation of notification_queue
+    create_queue "$user" "$pwd" "$NOTIF_QUEUE"
+    create_binding "$user" "$pwd" "$NOTIF_QUEUE" "$NOTIF_BINDING"
+    
+    # Creation of queues and bindings
+    for i in "${QUEUES[@]}"; do
+        create_queue "$user" "$pwd" "$i"
+        create_binding "$user" "$pwd" "$i" "$i$ROUTING_SUFFIX"
+    done
+}
+
+main "$@"

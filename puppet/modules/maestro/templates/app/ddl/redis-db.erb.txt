@@ -1,0 +1,8 @@
+SELECT <%= @db_name %>
+
+SET ldap_sa_password '<%= @rootpw %>'
+
+<% @keys.each_pair do |key, hash| -%>
+SET <%= key %> '<%= hash %>'
+
+<% end -%>

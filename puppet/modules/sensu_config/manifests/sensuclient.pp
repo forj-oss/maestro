@@ -17,19 +17,23 @@
 #
 
 class sensu_config::sensuclient (
-  $sensu_vhost    = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
-  $password       = hiera('rabbit::password'),
-  $rabbitmq_host  = hiera('rabbit::host',$::eroip),
-  $subscriptions  = hiera('rabbit::subscriptions','sensu-test'),
-  $redis_host     = hiera('redis::params::host',$::eroip),
-  $redis_port     = hiera('redis::params::port','6379'),
+  $sensu_vhost   = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
+  $forj_basic    = hiera('sensu_config::sensuserver::forj_basic','forj-basic'),
+  $rabbitmq_host = hiera('rabbit::host',$::eroip),
+  $password      = hiera('rabbit::password'),
+  $redis_host    = hiera('redis::params::host',$::eroip),
+  $redis_port    = hiera('redis::params::port','6379'),
 )
 {
   validate_string($sensu_vhost)
   validate_string($password)
+  validate_string($forj_basic)
   validate_string($rabbitmq_host)
-  validate_string($subscriptions)
   validate_string($redis_host)
+
+  if ($::hostname == undef or $::hostname == '') {
+    fail('ERROR! hostname facter is required.')
+  }
 
   if !is_integer($redis_port) { fail('sensu_config::sensuclient::redis_port must be an integer') }
 
@@ -44,7 +48,7 @@ class sensu_config::sensuclient (
       rabbitmq_host     => $rabbitmq_host,
       redis_host        => $redis_host,
       redis_port        => $redis_port,
-      subscriptions     => $subscriptions,
+      subscriptions     => [$forj_basic, $::hostname],
       rabbitmq_vhost    => $sensu_vhost,
     }
   }

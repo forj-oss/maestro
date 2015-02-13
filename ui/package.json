@@ -16,11 +16,13 @@
     "JSONPath": "0.10.0",
     "nconf": "0.6.9",
     "redis": "0.12.1",
-    "ldapjs": "0.7.1"
+    "ldapjs": "0.7.1",
+    "request": "2.48.0",
+    "sails-redis": "0.9"
   },
   "scripts": {
-    "start": "node app.js",
-    "debug": "node debug app.js"
+    "start": "node maestro-app.js",
+    "debug": "node debug maestro-app.js"
   },
   "jshintConfig": {
     "boss": false,
@@ -36,7 +38,7 @@
     "indent": 2,
     "curly": true
   },
-  "main": "app.js",
+  "main": "maestro-app.js",
   "repository": "",
   "author": "",
   "license": "",

@@ -36,12 +36,16 @@ fi
 # we use install_puppet.sh and install_modules.sh for puppet setup support
 # TODO: consider if we source/download this file from openstack public repos
 #
-# MODULE_FILE will be changed to non-default when GITBRANCH is empty or not 
+# MODULE_FILE will be changed to non-default when GITBRANCH is empty or not
 # master.
 if [ ! "${GITBRANCH}" = "" ] && [ ! "${GITBRANCH}" = "master" ] ; then
   export MODULE_FILE=modules.$GITBRANCH.env
 fi
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
+# Regarding issues with the latest passenger release and its dependencies
+# we need to set for an older installation version.
+puppet module install puppetlabs-apache --version 0.4.0
+puppet module install puppetlabs-passenger --version 0.3.0
 bash /opt/config/production/git/maestro/puppet/install_modules.sh
 bash /opt/config/production/git/maestro/hiera/hiera.sh
 

@@ -4,14 +4,18 @@ var redis = require('redis');
 var crypto = require('crypto');
 var validator = require('validator');
 var kit_ops = require('../../../node_modules/kit-ops/kit-ops');
+var cryptoUtil = require('../../../node_modules/crypto-util/crypto-util');
 var check_grav = require('../../../node_modules/check-grav/check-grav');
 var blueprint_utils = require('../../../node_modules/blueprint/blueprint');
+var config = require('./config');
+
+
 module.exports = {
   authenticate: function(req, callback){
     
     //Username = email
     var user = req.body.username;
-    var password = req.body.password;
+    var password = cryptoUtil.encrypt(req.body.password);
     
     if(validator.isEmail(user)){
       get_service_account(function(err, account){
@@ -26,13 +30,13 @@ module.exports = {
           
           async.series({
             authenticated: function(callback_){
-              client.bind('uid='+user+',ou=people,'+account.dit, password, function(err_bind){
+              client.bind('uid=' + user + ',ou=people,' + account.dit, password, function(err_bind){
                 if(err_bind){
                   callback_(null, false);
                 }else{
                   client.unbind(function(err_unb){
                     if(err_unb){
-                      console.log('ldap module error (Unbind, authenticated): '+err_unb) ;
+                      console.log('ldap module error (Unbind, authenticated): ' + err_unb) ;
                     }
                   });
                   callback_(null, true);
@@ -107,15 +111,16 @@ module.exports = {
     }
   }
 }
+
+
 function get_service_account(callback){
   client = redis.createClient();
-  
+
   client.on('error', function(err){
     callback(err, null);
   });
-  
-  //DEFAULT DB FOR LDAP ON REDIS (15)
-  client.select(15, function(){
+
+  client.select(config.redisdb, function(){
     
     async.series({
       user: function(callback_result){
@@ -165,6 +170,8 @@ function get_service_account(callback){
     
   });
 }
+
+
 function get_members_of(group, callback){
   get_service_account(function(err, account){
     if(err){
@@ -240,6 +247,8 @@ function get_members_of(group, callback){
     }
   })
 }
+
+
 function projectsVisibility(is_admin, is_authenticated, global_manage_projects){
   var anonymous = 'anonymous';
   var authenticated = 'authenticated';

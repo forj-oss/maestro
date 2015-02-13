@@ -17,7 +17,7 @@
  * ProjectController
  *
  * @module      :: Controller
- * @description	:: A set of functions called `actions`.
+ * @description :: A set of functions called `actions`.
  *
  *                 Actions contain code telling Sails how to respond to a certain type of request.
  *                 (i.e. do stuff, then send some JSON, show an HTML page, or redirect to another URL)
@@ -36,6 +36,7 @@
  */
  var maestro_exec = require('maestro-exec/maestro-exec');
   var blueprint_utils = require('blueprint/blueprint');
+  var project_utils = require('projects/projects');
 module.exports = {
   /**
    * Action blueprints:
@@ -52,7 +53,13 @@ module.exports = {
   },
   index: function(req, res){
     if(req.session.project_visibility){
-      res.view({ layout: null });
+      project_utils.getProjectsList(function (error, stdout, stderr) {
+        if (error){
+          res.view('403', { layout: null });
+        }else{
+          res.view({ layout: null, projects_list: stdout, gerritIp: project_utils.getGerritIp() });
+        }
+      });
     }else{
       res.view('403', { layout: null });
     }
@@ -66,13 +73,13 @@ module.exports = {
           if(result === undefined){
             res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+err.message ]});
           }else{
-            
+
             try{
               result = JSON.parse(result);
             }catch(e){
               result = new Error('Unable to parse malformed JSON');
             }
-            
+
             if(result instanceof Error){
               sails.log.debug('Unable to get the instance_id of the kit: '+result.message);
               res.view('500', { layout: null, errors: [ 'Unable to get the instance_id of the kit: '+result.message ]});
@@ -101,5 +108,5 @@ module.exports = {
    */
   _config: {}
 
-  
+
 };

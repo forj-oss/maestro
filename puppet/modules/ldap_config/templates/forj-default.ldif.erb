@@ -1,0 +1,44 @@
+version: 1
+
+dn: o=<%= @domain %>,dc=<%= @maestro_id %>
+description: <%= @description %>
+o: <%= @domain %>
+objectclass: organization
+objectclass: top
+
+dn: ou=groups,o=<%= @domain %>,dc=<%= @maestro_id %>
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+dn: cn=admins,ou=groups,o=<%= @domain %>,dc=<%= @maestro_id %>
+cn: admins
+description: <%= @second_level_domain %> admin group
+member: cn=admin,dc=<%= @maestro_id %>
+objectclass: groupOfNames
+objectclass: top
+
+dn: cn=developers,ou=groups,o=<%= @domain %>,dc=<%= @maestro_id %>
+cn: developers
+description: developers
+member: cn=admin,dc=<%= @maestro_id %>
+objectclass: groupOfNames
+objectclass: top
+
+dn: cn=guest,ou=groups,o=<%= @domain %>,dc=<%= @maestro_id %>
+cn: guest
+description: guests
+member: cn=admin,dc=<%= @maestro_id %>
+objectclass: groupOfNames
+objectclass: top
+
+dn: cn=operators,ou=groups,o=<%= @domain %>,dc=<%= @maestro_id %>
+cn: operators
+description: <%= @second_level_domain %> operators
+member: cn=admin,dc=<%= @maestro_id %>
+objectclass: groupOfNames
+objectclass: top
+
+dn: ou=people,o=<%= @domain %>,dc=<%= @maestro_id %>
+objectclass: organizationalUnit
+objectclass: top

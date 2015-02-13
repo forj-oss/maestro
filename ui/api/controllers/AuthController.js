@@ -48,6 +48,9 @@ module.exports = {
   sign_up: function(req, res){
     res.view({ layout: 'login_layout' });
   },
+  pending_approval: function(req, res){
+    res.view({ layout: 'login_layout' });
+  },
   sign_in: function(req, res){
     var message = req.param('message');
     findElement(sails.config.env.plugins.auth, 'default', true, function(auth_plugin){
@@ -56,9 +59,6 @@ module.exports = {
   },
   sign_out: function(req, res){
     req.session.destroy();
-    res.view({ layout: 'login_layout' });
-  },
-  login: function(req, res){
     res.view({ layout: 'login_layout' });
   },
   first_admin: function(req, res){
