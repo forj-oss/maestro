@@ -522,6 +522,10 @@ limitations under the License.
   -webkit-transition:opacity linear 0.2s;
   transition:opacity linear 0.2s;
 }
+.notification-msg .notification-date {
+  color: #C0C0C0;
+  font-size: 0.8em;
+}
 .notification-msg .critical{
   color: red;
 }
@@ -552,6 +556,8 @@ limitations under the License.
 }
 .notification-msg .notification-dismiss{
   display: none;
+  color: white;
+  cursor: pointer;
 }
 
 .bounce-anim{

@@ -75,7 +75,7 @@ forjApp.directive('showPanelAnim', [function () {
 
 forjApp.factory('forjNotifications', ['$http', '$rootScope', function($http, $rootScope) {
 
-  var time = 3000;// Time in miliseconds to wait for the next pull of notifications.
+  var time = NOTIFICATIONS_UPDATE_DELAY || 3000;// Time in miliseconds to wait for the next pull of notifications.
   var notifications = [], newNotificationEvent = [], notificationRemovedEvent = [],
 
   isAlreadyIn = function(notif, notificationsSet) {
@@ -101,6 +101,7 @@ forjApp.factory('forjNotifications', ['$http', '$rootScope', function($http, $ro
   },
 
   newNotificationEventHandler = function(msg) {
+    msg.message.time_stamp = new Date(msg.message.time_stamp);
     notifications.unshift(msg);
     for (var i = 0; i < newNotificationEvent.length; i++) {
       newNotificationEvent[i](msg);
@@ -117,7 +118,7 @@ forjApp.factory('forjNotifications', ['$http', '$rootScope', function($http, $ro
         }
       }
 
-      for (i = 0; i < data.length; i++) {// Removes old notifications
+      for (i = 0; i < notifications.length; i++) {// Removes old notifications
         if ( !isAlreadyIn(notifications[i], data) ) {
           notificationRemovedEventHandler(notifications[i]);
           i--;// This is here because the line above removes one item from notifications

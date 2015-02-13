@@ -32,9 +32,17 @@
   <link rel="stylesheet" href="/linker/styles/vtabs.css">
   <!--STYLES END-->
 
+  <script type="text/javascript">
+  // Global variables
+  var NOTIFICATIONS_UPDATE_DELAY = <%=sails.config.env.NOTIFICATIONS_UPDATE_DELAY%>;
+  </script>
+
   <script src="/js/angular.v1.3.10.min.js"></script>
   <script src="/js/angular-animate.v1.3.10.min.js"></script>
   <!--SCRIPTS-->
+  <script src="/linker/js/socket.io.js"></script>
+  <script src="/linker/js/sails.io.js"></script>
+  <script src="/linker/js/app.js"></script>
   <script src="/linker/js/modernizr.custom.js"></script>
   <script src="/linker/js/jquery.1.9.1.min.js"></script>
   <script src="/linker/js/bootstrap.js"></script>
@@ -45,6 +53,8 @@
   <script src="/linker/js/tab.js"></script>
   <script src="/linker/js/header_utils.js"></script>
   <!--SCRIPTS END-->
+
+
 </head>
 
 <body>
@@ -53,9 +63,9 @@
       <div class="header-logo">
         <div class="forj-log"></div>
         <% if(req.session.blueprint_name){ %>
-          <h5><%=req.session.blueprint_name%> Forj</h5>
+          <h5 class="hidden-xs"><%=req.session.blueprint_name%> Forj</h5>
           <% }else {%>
-            <h5>Forj Setup In Progress</h5>
+            <h5 class="hidden-xs">Forj Setup In Progress</h5>
             <% } %>
           </div>
           <div class="header-options">
@@ -69,16 +79,19 @@
                     <div class="notifications-viewport">
                       <div class="notifications-wrapper container-fluid">
                         <h4 data-ng-hide="notifications.length > 0" style="text-align: center;">You don't have notifications</h4>
-                        <div class="notification-msg row container-fluid" data-ng-repeat="notification in notifications">
-                          <div class="row warning" data-ng-show="notification.message.log.level === 'warning'">
-                            <span class="col-xs-12 glyphicon glyphicon-alert text-right" title="Warning"></span>
-                          </div>
-                          <div class="row critical" data-ng-show="notification.message.log.level === 'critical'">
-                            <span class="col-xs-12 glyphicon glyphicon-exclamation-sign text-right" title="Critical!"></span>
+                        <div class="notification-msg row container-fluid" data-ng-repeat="notification in notifications | orderBy: message.time_stamp">
+                          <div class="row">
+                            <span class="col-xs-2 text-left">
+                              <span class="glyphicon glyphicon-exclamation-sign critical" title="Critical!" data-ng-show="notification.message.log.level === 'critical'"></span>
+                              <span class="glyphicon glyphicon-alert warning" title="Warning" data-ng-show="notification.message.log.level === 'warning'"></span>
+                            </span>
+                            <span class="notification-date col-xs-10 text-right">{{ notification.message.time_stamp | date: 'medium'}}</span>
                           </div>
                           <div class="row">
-                            <span class="notification-title col-xs-8">{{ notification.message.action.ctx_data.name }}</span>
-                            <a href="#" class="notification-dismiss col-xs-4 text-right" data-ng-click="removeNotification(notification)">dismiss</a>
+                            <span class="notification-title col-xs-10">{{ notification.message.action.ctx_data.name }}</span>
+                            <span class="col-xs-2 text-center">
+                              <span class="glyphicon glyphicon-trash notification-dismiss" title="Dismiss notification" data-ng-click="removeNotification(notification)"></span>
+                            </span>
                           </div>
                           <div class="row">
                             <p class="notification-description col-xs-12">{{ notification.message.action.ctx_data.description }}</p>

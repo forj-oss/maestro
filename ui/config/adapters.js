@@ -66,9 +66,12 @@ module.exports.adapters = {
     *  in Redis using sails-redis adapter, the
     *  NotificationController.js do the select
     *  by itself.
-    *  I think the problem is that the old
-    *  version of sails-redis (0.9.x) doesn´t
-    *  support that feature.
+    *  The problem is that the old version of
+    *  sails-redis (0.9.x) doesn´t support
+    *  that feature.
+    *  For more info. see links below:
+    *  https://github.com/balderdashy/sails-redis/issues/29
+    *  https://github.com/vanetix/sails-redis/commit/a72c39590494eb0c86cb29aeaf302c995c52051f
     *************************************************/
   },
 };

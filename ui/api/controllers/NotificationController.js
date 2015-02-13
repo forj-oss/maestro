@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-'use strict';
 
 /**
 * RedisController
@@ -33,8 +32,11 @@ limitations under the License.
 * @docs        :: http://sailsjs.org/#!documentation/controllers
 */
 
+'use strict';
 var async = require('async');
-var REDIS_DB = process.env.REDIS_DB || 1;
+var getRedisNotificationDB = function () {
+  return sails.config.env.backend.db.redis.id || 1;
+};
 
 module.exports = {
 
@@ -54,13 +56,12 @@ module.exports = {
       Notification.native(callback);
     },
     function(collection, callback) {// Selects redis database
-      collection.select(REDIS_DB, function(err) {
+      collection.select(getRedisNotificationDB(), function(err) {
         callback(err, collection);
       });
     },
     function(collection, callback) {// Gets all the user's keys
       collection.keys(param, function(err, keys) {
-        keys.reverse();// Reverses the array because we want the newer first
         callback(err, collection, keys);
       });
     },
@@ -125,7 +126,7 @@ module.exports = {
       Notification.native(callback);
     },
     function(collection, callback) {
-      collection.select(REDIS_DB, function(err) {
+      collection.select(getRedisNotificationDB(), function(err) {
         callback(err, collection);
       });
     },
