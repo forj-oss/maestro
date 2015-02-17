@@ -190,6 +190,9 @@ $(document).ready(function(){
     if($(this).attr('id')=='li-projects'){
       $('#container-tools').load('/project/index');
     }
+    if($(this).attr('id')=='li-users'){
+      $('#container-tools').load('/users/index');
+    }
   });
   $('.gravatar').click(function(){
     if( $(this).children('div.user-options').length === 0 ){
