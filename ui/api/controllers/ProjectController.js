@@ -76,15 +76,15 @@ module.exports = {
 
         queue_util.publish(rabbitmqConnectionOptions, rabbitmqImplOptions, exchangeName, exchangeOptions, payload, routingKey, function(error) {
           if (error){
-            console.error(error);
-            res.json(error);
+            console.error(error.message ? error.message : error);
+            res.json(error.message ? error.message : error);
           }else{
             res.json(null);
           }
         });
       }else {
-        console.error('ProjectController error, msg is not valid: ' + options);
-        res.json(new Error('Project is not valid!'));
+        console.error('ProjectController error, msg is not valid: ' + JSON.stringify(options));
+        res.json(new Error('Project name is not valid!').message);
       }
     }else{
       res.view('403', { layout: null });
