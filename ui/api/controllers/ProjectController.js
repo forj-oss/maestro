@@ -49,43 +49,53 @@ module.exports = {
   create: function (req, res) {
     if(req.session.project_visibility){
       // Message to be published in Rabbitmq
-      var options = {
-        ctx: 'project.create.' + req.body.project_name.replace(' ',''),
-        name: req.body.project_name,
-        desc: req.body.project_name,
-        id: configJson.get('site:id'),
-        user: req.session.email,
-        role: 'admins',
-        debug: true,
-        log: {
-          enable: true,
-          level: 'info',
-          target: ''
+    var options = {
+        message: {  
+          action: {
+            context : 'project.create.' + req.body.project_name.replace(' ',''),
+            ctx_data: {
+              name : req.body.project_name,
+              description: req.body.project_name
+            }
           },
-        origin: 'maestro',
-        time_stamp: new Date().toISOString()
+          ACL: {
+            user: req.session.email,
+            role: 'admins'
+          },
+          debug: true,
+          log: {
+            enable: true,
+              level: 'info',
+              target: ''
+            },
+          origin: 'maestro',
+          site_id: configJson.get('site:id'),
+          time_stamp: new Date().toISOString()
+        }
       };
 
-      if (msg.isValid(options)){
-        var rabbitmqConnectionOptions = sails.config.env.rabbitmq.connection;
-        var rabbitmqImplOptions = { defaultExchangeName: sails.config.env.rabbitmq.exchange_name, reconnect: false };
-        var exchangeName = sails.config.env.rabbitmq.exchange_name;
-        var exchangeOptions = sails.config.env.rabbitmq.exchange_options;
-        var payload = msg.getJSON(options);
-        var routingKey = 'project.create.' + req.body.project_name.replace(' ','');
+      msg.isValid(options, function (error){
+        if (error){
+          console.error('ProjectController error, msg is not valid: ' + error);
+          res.json(error.message ? error.message : error);
+        }else{
+          var rabbitmqConnectionOptions = sails.config.env.rabbitmq.connection;
+          var rabbitmqImplOptions = { defaultExchangeName: sails.config.env.rabbitmq.exchange_name, reconnect: false };
+          var exchangeName = sails.config.env.rabbitmq.exchange_name;
+          var exchangeOptions = sails.config.env.rabbitmq.exchange_options;
+          var payload = msg.getJSON(options);
+          var routingKey = 'project.create.' + req.body.project_name.replace(' ','');
 
-        queue_util.publish(rabbitmqConnectionOptions, rabbitmqImplOptions, exchangeName, exchangeOptions, payload, routingKey, function(error) {
-          if (error){
-            console.error(error.message ? error.message : error);
-            res.json(error.message ? error.message : error);
-          }else{
-            res.json(null);
-          }
-        });
-      }else {
-        console.error('ProjectController error, msg is not valid: ' + JSON.stringify(options));
-        res.json(new Error('Project name is not valid!').message);
-      }
+          queue_util.publish(rabbitmqConnectionOptions, rabbitmqImplOptions, exchangeName, exchangeOptions, payload, routingKey, function(error) {
+            if (error){
+              console.error(error.message ? error.message : error);
+              res.json(error.message ? error.message : error);
+            }else{
+              res.json(null); // Success
+            }
+          });
+        }
+      });
     }else{
       res.view('403', { layout: null });
     }
