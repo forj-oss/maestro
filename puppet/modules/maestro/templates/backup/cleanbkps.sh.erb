@@ -98,8 +98,8 @@ function folderNameToDate() {
     return 1
   fi
 
-  year=${string:0:4}
-  week=${string:5:2}
+  year=10#${string:0:4}
+  week=10#${string:5:2}
   weekToDate "$year" "$week" "$date_fmt"
 }
 
