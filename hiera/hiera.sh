@@ -122,14 +122,18 @@ echo "################# Hiera Installation done, step 1/2 ###################"
 
 #install hiera-eyaml
 if is_ubuntu; then
+    # Required because last version (1.7.1) of highline package only works for ruby 1.9
+    gem install --include-dependencies --no-rdoc --no-ri highline -v '~> 1.6.19'
     gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
     gem install --include-dependencies --no-rdoc --no-ri deep_merge
     gem install --include-dependencies --no-rdoc --no-ri json -v '~>1.7.5'
 elif is_rhel6; then
+    gem install --include-dependencies --no-rdoc --no-ri highline -v '~> 1.6.19'
     gem install --include-dependencies --no-rdoc --no-ri hiera-eyaml
     gem install --include-dependencies --no-rdoc --no-ri deep_merge
     gem install --include-dependencies --no-rdoc --no-ri json  -v '~>1.7.5'
 elif is_rhel7; then
+    gem install  highline -v '~> 1.6.19'
     gem install  hiera-eyaml
     gem install  deep_merge
     gem install  json  -v '~>1.7.5'
