@@ -18,7 +18,7 @@
 
 class sensu_config::sensuclient (
   $sensu_vhost   = hiera('sensu_config::sensuclient::sensu_vhost','sensu'),
-  $forj_basic    = hiera('sensu_config::sensuserver::forj_basic','forj-basic'),
+  $forj_basic    = hiera_array('sensu_config::sensuserver::forj_basic', ['forj-basic']),
   $rabbitmq_host = hiera('rabbit::host',$::eroip),
   $password      = hiera('rabbit::password'),
   $redis_host    = hiera('redis::params::host',$::eroip),
@@ -27,7 +27,7 @@ class sensu_config::sensuclient (
 {
   validate_string($sensu_vhost)
   validate_string($password)
-  validate_string($forj_basic)
+  validate_array($forj_basic)
   validate_string($rabbitmq_host)
   validate_string($redis_host)
 
@@ -48,7 +48,7 @@ class sensu_config::sensuclient (
       rabbitmq_host     => $rabbitmq_host,
       redis_host        => $redis_host,
       redis_port        => $redis_port,
-      subscriptions     => [$forj_basic, $::hostname],
+      subscriptions     => flatten([$forj_basic, $::hostname]),
       rabbitmq_vhost    => $sensu_vhost,
     }
   }

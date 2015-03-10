@@ -18,7 +18,7 @@
 class sensu_config::sensuserver (
   $sensu_user    = hiera('sensu_config::sensuserver::sensu_user','sensu'),
   $sensu_vhost   = hiera('sensu_config::sensuserver::sensu_vhost','sensu'),
-  $forj_basic    = hiera('sensu_config::sensuserver::forj_basic','forj-basic'),
+  $forj_basic    = hiera_array('sensu_config::sensuserver::forj_basic', ['forj-basic']),
   $rabbitmq_host = hiera('rabbit::host','localhost'),
   $rabbitmq_port = hiera('rabbit::port','5672'),
   $rabbit_admin  = hiera('rabbit::admin','admin'),
@@ -32,7 +32,7 @@ class sensu_config::sensuserver (
 
   validate_string($sensu_user)
   validate_string($sensu_vhost)
-  validate_string($forj_basic)
+  validate_array($forj_basic)
   validate_string($rabbitmq_host)
   validate_string($rabbit_admin)
   validate_string($password)
@@ -74,7 +74,7 @@ class sensu_config::sensuserver (
   class { 'sensu':
     server            => true,
     rabbitmq_password => $password,
-    subscriptions     => [$forj_basic, $::hostname],
+    subscriptions     => flatten([$forj_basic, $::hostname]),
     api               => true,
     rabbitmq_host     => $rabbitmq_host,
     rabbitmq_port     => $rabbitmq_port,
@@ -104,7 +104,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'disk-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/disk-metrics.rb',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     type        => 'metric',
@@ -113,7 +113,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'cpu-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/cpu-metrics.rb',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     type        => 'metric',
@@ -122,7 +122,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'memory-metrics':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/memory-metrics.rb',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     type        => 'metric',
@@ -131,7 +131,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-disk':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-disk.rb -w 75 -c 85',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -139,7 +139,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-cpu':
     command     => '/opt/sensu/embedded/bin/ruby /etc/sensu/plugins/check-cpu.rb',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -147,7 +147,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'check-mem':
     command     => '/etc/sensu/plugins/check-mem.sh',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '1800',
     standalone  => false,
     handlers    => 'redis-handler',
@@ -155,7 +155,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'disk-usage':
     command     => '/etc/sensu/plugins/disk-usage.sh',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '300',
     standalone  => false,
     type        => 'metric',
@@ -164,7 +164,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'cpu-usage':
     command     => '/etc/sensu/plugins/cpu-usage.sh',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '300',
     standalone  => false,
     type        => 'metric',
@@ -173,7 +173,7 @@ class sensu_config::sensuserver (
 
   sensu::check{ 'memory-usage':
     command     => '/etc/sensu/plugins/memory-usage.sh',
-    subscribers => $forj_basic,
+    subscribers => flatten($forj_basic),
     interval    => '300',
     standalone  => false,
     type        => 'metric',
