@@ -20,7 +20,6 @@ class maestro::backup::backup_server (
 {
   include maestro::backup::params
   include maestro::backup::clean_backups
-  include maestro::backup::cdn_upload
   $backup_user = $maestro::backup::params::backup_user
   ## Prepares user
   $home = "${::maestro::backup::params::backup_home}/${::maestro::backup::params::backup_user}"
@@ -68,8 +67,8 @@ class maestro::backup::backup_server (
 
   cron { 'box_backupstatus':
     user    => $::maestro::backup::params::backup_user,
-    hour    => '03',
-    minute  => '30',
+    hour    => $::maestro::backup::params::backup_status_hour,
+    minute  => $::maestro::backup::params::backup_status_minute,
     command => "${maestro::backup::params::box_backup_path}/sbin/backup-status.py",
     require => File["${maestro::backup::params::box_backup_path}/sbin/backup-status.py"],
   }->
@@ -118,5 +117,12 @@ class maestro::backup::backup_server (
       mode    => '0440',
       require => User[$::maestro::backup::params::backup_user],
     }
+  }
+
+  cron { 'cdn_upload':
+    user    => 'root',
+    hour    => $::maestro::backup::params::cdn_upload_hour,
+    minute  => $::maestro::backup::params::cdn_upload_minute,
+    command => "/usr/bin/puppet apply -e \"include maestro::backup::cdn_upload\" --modulepath=/opt/config/${::environment}/git/maestro/puppet/modules",
   }
 }

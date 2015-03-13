@@ -19,23 +19,28 @@ class maestro::backup::cdn_upload (
 )
 {
   include maestro::backup::params
-  # master_bkp.sh runs at 00:20, we are leaving 4 hours to complete
-  schedule { 'backup-schedule':
-    period => daily,
-    range  => '4:20 - 6:20',
-    repeat => 1,
-  }
+
+  validate_string($maestro::backup::params::backup_fullpath)
+  validate_string($maestro::backup::params::maestro_tar_file)
+  validate_string($::domain)
+
+  # TODO Append date of creation to backup.tar, example backup-04-30-14.tar
+  # TODO Cleanup manifests to delete backups older than x days in the cloud storage and locally (maestro box)
   exec {'tar-mnt-backups':
     cwd     => $maestro::backup::params::backup_fullpath,
     command => "/bin/tar cvf ${maestro::backup::params::maestro_tar_file} ${maestro::backup::params::backup_fullpath}/*",
     onlyif  => "/usr/bin/test -e ${maestro::backup::params::backup_fullpath}"
-  }
-  pinascdn {'pinas-upload':
+  }->
+  pinascdn {'backup-delete':
+    ensure     => absent,
+    file_name  => $maestro::backup::params::maestro_tar_file,
+    remote_dir => $::domain,
+    local_dir  => $maestro::backup::params::backup_fullpath,
+  }->
+  pinascdn {'backup-upload':
     ensure     => present,
     file_name  => $maestro::backup::params::maestro_tar_file,
     remote_dir => $::domain,
     local_dir  => $maestro::backup::params::backup_fullpath,
-    schedule   => 'backup-schedule',
-    subscribe  => Exec['tar-mnt-backups'],
   }
 }
