@@ -44,7 +44,7 @@ Actions used when ou working on a test branch:
 
 Actions used when you are working on your development branch, and wanted to test your code, on a server.
 - --push-to <Server>     to send out all current branch commits to the remote server.
-- --remote-from <Server> to remove links to the remote server.
+- --remove-from <Server> to remove links to the remote server.
 
 Details:
  - configure <Server>     : Configure an eroplus to become a testing environment. The IP is the public address of the eroplus to use.
@@ -64,6 +64,7 @@ Options:
  --repo-dir <DIR>  : By default, the path owned by root, is /opt/config/production/git/ by convention (puppet references). You can change it.
                      If the DIR doesn't exist, it will be created by $BASE
                      You can set TEST_REPODIR Variable.
+ --init <url>      : By default, test-box.sh wait for the server to do the repo clone it self. You can force to initialize this clone from a url.
  --ref remote|local: During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
  --commit <Msg>    : Will commit your code, with a specific <message>
  --commit-all <Msg>: Same as --commit, but the commit will add all tracked updated files to the commit.
@@ -218,6 +219,12 @@ function configure_from_remote
 
 }
 
+function do_root_clone()
+{
+ remote_root_task "mkdir $REPO_DIR"
+ remote_root_task "git clone $1"
+}
+
 function do_send()
 { # Function which describe how to send the update to the remote server.
  fix_ero_ip
@@ -358,6 +365,10 @@ do
        shift
        REPO_DIR="$1"
        shift;;
+    "--init")
+       shift
+       INIT_URL="$1"
+       shift;;
     "--repo")
        shift
        REPO="$1"
@@ -445,6 +456,14 @@ fi
 
 CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
+if [ "$INIT_URL" != "" ]
+then
+   do_root_clone $INIT_URL
+   if [ $? -ne 0 ]
+   then
+      exit
+   fi
+fi
 
 case $ACTION in
     "CONFIGURE")
