@@ -106,8 +106,46 @@ function fix_ero_ip
   ssh-keygen -R $ERO_IP_SHOW
 }
 
+function do_connect
+{
+ if [ "$CONNECTED" = 'True' ]
+ then
+   return
+ fi
+ CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
+ ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=500 $CONNECTION -f -N
+ if [ $? -ne 0 ]
+ then
+    Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box configure your ~/.ssh/config.
+Typical input you can add in your .ssh/config:
+
+host 15.125.*
+        user ubuntu
+        StrictHostKeyChecking no
+        IdentityFile ~/.hpcloud/keypairs/nova.pem
+        ProxyCommand corkscrew MyProxy 8080 %h %p # <= This line is optional. Required if direct access is prohibited.
+"
+ fi
+ CONNECTED=True
+ CONNECTION="-o ControlMaster=auto -o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
+ echo "Connected to $ERO_IP. CONNECTION=$CONNECTION"
+}
+
+function do_disconnect
+{
+ if [ "$CONNECTED" != 'True' ]
+ then
+   return
+ fi
+ echo "Disconnecting..."
+ ssh -O exit $CONNECTION
+ CONNECTED=False
+ echo "Disconnected."
+}
+
 function remote_task
 {
+ do_connect
  echo "[[1m$REMOTE_USER@$ERO_IP_SHOW ~[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION $*" 2>&1 | grep -v "Shared connection "
  return $?
@@ -115,6 +153,7 @@ function remote_task
 
 function remote_root
 {
+ do_connect
  echo "[[1mroot@$ERO_IP_SHOW ~[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION sudo -i \"bash -c \\\"$*\\\"\"" 2>&1 | grep -v "Shared connection "
  return $?
@@ -122,6 +161,7 @@ function remote_root
 
 function remote_root_task
 {
+ do_connect
  echo "[[1mroot@$ERO_IP_SHOW $REPO_DIR$REPO[0m] $ [1;33m$*[0m"
  eval "ssh $CONNECTION sudo -i \"bash -c 'cd $REPO_DIR/$REPO ; $*'\"" 2>&1 | grep -v "Shared connection "
  return $?
@@ -129,6 +169,7 @@ function remote_root_task
 
 function configure_from_local
 {
+ do_connect
  if ssh $CONNECTION [ ! -d git/${REPO}.git ]
  then
     remote_task "\"mkdir -p git ; git init --bare git/${REPO}.git\""
@@ -156,7 +197,8 @@ You can add more test-box repository, like 'test-box=RepoName1;testing-$USER|Rep
 
 function check_remote_branch
 {
- REM_BRANCH="$(ssh -o StrictHostKeyChecking=no -t "$ERO_IP" sudo -i "bash -c 'cd $REPO_DIR/${REPO} ; git rev-parse --abbrev-ref HEAD'" | dos2unix)"
+ do_connect
+ REM_BRANCH="$(ssh $CONNECTION sudo -i "bash -c 'cd $REPO_DIR/${REPO} ; git rev-parse --abbrev-ref HEAD'" | dos2unix)"
  case "$REM_BRANCH" in
    "master" )
       remote_root_task "git stash -k -u "
@@ -187,7 +229,7 @@ function check_remote_branch
               break;;
             n|N)
               echo "Ok. Note that you have not swithed to your own branch. a git pull won't get your testing code. You will need to configure it again if you want to get your code to test."
-              ssh -O exit $CONNECTION
+              do_disconnect
               exit
               break;;
          esac
@@ -198,6 +240,7 @@ function check_remote_branch
 
 function configure_from_remote
 {
+ do_connect
  echo "Checking remote repository..."
  if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
  then
@@ -221,8 +264,18 @@ function configure_from_remote
 
 function do_root_clone()
 {
- remote_root_task "mkdir $REPO_DIR"
- remote_root_task "git clone $1"
+ if [ "$ERO_IP" = "" ]
+ then
+    Error "Missing remote server IP. --init works in combination with --push-to or --configure"
+    exit 1
+ fi
+ do_connect
+ if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
+ then
+    remote_root "mkdir -p $REPO_DIR"
+    remote_root "git config --global http.sslVerify false"
+    remote_root "git clone $1"
+ fi
 }
 
 function do_send()
@@ -230,12 +283,7 @@ function do_send()
  fix_ero_ip
 
  local_task git push testing-$ERO_IP HEAD:testing-$USER
- CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
- ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
- if [ $? -ne 0 ]
- then
-    Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
- fi
+ do_connect
  REMOTE_USER="$(ssh $CONNECTION "id -un" | dos2unix)"
  check_remote_branch
  remote_root_task git reset --hard testing/testing-$USER
@@ -253,20 +301,7 @@ function do_configure
 {
  fix_ero_ip
  echo "Checking kit connection..."
- CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
- ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
- if [ $? -ne 0 ]
- then
-    Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box configure your ~/.ssh/config.
-Typical input you can add in your .ssh/config:
-
-host 15.125.*
-        user ubuntu
-        StrictHostKeyChecking no
-        IdentityFile ~/.hpcloud/keypairs/nova.pem
-        ProxyCommand corkscrew MyProxy 8080 %h %p # <= This line is optional. Required if direct access is prohibited.
-"
- fi
+ do_connect
 
  REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
 
@@ -276,7 +311,7 @@ host 15.125.*
  else
     configure_from_remote
  fi
- ssh -O exit $CONNECTION
+ do_disconnect
  printf "[1mDONE[0m\nYou are now in a new testing branch. Every commits here are specifics to this branch. a git push will move your code to the remote kit.
 On the server, as root, you can do a git pull from $REPO_DIR/${REPO}. And test your code.
 
@@ -339,7 +374,7 @@ else
    REPO_DIR="/opt/config/production/git/"
 fi
 
-OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from: -- "$@" )
+OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
 if [ $? != 0 ]
 then
     Help "Invalid options"
@@ -360,6 +395,10 @@ do
            ;;
        esac
        shift
+       ;;
+    "--debug")
+       shift
+       set -x
        ;;
     "--repo-dir")
        shift
@@ -456,6 +495,7 @@ fi
 
 CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
+
 if [ "$INIT_URL" != "" ]
 then
    do_root_clone $INIT_URL
@@ -494,7 +534,7 @@ case $ACTION in
      fix_ero_ip
 
      do_send
-     ssh -O exit $CONNECTION
+     do_disconnect
      # SEND done
      local_task git checkout $REST_BRANCH
      ;;
@@ -506,7 +546,7 @@ case $ACTION in
 
      ERO_IP=$(echo $CUR_BRANCH | sed "s/^testing-${USER}-"'\(.*\)$/\1/g')
      do_send
-     ssh -O exit $CONNECTION
+     do_disconnect
      ;;
     "REPORT")
      echo "Currently not implemented."
@@ -532,12 +572,8 @@ case $ACTION in
      local_task git remote remove testing-$ERO_IP
 
      echo "Checking kit connection..."
-     CONNECTION="-o ControlPath=~/.ssh/%h_%p_%r -t -o StrictHostKeyChecking=no $ERO_IP"
-     ssh -o ControlMaster=yes -o ControlPath=~/.ssh/%h_%p_%r -o ControlPersist=60 $CONNECTION -f -N
-     if [ $? -ne 0 ]
-     then
-        Error 1 "Unable to connect to '$ERO_IP'. Check the IP address. You may need to use ssh-add to add the required identity to access the ero box."
-     fi
+     do_connect
+
      REMOTE_USER="$(ssh $CONNECTION id -un | dos2unix)"
      echo "Removing remote branch... The remote testing repo won't be removed to prevent other tester to loose their branch."
      remote_root_task "git reset --hard HEAD"
@@ -554,7 +590,7 @@ case $ACTION in
      else 
        echo "Note: On the remote server, I did not remove the git remote testing, which is used by others."
      fi          
-     ssh -O exit $CONNECTION
+     do_disconnect
      echo "$CUR_BRANCH fully removed."
      ;;
  esac
