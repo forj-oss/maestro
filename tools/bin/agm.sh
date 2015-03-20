@@ -390,6 +390,7 @@ function AGM_refresh
        fi
        unset CHECK_PATH AGM_PATH_SEARCH
     else # Search for AGM_ID from agm.repo data file
+       AGM_CUR_REPO_BRANCH="$(echo "$AGM_CUR_REPO_BRANCH" | sed 's|/|\\/|g')"
        AGM_ID_SEARCH="$(awk -F'|' '$1 ~ /^'"$AGM_CUR_REPO_NAME"'$/ && $3 ~ /^'"$AGM_CUR_REPO_BRANCH"'$/ { printf "%s\n",$2 }' $AGM_REPO  | head -n 1)"
        if [ "$AGM_ID_SEARCH" = "" ]
        then
