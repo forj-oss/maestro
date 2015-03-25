@@ -54,11 +54,28 @@ fi
 
 eval "$(echo "$HPCLOUD_PRIV" | base64 -d | gunzip)"
 
-# Default Compute parameters
-COMPUTE_OS_AUTH_URL="https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+COMPUTE_OS_AUTH_URL="$(GetJson /meta-boot.js compute_os_auth_url)"
+if [ "$COMPUTE_OS_AUTH_URL" = "" ]
+then
+   # Default Compute parameters to 
+   echo "Warning! 'compute_os_auth_url' metadata missed. Default to hpcloud URL."
+   COMPUTE_OS_AUTH_URL="https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+fi
 
-# Default DNS parameters
-DNS_AUTH_URL="https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+# Requires tokens path in url
+if [ "$(echo "$COMPUTE_OS_AUTH_URL" | grep -e '/tokens/*$')" = "" ]
+then
+   echo "Update Openstack compute url to become compliant. '/tokens$'"
+   COMPUTE_OS_AUTH_URL="$COMPUTE_OS_AUTH_URL/tokens"
+fi
+
+DNS_AUTH_URL="$(GetJson /meta-boot.js dns_auth_url)"
+if [ "$DNS_AUTH_URL" = "" ]
+then
+   # Default DNS parameters
+   echo "Warning! 'dns_auth_url' metadata missed. Default to hpcloud URL."
+   DNS_AUTH_URL="https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+fi
 
 
 ###########################################################################################
@@ -69,7 +86,7 @@ DNS_AUTH_URL="https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
 # Needs:
 # HPCLOUD_OS_USER     - Provided by meta-data 'hpcloud_priv' encoded base64
 # HPCLOUD_OS_KEY      - Provided by meta-data 'hpcloud_priv' encoded base64
-# COMPUTE_OS_AUTH_URL - Provided by this script
+# COMPUTE_OS_AUTH_URL - Provided by meta-data 'compute_os_auth_url'
 # COMPUTE_TENANT_NAME - Provided by meta-data 'tenant_name'. Used by fog hp provider.
 # COMPUTE_OS_REGION   - Provided by meta-data 'hpcloud_os_region'.
 
@@ -80,7 +97,7 @@ check_var "$COMPUTE_TENANT_NAME" "Missing TENANT_NAME. Check your metadata 'tena
 DEFAULT="
 default:
   openstack_api_key: '${HPCLOUD_OS_KEY}'
-  openstack_auth_url: ${COMPUTE_OS_AUTH_URL}tokens
+  openstack_auth_url: ${COMPUTE_OS_AUTH_URL}
   openstack_region: $COMPUTE_OS_REGION
   openstack_tenant: $COMPUTE_TENANT_NAME
   openstack_username: '${HPCLOUD_OS_USER}'"
@@ -90,7 +107,7 @@ default:
 # Needs:
 # DNS_KEY       - Provided by meta-data 'hpcloud_priv' encoded base64
 # DNS_SECRET    - Provided by meta-data 'hpcloud_priv' encoded base64
-# DNS_AUTH_URL  - Provided by this script
+# DNS_AUTH_URL  - Provided by meta-data 'dns_auth_url' 
 # DNS_TENANT_ID - Provided by meta-data 'dns_tenantid'
 # DNS_ZONE      - Provided by meta-data 'dns_zone'.
 
