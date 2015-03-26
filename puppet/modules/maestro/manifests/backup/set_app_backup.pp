@@ -18,6 +18,7 @@ define maestro::backup::set_app_backup(
 ) {
   $app_name           = $name
   $app_location       = $applications[$name]['app_location']
+  $exclude            = $applications[$name]['exclude']
   $db_backup_tool     = $applications[$name]['db_backup_tool']
   $db_name            = $applications[$name]['db_name']
   $db_user            = $applications[$name]['db_user']

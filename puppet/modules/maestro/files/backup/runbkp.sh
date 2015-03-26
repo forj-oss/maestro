@@ -49,6 +49,7 @@ CURRENT_TIME=$(date '+%Y-%m-%d_%H-%M-%S')        #--- set for log events
 SSH_CONFIG_HOST=""                               #--- to be set as part of configurations provided and confirmatio 
 APP_NAME=""                                      #--- application name (used as part of bkp folder base ): jenkins, gerrit, wiki, Nexus
 APP_LOCATION=""                                  #--- Path to source folder where is located all files to be backup
+EXCLUDE=""                                       #--- Exclude this path
 BKP_REMOTE_LOCATION=""                           #--- remote backup history: "backups"/"$HOST_NAME"/"$APP_NAME"
 BKP_FILES_NAME=""                                #--- base name for the bup save function: $APP_NAME"_files"
 BKP_LOCAL_LOCATION=""                            #--- local backup folder "/mnt/$APP_NAME/"
@@ -56,14 +57,13 @@ BUP_REPO=""                                      #--- local backup folder "/mnt/
 LOG_FILE=""                                      #--- "$APP_LOCATION/logs " will be the container for this log file, name: $APP_NAME".log""
 LOGS_DIR=""                                      #--- folder for log file & DB backups: "$APP_LOCATION/logs"
 BUP_PATH=""                                      #--- all the file system locations to include into the bup directory ie. ("$APP_LOCATION $DB_BKP_DIR")
-
-####################################################################################################################################################################
-############################################          Database section           ###################################################################################
-####################################################################################################################################################################
 TAROPTS="-cvPf"                                  # ---- "czvPf" Tar options to (c)create, (z)compress, (v)verbose, (P)preserve absolute names, (f) the specific file
 TIMESTAMP=$( date +%Y%m%d )
 CLEAR_DB_DAY="7"                                 # ---- day of the week when to perform a cleanup of "DB history backups" days: 1-7 (Monday - Sunday)
 
+####################################################################################################################################################################
+############################################          Database section           ###################################################################################
+####################################################################################################################################################################
 DB_USER=""                                       # ---- (e.g.: DB_USER=wikiuser)
 DB_PWD=""                                        # ---- "$DB_PWD"   # (e.g.: user password)
 DB_NAME=""                                       # ---- "reviewdb"
@@ -232,6 +232,7 @@ function create_backup_info(){ # --- sets information to be consulted about the 
       echo "application: \"${APP_NAME}\"" >> $BKP_INFO
       echo "bup_name: \"${BKP_FILES_NAME}\"" >> $BKP_INFO
       echo "source_folder: \"${APP_LOCATION}\"" >> $BKP_INFO
+      echo "exclude: \"${EXCLUDE}\"" >> $BKP_INFO
       echo "db_backup_tool: \"${DB_BKP_TOOL_NAME}\"" >> $BKP_INFO
       echo "databases: \"${DATABASES}\"" >> $BKP_INFO      
       tbkfls=$( find $BUP_PATH -print | wc -l )           # obtain the number of files and folders saved
@@ -268,7 +269,13 @@ function bupsave {    #--- performs the bup operations to create the backup repo
               BUP_PATH="${BUP_PATH} ${DB_BKP_DIR}"
       fi
       create_backup_info
-      tar $TAROPTS - $BUP_PATH | bup -d $BUP_REPO split --name=$BKP_FILES_NAME >> $LOG_FILE
+
+      TAR_CMD="tar $TAROPTS - $BUP_PATH"
+      if [ ! -z "$EXCLUDE" ]; then
+        TAR_CMD="$TAR_CMD --exclude $EXCLUDE"
+      fi
+
+      $TAR_CMD | bup -d $BUP_REPO split --name=$BKP_FILES_NAME >> $LOG_FILE
       if [[ $? -eq 0 ]] ; then
              echo "- Success: $CURRENT_TIME : bup save finish OK" >> $LOG_FILE
              echo "- Success: $CURRENT_TIME : bup save finish OK"
@@ -284,7 +291,7 @@ function rewval {
       BKP_LOCAL_LOCATION="/mnt/${APP_NAME}/"
       BUP_REPO="${BKP_LOCAL_LOCATION}bup_repo/"
       LOGS_DIR="${BKP_LOCAL_LOCATION}logs"
-      BKP_REMOTE_LOCATION="/mnt/backups/${HOST_NAME}/${APP_NAME}"      
+      BKP_REMOTE_LOCATION="/mnt/backups/${HOST_NAME}/${APP_NAME}"
       chk_log
 }
 
@@ -331,7 +338,9 @@ function chkconff {    # --= check availability of config file
           echo "- ERROR  : $CURRENT_TIME : The Application folder is not valid, app_location=${APP_LOCATION}" >> $LOG_FILE
           ERRORS=$((ERRORS+1))
           #exit 1
-  fi  
+  fi
+
+  EXCLUDE=$(cat $CONF_FILE | cut -d "#" -f1  | awk ' BEGIN { FS=":" } /^exclude/ {print $2}' | cut -d " " -f1 )
 
   BKP_FILES_NAME=$(cat $CONF_FILE | cut -d "#" -f1  | awk ' BEGIN { FS=":" } /^bkp_name/ {print $2}'| cut -d " " -f1 )
   if [ -z "${BKP_FILES_NAME}" ]; then
