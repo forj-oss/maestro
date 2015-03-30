@@ -272,7 +272,7 @@ function bupsave {    #--- performs the bup operations to create the backup repo
 
       TAR_CMD="tar $TAROPTS - $BUP_PATH"
       if [ ! -z "$EXCLUDE" ]; then
-        TAR_CMD="$TAR_CMD --exclude $EXCLUDE"
+        TAR_CMD="$TAR_CMD --exclude=$EXCLUDE"
       fi
 
       $TAR_CMD | bup -d $BUP_REPO split --name=$BKP_FILES_NAME >> $LOG_FILE
