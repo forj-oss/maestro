@@ -45,6 +45,11 @@ function is_rhel6 {
         cat /etc/*release | grep -q 'release 6'
 }
 
+function is_centos {
+    [ -f /usr/bin/yum ] && \
+        cat /etc/*release | grep -q -e "CentOS"
+}
+
 function is_rhel7 {
     [ -f /usr/bin/yum ] && \
         cat /etc/*release | grep -q -e "Red Hat" -e "CentOS" && \
@@ -124,9 +129,21 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
 enabled=1
 gpgcheck=1
 EOF
+    if is_centos; then
+        cat > /etc/yum.repos.d/puppetlabs.dependencies.repo <<"EOF_DEP"
+[puppetlabs-dependencies]
+name=Puppet Labs Dependencies El 6 - $basearch
+baseurl=http://yum.puppetlabs.com/el/6/dependencies/$basearch
+enabled=1
+gpgcheck=0
+EOF_DEP
+    fi
 
     if [ "$THREE" != 'yes' ]; then
         echo 'exclude=puppet-2.8* puppet-2.9* puppet-3* facter-2* puppet-server-3* ' >> /etc/yum.repos.d/puppetlabs.repo
+        if is_centos; then
+            echo 'exclude=puppet-2.8* puppet-2.9* puppet-3* facter-2* puppet-server-3* ' >> /etc/yum.repos.d/puppetlabs.dependencies.repo
+        fi
     fi
 
     yum update -y
