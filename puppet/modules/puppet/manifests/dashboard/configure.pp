@@ -16,8 +16,10 @@
 #
 class puppet::dashboard::configure(
     $password = hiera('puppet::dashboard::password','changeme'),
-    $mysql_password = hiera('puppet::dashboard::mysql_password','changeme'),
+    $mysql_root_password = hiera('mysql_root_password'),
 ) {
+
+  validate_string($mysql_root_password)
 
   if ! defined(Package['ruby1.9.3'])  {
     package { 'ruby1.9.3':
@@ -51,7 +53,7 @@ class puppet::dashboard::configure(
     dashboard_charset  => 'utf8',
     dashboard_site     => $::fqdn,
     dashboard_port     => '3000',
-    mysql_root_pw      => $mysql_password,
+    mysql_root_pw      => $mysql_root_password,
     passenger          => true,
     require            => Package['ruby1.9.3'],
   }

@@ -49,27 +49,27 @@ define maestro::app::run_ddl(
 
   if $mysql_server == undef
   {
-    fail('missing mysql_server this is missing.')
+    fail('missing mysql_server.')
   }
   if $mysql_root_user == undef
   {
-    fail('missing mysql_root_user this is missing.')
+    fail('missing mysql_root_user.')
   }
   if $mysql_root_password == undef
   {
-    fail('missing mysql_root_password this is missing.')
+    fail('missing mysql_root_password.')
   }
   if $mysql_user == undef
   {
-    fail('missing mysql_user this is missing.')
+    fail('missing mysql_user.')
   }
   if $mysql_password == undef
   {
-    fail('missing mysql_password this is missing.')
+    fail('missing mysql_password.')
   }
   if $ddl_home_dir == undef
   {
-    fail('missing ddl_home_dir this is missing.')
+    fail('missing ddl_home_dir.')
   }
   if $ddl_source != undef
   {

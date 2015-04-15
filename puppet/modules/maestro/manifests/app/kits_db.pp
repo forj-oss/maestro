@@ -31,11 +31,16 @@
 class maestro::app::kits_db(
   $mysql_server         = hiera('maestro::app::mysql_server','localhost'),
   $mysql_root_user      = hiera('maestro::app::mysql_root_user','root'),
-  $mysql_root_password  = hiera('maestro::app::mysql_root_password','changeme'),
+  $mysql_root_password  = hiera('mysql_root_password'),
   $mysql_user           = hiera('maestro::app::mysql_user','kitusr'),
-  $mysql_password       = hiera('maestro::app::mysql_password','$Changeme01'),
+  $mysql_password       = hiera('maestro::app::mysql_password'),
   $ddl_home_dir         = undef,
 ){
+  validate_string($mysql_server)
+  validate_string($mysql_root_user)
+  validate_string($mysql_root_password)
+  validate_string($mysql_user)
+  validate_string($mysql_password)
 
   if $ddl_home_dir == undef
   {
@@ -44,13 +49,7 @@ class maestro::app::kits_db(
   {
     $ddl_home_dir_use = $ddl_home_dir
   }
-  include mysql
-  if !defined(Class['mysql::server'])
-  {
-    class { 'mysql::server':
-      config_hash => { 'root_password' => $mysql_root_password }
-    }
-  }
+
   maestro::app::run_ddl{ 'kit_tools_ui.sql':
     mysql_server        => $mysql_server,
     mysql_root_user     => $mysql_root_user,
@@ -59,6 +58,7 @@ class maestro::app::kits_db(
     mysql_password      => $mysql_password,
     ddl_content         => 'maestro/app/ddl/kit_tools_ui.erb.sql',
     ddl_home_dir        => $ddl_home_dir_use,
+    require             => Class['mysql::server'],
   }
   maestro::app::run_ddl{ 'setup-db.sql':
     mysql_server        => $mysql_server,
@@ -68,6 +68,7 @@ class maestro::app::kits_db(
     mysql_password      => $mysql_password,
     ddl_content         => 'maestro/app/ddl/setup-db.erb.sql',
     ddl_home_dir        => $ddl_home_dir_use,
+    require             => Class['mysql::server'],
   }
   maestro::app::run_ddl{ 'forj.config-setup-db.sql':
     mysql_server        => $mysql_server,
@@ -77,5 +78,6 @@ class maestro::app::kits_db(
     mysql_password      => $mysql_password,
     ddl_content         => 'maestro/app/ddl/forj.config-setup-db.erb.sql',
     ddl_home_dir        => $ddl_home_dir_use,
+    require             => Class['mysql::server'],
   }
 }

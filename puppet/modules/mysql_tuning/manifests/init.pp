@@ -37,7 +37,7 @@
 #                       and joins that do not use indexes and thus perform full table scans.
 
 class mysql_tuning (
-  $mysql_root_password  = hiera('mysql_tuning::mysql_root_password','changeme'),
+  $mysql_root_password  = hiera('mysql_root_password'),
   $key_buffer_size      = hiera('mysql_tuning::key_buffer_size','16K'),
   $table_open_cache     = hiera('mysql_tuning::table_open_cache','8'),
   $max_allowed_packet   = hiera('mysql_tuning::max_allowed_packet','1M'),
@@ -50,15 +50,8 @@ class mysql_tuning (
   $join_buffer_size     = hiera('mysql_tuning::join_buffer_size','256K'),
 )
 {
-
   include mysql
-
-  if !defined(Class['mysql::server'])
-  {
-    class { 'mysql::server':
-      config_hash => { 'root_password' => $mysql_root_password }
-    }
-  }
+  validate_string($mysql_root_password)
 
   mysql::server::config { 'tuning':
     settings => {
