@@ -274,7 +274,7 @@ function do_root_clone()
  then
     remote_root "mkdir -p $REPO_DIR"
     remote_root "git config --global http.sslVerify false"
-    remote_root "git clone $1"
+    remote_root "cd $REPO_DIR ; git clone $1"
  fi
 }
 
