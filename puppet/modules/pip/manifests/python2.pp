@@ -26,9 +26,10 @@ class pip::python2 {
     ensure => absent,
   }
 
-  package { $::pip::params::python_pip_package:
-    ensure  => absent,
-  }
+# Is conflicting with ansible puppet module, not needed here anymore
+#  package { $::pip::params::python_pip_package:
+#    ensure  => absent,
+#  }
 
   exec { 'install_setuptools2':
     command   => 'python2 /var/lib/python-install/ez_setup.py',

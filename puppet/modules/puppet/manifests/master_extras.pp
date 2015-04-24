@@ -52,13 +52,26 @@ class puppet::master_extras (
 
   include pip::python2
   $pip_provider = pip2
-
-  package { ['python-cinderclient', 'python-novaclient']:
-    ensure   => latest,
-    provider => $pip_provider,
+  if(!defined(Package['python-cinderclient']))
+  {
+    package { 'python-cinderclient':
+      ensure   => latest,
+      provider => $pip_provider,
+    }
   }
 
-  package { 'python-paramiko':
-    ensure => present,
+  if(!defined(Package['python-novaclient']))
+  {
+    package { 'python-novaclient':
+      ensure   => latest,
+      provider => $pip_provider,
+    }
+  }
+
+  if(!defined(Package['python-paramiko']))
+  {
+    package { 'python-paramiko':
+      ensure => present,
+    }
   }
 }
