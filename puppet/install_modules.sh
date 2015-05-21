@@ -14,6 +14,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+function test-box
+{
+  echo "test-box: not implemented."
+}
+
+if [ -f "$INIT_FUNCTIONS" ]
+then
+   echo "FORJ '$INIT_FUNCTIONS' loaded."
+   source $INIT_FUNCTIONS
+   declare -A TEST_BOX_REPOS
+   Load_test-box_repos
+fi
+
 SCRIPT_NAME=$(basename $0)
 SCRIPT_DIR=$(readlink -f "$(dirname $0)")
 MODULE_PATH=/etc/puppet/modules
@@ -26,7 +39,6 @@ function remove_module {
     echo "ERROR: remove_module requires a SHORT_MODULE_NAME."
   fi
 }
-
 
 # Array of modules to be installed key:value is module:version.
 declare -A MODULES
@@ -168,11 +180,19 @@ for MOD in ${!SOURCE_MODULES[*]} ; do
       git clone ${MOD} "${MODULE_PATH}/${MODULE_NAME}"
     fi
   fi
+
   # fetch the latest refs from the repo
   ${GIT_CMD_BASE} remote update
-  # make sure the correct revision is installed, I have to use rev-list b/c rev-parse does not work with tags
-  if [ `${GIT_CMD_BASE} rev-list HEAD --max-count=1` != `${GIT_CMD_BASE} rev-list ${SOURCE_MODULES[$MOD]} --max-count=1` ]; then
-    # checkout correct revision
-    ${GIT_CMD_BASE} checkout ${SOURCE_MODULES[$MOD]}
+
+  test-box "${MODULE_PATH}" "${MODULE_NAME}" "$(echo "${MOD}"| awk -F/ '{print $NF}')"
+
+  if [ $? -eq 0 ]
+  then
+    # make sure the correct revision is installed, I have to use rev-list b/c rev-parse does not work with tags
+    if [ `${GIT_CMD_BASE} rev-list HEAD --max-count=1` != `${GIT_CMD_BASE} rev-list ${SOURCE_MODULES[$MOD]} --max-count=1` ]; then
+      # checkout correct revision
+      ${GIT_CMD_BASE} checkout ${SOURCE_MODULES[$MOD]}
+    fi
   fi
+
 done

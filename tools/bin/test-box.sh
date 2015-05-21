@@ -59,15 +59,18 @@ Details:
  - remove-from <Server>   : Will remove any configuration built by --push-to to send commits to your remote server.
 
 Options:
- --repo <REPONAME> : Without this option, by default, it will select maestro as repository. You can work with a different one.
-                     you can set TEST_REPONAME Variable.
- --repo-dir <DIR>  : By default, the path owned by root, is /opt/config/production/git/ by convention (puppet references). You can change it.
-                     If the DIR doesn't exist, it will be created by $BASE
-                     You can set TEST_REPODIR Variable.
- --init <url>      : By default, test-box.sh wait for the server to do the repo clone it self. You can force to initialize this clone from a url.
- --ref remote|local: During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
- --commit <Msg>    : Will commit your code, with a specific <message>
- --commit-all <Msg>: Same as --commit, but the commit will add all tracked updated files to the commit.
+ --repo <REPONAME>      : Set the name of the repository to synchronize. 'maestro' is set by default.
+                          you can set TEST_REPONAME Variable.
+ --repo-dir <DIR>       : By default, the path owned by root, is /opt/config/production/git/ by convention (puppet references). You can change it.
+                          If the DIR doesn't exist, it will be created by $BASE
+                          You can set TEST_REPODIR Variable.
+ --root-repo <ROOTREPO> : By default, <repo-dir> should have the repository cloned with <REPONAME> as root directory. 
+                          If the root directory is not <REPONAME>, use this option to change it. 
+                          (Ex: Maestro clone puppet-gardener repository as gardener in /etc/puppet/modules)
+ --init <url>           : By default, test-box.sh wait for the server to do the repo clone it self. You can force to initialize this clone from a url.
+ --ref remote|local     : During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
+ --commit <Msg>         : Will commit your code, with a specific <message>
+ --commit-all <Msg>     : Same as --commit, but the commit will add all tracked updated files to the commit.
  --fixup <Commit>  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
                      If you set 'last' to <Commit>, test-box will search for the last unfixed commit number.
  --squash <Commit> : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
@@ -162,8 +165,8 @@ function remote_root
 function remote_root_task
 {
  do_connect
- echo "[[1mroot@$ERO_IP_SHOW $REPO_DIR$REPO[0m] $ [1;33m$*[0m"
- eval "ssh $CONNECTION sudo -i \"bash -c 'cd $REPO_DIR/$REPO ; $*'\"" 2>&1 | grep -v "Shared connection "
+ echo "[[1mroot@$ERO_IP_SHOW $REPO_DIR/$ROOT_REPO[0m] $ [1;33m$*[0m"
+ eval "ssh $CONNECTION sudo -i \"bash -c 'cd $REPO_DIR/$ROOT_REPO ; $*'\"" 2>&1 | grep -v "Shared connection "
  return $?
 }
 
@@ -181,7 +184,7 @@ function configure_from_local
  local_task git push testing-$ERO_IP testing-$USER-$ERO_IP:testing-$USER
  local_task git branch --set-upstream-to=testing-$ERO_IP/testing-$USER
 
- if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
+ if ssh $CONNECTION [ ! -d $REPO_DIR/$ROOT_REPO ]
  then
     echo "Warning! The remote repository is not available.
 Reminder: while booting your box, set --meta 'test-box=$REPO;testing-$USER'
@@ -198,7 +201,7 @@ You can add more test-box repository, like 'test-box=RepoName1;testing-$USER|Rep
 function check_remote_branch
 {
  do_connect
- REM_BRANCH="$(ssh $CONNECTION sudo -i "bash -c 'cd $REPO_DIR/${REPO} ; git rev-parse --abbrev-ref HEAD'" | dos2unix)"
+ REM_BRANCH="$(ssh $CONNECTION sudo -i "bash -c 'cd $REPO_DIR/${ROOT_REPO} ; git rev-parse --abbrev-ref HEAD'" | dos2unix)"
  case "$REM_BRANCH" in
    "master" )
       remote_root_task "git stash -k -u "
@@ -242,9 +245,9 @@ function configure_from_remote
 {
  do_connect
  echo "Checking remote repository..."
- if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
+ if ssh $CONNECTION [ ! -d $REPO_DIR/$ROOT_REPO ]
  then
-    Error 1 "$REPO_DIR/$REPO was not found on the remote server $ERO_IP"
+    Error 1 "$REPO_DIR/$ROOT_REPO was not found on the remote server $ERO_IP"
  fi
  if ssh $CONNECTION [ ! -d git/${REPO}.git ]
  then
@@ -270,7 +273,7 @@ function do_root_clone()
     exit 1
  fi
  do_connect
- if ssh $CONNECTION [ ! -d $REPO_DIR/$REPO ]
+ if ssh $CONNECTION [ ! -d $REPO_DIR/$ROOT_REPO ]
  then
     remote_root "mkdir -p $REPO_DIR"
     remote_root "git config --global http.sslVerify false"
@@ -366,6 +369,7 @@ then
 else
    REPO="maestro"
 fi
+ROOT_REPO="$REPO"
 
 if [ "$TEST_REPODIR" != "" ]
 then
@@ -374,7 +378,7 @@ else
    REPO_DIR="/opt/config/production/git/"
 fi
 
-OPTS=$(getopt -o h -l ref:,repo-dir:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
+OPTS=$(getopt -o h -l ref:,repo-dir:,root-repo:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
 if [ $? != 0 ]
 then
     Help "Invalid options"
@@ -407,6 +411,10 @@ do
     "--init")
        shift
        INIT_URL="$1"
+       shift;;
+    "--root-repo")
+       shift
+       ROOT_REPO="$1"
        shift;;
     "--repo")
        shift
@@ -552,7 +560,6 @@ case $ACTION in
      echo "Currently not implemented."
      ;;
     "REMOVE")
-     set -x
      if [ "$REMOVE_BRANCH" != "" ]
      then
         local_task git checkout $REMOVE_BRANCH || task_exit ""

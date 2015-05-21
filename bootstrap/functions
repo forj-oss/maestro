@@ -22,7 +22,7 @@ function GetJson
 import json
 import os.path
 import sys
- 
+
 if os.path.isfile('$1'):
    json_d=open('$1').read()
    data=json.loads(json_d)
@@ -67,7 +67,7 @@ function GitLinkCheck
       if [ "$(echo $_LINK | grep -ie '^.*:[a-z].*$')" = "" ]
       then
            echo "ERROR: $_LINK is not a scp valid format."
-           return 1 
+           return 1
       else
            return 0
       fi
@@ -87,7 +87,7 @@ function GitLinkCheck
            return 0
        else
            echo "ERROR: $_LINK does not have a valid protocol for git"
-           return 1 
+           return 1
        fi
    fi
  RestoreDebugInfo
@@ -109,7 +109,7 @@ function Load_test-box_repos()
        if [ "$REPO_NAME" != "" ] && [ "$REPO_NAME_BRANCH" != "" ]
        then
           TEST_BOX_REPOS["$REPO_NAME"]="$REPO_NAME_BRANCH"
-          echo "Test-box: repo '$REPO_NAME' added with '$REPO_NAME_BRANCH'"
+          echo "Test-box: repo '$REPO_NAME' added with '${TEST_BOX_REPOS["$REPO_NAME"]}'"
        fi
     done
  fi
@@ -130,58 +130,71 @@ function CloneRepo()
  GITURL="$2"
  source /etc/environment
  git clone -b $GITBRANCH $GITURL $GITNAME
- if [ "${TEST_BOX_REPOS[$GITNAME]}" != "" ]
+ test-box $(pwd) $GITNAME $GITNAME
+}
+
+function test-box
+{
+ REPO_NAME="$3"
+ GITNAME="$2"
+ MODULE_PATH="$1"
+ if [ "${TEST_BOX_REPOS[$REPO_NAME]}" != "" ]
  then
-    echo "Test-box: Searching for branch '"${TEST_BOX_REPOS[$GITNAME]}"' from ~ubuntu/git/${GITNAME}.git"
-    if [ ! -d ~ubuntu/git/${GITNAME}.git ] || [ "$(cd ~ubuntu/git/${GITNAME}.git ; git branch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
+    echo "Test-box: Searching for branch '"${TEST_BOX_REPOS[$REPO_NAME]}"' from ~ubuntu/git/${REPO_NAME}.git"
+    if [ ! -d ~ubuntu/git/${REPO_NAME}.git ] || [ "$(cd ~ubuntu/git/${REPO_NAME}.git ; git branch | grep '[ *] *'${TEST_BOX_REPOS[$REPO_NAME]})" = "" ]
     then
-       echo "build.sh: test-box-repo=${GITNAME}"
-       echo "Test-box: Waiting for ~ubuntu/git/${GITNAME}.git to exist.
-On your workstation, you can start test-box.sh --configure <IP> --repo ${GITNAME}"
-       while [ ! -d ~ubuntu/git/${GITNAME}.git ]
+       # Do never print more than 4 lines waiting. Used by forj cli to detect the need to call test-box.
+       set +x
+       echo "forj-cli: tb-repo=${REPO_NAME} tb-dir=${MODULE_PATH} tb-root-repo=${GITNAME}"
+       echo "build.sh: test-box-repo=${REPO_NAME}"
+       echo "Test-box: Waiting for ~ubuntu/git/${REPO_NAME}.git to exist.
+On your workstation, you can start test-box.sh --configure <IP> --repo ${REPO_NAME}"
+       while [ ! -d ~ubuntu/git/${REPO_NAME}.git ]
        do
           sleep 5
        done
-       echo "~ubuntu/git/${GITNAME}.git is existing! Waiting for branch to become available."
-       cd ~ubuntu/git/${GITNAME}.git
-       while [ "$(git branch | grep '[ *] *'${TEST_BOX_REPOS[$GITNAME]})" = "" ]
+       echo "~ubuntu/git/${REPO_NAME}.git is existing! Waiting for branch to become available."
+       cd ~ubuntu/git/${REPO_NAME}.git
+       while [ "$(git branch | grep '[ *] *'${TEST_BOX_REPOS[$REPO_NAME]})" = "" ]
        do
           sleep 5
        done
        cd -
-       cd $GITNAME
+       cd "$MODULE_PATH/$GITNAME"
        echo "Test-box: Waiting for remote testing to be created in $(pwd)"
        while [ "$(git remote | grep testing)" = "" ]
        do
           sleep 5
        done
-       echo "Test-box: Waiting for branch testing-${TEST_BOX_REPOS[$GITNAME]} to be created/attached in $(pwd)"
-       while [ "$(git branch | grep "* ${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+       echo "Test-box: Waiting for branch testing-${TEST_BOX_REPOS[$REPO_NAME]} to be created/attached in $(pwd)"
+       while [ "$(git branch | grep "* ${TEST_BOX_REPOS[$REPO_NAME]}")" = "" ]
        do
           sleep 5
        done
-       echo "Test-box: $(pwd) is checked out to ${TEST_BOX_REPOS[$GITNAME]} branch, connected to ~ubuntu/git/${GITNAME}.git ${TEST_BOX_REPOS[$GITNAME]}"
+       echo "Test-box: $(pwd) is checked out to ${TEST_BOX_REPOS[$REPO_NAME]} branch, connected to ~ubuntu/git/${REPO_NAME}.git ${TEST_BOX_REPOS[$REPO_NAME]}"
        cd -
     else
-       cd $GITNAME
+       cd "$MODULE_PATH/$GITNAME"
        if [ "$(git remote | grep testing)" = "" ]
        then
-          git remote add testing /home/ubuntu/git/${GITNAME}.git/
+          git remote add testing /home/ubuntu/git/${REPO_NAME}.git/
        fi
        git fetch testing
        git stash -k -u
-       if [ "$(git branch | grep "${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+       if [ "$(git branch | grep "${TEST_BOX_REPOS[$REPO_NAME]}")" = "" ]
        then
-          if [ "$(git branch | grep "* ${TEST_BOX_REPOS[$GITNAME]}")" = "" ]
+          if [ "$(git branch | grep "* ${TEST_BOX_REPOS[$REPO_NAME]}")" = "" ]
           then
-             git checkout ${TEST_BOX_REPOS[$GITNAME]}
+             git checkout ${TEST_BOX_REPOS[$REPO_NAME]}
           fi
-          git branch --set-upstream testing/${TEST_BOX_REPOS[$GITNAME]} ${TEST_BOX_REPOS[$GITNAME]}
+          git branch --set-upstream testing/${TEST_BOX_REPOS[$REPO_NAME]} ${TEST_BOX_REPOS[$REPO_NAME]}
        else
-          git checkout --track remotes/testing/${TEST_BOX_REPOS[$GITNAME]}
+          git checkout --track remotes/testing/${TEST_BOX_REPOS[$REPO_NAME]}
        fi
        cd -
     fi
+    RestoreDebugInfo
+    return 1
  fi
  RestoreDebugInfo
 }
