@@ -39,6 +39,7 @@ fi
 CloneRepo maestro $MAESTRO_LINK $GITBRANCH
 cd maestro
 git config core.autocrlf false
+git config --global url.https://.insteadOf git://
 
 mkdir /opt/config/production/puppet/
 ln -s /opt/config/production/git/maestro/puppet/manifests /opt/config/production/puppet
