@@ -69,11 +69,15 @@ Options:
                           (Ex: Maestro clone puppet-gardener repository as gardener in /etc/puppet/modules)
  --init <url>           : By default, test-box.sh wait for the server to do the repo clone it self. You can force to initialize this clone from a url.
  --ref remote|local     : During a configure, your testing branch code reference will be the remote server if you set 'remote' otherwise, it will be your local repository as the testing code data.
- --commit <Msg>         : Will commit your code, with a specific <message>
+ --commit <Msg> [-a]    : Will commit your code, with a specific <message>. 
+                          The optional -a is the 'git commit -a' option. See git for details.
  --commit-all <Msg>     : Same as --commit, but the commit will add all tracked updated files to the commit.
- --fixup <Commit>  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
-                     If you set 'last' to <Commit>, test-box will search for the last unfixed commit number.
- --squash <Commit> : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+                          This is equivalent as --commit <Msg] -a
+ --fixup <Commit> [-a]  : Will commit with 'fixup!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+                          The optional -a is the 'git commit -a' option. See git for details.
+                          If you set 'last' to <Commit>, test-box will search for the last unfixed commit number.
+ --squash <Commit> [-a] : Will commit with 'squash!' prefix your commit message for use with rebase --autosquash. See git help commit for details.
+                          The optional -a is the 'git commit -a' option. See git for details.
 
 This script helps to implement everything to create a test environment connected to a testing local branch.
 It helps you to test some code controlled by git (limit data loss risk, and environment controlled.) on a remote kit."
@@ -391,7 +395,7 @@ then
 fi
 
 
-OPTS=$(getopt -o h -l ref:,repo-dir:,root-repo:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
+OPTS=$(getopt -o h,a -l ref:,repo-dir:,root-repo:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
 if [ $? != 0 ]
 then
     Help "Invalid options"
@@ -458,19 +462,23 @@ do
        do_commit --commit-all "$1"
        shift;;
      "--commit" | "--fixup" | "--squash")
-       if [ "$(echo "$2" | cut -c1-2)"  = -- ]
+       ACT=$1
+       if [ "$(echo "$2" | cut -c1-2)"  != -- ]
        then
-          do_commit "$1" ""
-       else
           if [ "$2" = "last" ]
           then
-             COMMITID="$(git log --oneline | grep -v fixup | head -n 1 | awk '{ print $1 }')"
-             do_commit "$1" "$COMMITID"
+             OPT="$(git log --oneline | grep -v fixup | head -n 1 | awk '{ print $1 }')"
           else
-             do_commit "$1" "$2"
+             OPT="$2"
           fi
           shift
+          if [ "$2" = "-a" ]
+          then
+             OPT="$OPT -a"
+             shift
+          fi
        fi
+       do_commit "$ACT" "$OPT"
        shift;;
        # Adding this repository PATH to the test-box list to send out.
      "--report")
