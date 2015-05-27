@@ -378,6 +378,19 @@ else
    REPO_DIR="/opt/config/production/git/"
 fi
 
+TEST_BOX_RC=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ $? -ne 0 ]
+then
+   Error 1 "You are not in a git repository. Move to a $REPO clone repo directory and retry"
+fi
+
+if [ -f $TEST_BOX_RC/.test-box ]
+then
+   echo "Loading test-box resource $TEST_BOX_RC/.test-box"
+   source $TEST_BOX_RC/.test-box
+fi
+
+
 OPTS=$(getopt -o h -l ref:,repo-dir:,root-repo:,repo:,configure:,send,ssend,commit-all:,commit:,fixup:,squash:,report:,remove,push-to:,remove-from:,init:,debug -- "$@" )
 if [ $? != 0 ]
 then
@@ -489,12 +502,6 @@ do
        exit;;
   esac
 done
-
-git rev-parse --show-toplevel 2>/dev/null
-if [ $? -ne 0 ]
-then
-   Error 1 "You are not in a git repository. Move to a $REPO clone repo directory and retry"
-fi
 
 if [ "$(git remote -v | grep "origin *.*$REPO")" = "" ]
 then
