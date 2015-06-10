@@ -85,7 +85,9 @@ function setup_puppet_fedora {
     # work-around is to just symlink pip-python to "fool" it.
     # See upstream issue:
     #  https://tickets.puppetlabs.com/browse/PUP-1082
-    ln -fs /usr/bin/pip /usr/bin/pip-python
+    if [ ! -L /usr/bin/pip-python ]; then
+        ln -fs /usr/bin/pip /usr/bin/pip-python
+    fi
 }
 
 function setup_puppet_rhel7 {
@@ -102,7 +104,9 @@ function setup_puppet_rhel7 {
     rpm -ivh $puppet_pkg
 
     # see comments in setup_puppet_fedora
-    ln -s /usr/bin/pip /usr/bin/pip-python
+    if [ ! -L /usr/bin/pip-python ]; then
+        ln -s /usr/bin/pip /usr/bin/pip-python
+    fi
 }
 
 function setup_puppet_rhel6 {
