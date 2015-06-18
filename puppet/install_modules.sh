@@ -42,10 +42,12 @@ function remove_module {
 
 # Array of modules to be installed key:value is module:version.
 declare -A MODULES
+declare -a ORDERS
 
 # Array of modues to be installed from source and without dependency resolution.
 # key:value is source location, revision to checkout
 declare -A SOURCE_MODULES
+declare -a SOURCE_ORDERS
 
 #NOTE: if we previously installed kickstandproject-ntp we nuke it here
 # since puppetlabs-ntp and kickstandproject-ntp install to the same dir
@@ -80,7 +82,7 @@ fi
 
 if [ "${DEFAULT_MODULES}" = "1" ] ; then
   echo "... using default modules ..."
-  MODULES["puppetlabs-ntp"]="0.2.0"
+  MODULES["puppetlabs-ntp"]="0.2.0"; ORDERS+=( "puppetlabs-ntp" )
 
 # freenode #puppet 2012-09-25:
 # 18:25 < jeblair> i would like to use some code that someone wrote,
@@ -92,33 +94,34 @@ if [ "${DEFAULT_MODULES}" = "1" ] ; then
 # 18:30 < jamesturnbull> jeblair: since we - being PL - are the author
 # - our intent was not to limit it's use and it should be Apache
 # licensed
-  MODULES["openstackci-vcsrepo"]="0.0.8"
+  MODULES["openstackci-vcsrepo"]="0.0.8"; ORDERS+=( "openstackci-vcsrepo" )
 
-  MODULES["puppetlabs-apache"]="0.0.4"
-  MODULES["puppetlabs-apt"]="1.4.2"
-  MODULES["puppetlabs-haproxy"]="0.4.1"
-  MODULES["puppetlabs-mysql"]="0.6.1"
-  MODULES["puppetlabs-postgresql"]="3.4.1"
-  MODULES["puppetlabs-stdlib"]="4.3.2"
-  MODULES["saz-memcached"]="2.0.2"
-  MODULES["spiette-selinux"]="0.5.1"
-  MODULES["rafaelfc-pear"]="1.0.3"
-  MODULES["puppetlabs-inifile"]="1.0.0"
-  MODULES["puppetlabs-firewall"]="0.0.4"
-  MODULES["puppetlabs-puppetdb"]="3.0.1"
-  MODULES["stankevich-python"]="1.6.6"
-  MODULES["garethr-erlang"]="0.3.0"
-  MODULES["sensu-sensu"]="1.2.1"
-  MODULES["camptocamp-openldap"]="0.5.3"
-  MODULES["stahnma-epel"]="1.0.0"
-  MODULES["nanliu-staging"]="0.3.1"
-  # MODULES["puppetlabs-rabbitmq"]="4.0.0"
+  MODULES["puppetlabs-apache"]="0.0.4"; ORDERS+=( "puppetlabs-apache" )
+  MODULES["puppetlabs-passenger"]="0.3.0"; ORDERS+=( "puppetlabs-passenger" )
+  MODULES["puppetlabs-apt"]="1.4.2"; ORDERS+=( "puppetlabs-apt" )
+  MODULES["puppetlabs-haproxy"]="0.4.1"; ORDERS+=( "puppetlabs-haproxy" )
+  MODULES["puppetlabs-mysql"]="0.6.1"; ORDERS+=( "puppetlabs-mysql" )
+  MODULES["puppetlabs-postgresql"]="3.4.1"; ORDERS+=( "puppetlabs-postgresql" )
+  MODULES["puppetlabs-stdlib"]="4.3.2"; ORDERS+=( "puppetlabs-stdlib" )
+  MODULES["saz-memcached"]="2.0.2"; ORDERS+=( "saz-memcached" )
+  MODULES["spiette-selinux"]="0.5.1"; ORDERS+=( "spiette-selinux" )
+  MODULES["rafaelfc-pear"]="1.0.3"; ORDERS+=( "rafaelfc-pear" )
+  MODULES["puppetlabs-inifile"]="1.0.0"; ORDERS+=( "puppetlabs-inifile" )
+  MODULES["puppetlabs-firewall"]="0.0.4"; ORDERS+=( "puppetlabs-firewall" )
+  MODULES["puppetlabs-puppetdb"]="3.0.1"; ORDERS+=( "puppetlabs-puppetdb" )
+  MODULES["stankevich-python"]="1.6.6"; ORDERS+=( "stankevich-python" )
+  MODULES["garethr-erlang"]="0.3.0"; ORDERS+=( "garethr-erlang" )
+  MODULES["sensu-sensu"]="1.2.1"; ORDERS+=( "sensu-sensu" )
+  MODULES["camptocamp-openldap"]="0.5.3"; ORDERS+=( "camptocamp-openldap" )
+  MODULES["stahnma-epel"]="1.0.0"; ORDERS+=( "stahnma-epel" )
+  MODULES["nanliu-staging"]="0.3.1"; ORDERS+=( "nanliu-staging" )
+  # MODULES["puppetlabs-rabbitmq"]="4.0.0"; ORDERS+=( "puppetlabs-rabbitmq" )
 
 # Source modules should use tags, explicit refs or remote branches because
 # we do not update local branches in this script.
-  SOURCE_MODULES["https://github.com/miqui/puppetlabs-rabbitmq"]="origin/master"
-  SOURCE_MODULES["https://github.com/nibalizer/puppet-module-puppetboard"]="2.4.0"
-  SOURCE_MODULES["https://git.openstack.org/openstack-infra/puppet-storyboard"]="origin/master"
+  SOURCE_MODULES["https://github.com/miqui/puppetlabs-rabbitmq"]="origin/master"; SOURCE_ORDERS+=( "https://github.com/miqui/puppetlabs-rabbitmq" )
+  SOURCE_MODULES["https://github.com/nibalizer/puppet-module-puppetboard"]="2.4.0"; SOURCE_ORDERS+=( "https://github.com/nibalizer/puppet-module-puppetboard" )
+  SOURCE_MODULES["https://git.openstack.org/openstack-infra/puppet-storyboard"]="origin/master"; SOURCE_ORDERS+=( "https://git.openstack.org/openstack-infra/puppet-storyboard" )
 fi
 
 if [ -z "${!MODULES[*]}" ] && [ -z "${!SOURCE_MODULES[*]}" ] ; then
@@ -135,17 +138,17 @@ then
 fi
 
 # Install all the modules
-for MOD in ${!MODULES[*]} ; do
-  echo -n "Installing module ${MOD}... "
+for MOD in ${!ORDERS[@]} ; do
+  echo -n "Installing module ${ORDERS[$MOD]}... "
   # If the module at the current version does not exist upgrade or install it.
-  if ! echo ${MODULE_LIST} | grep "$MOD ([^v]*v${MODULES[$MOD]}" >/dev/null 2>&1
+  if ! echo ${MODULE_LIST} | grep "${ORDERS[$MOD]} ([^v]*v${MODULES[${ORDERS[$MOD]}]}" >/dev/null 2>&1
   then
-    echo "v${MODULES[$MOD]}"
+    echo "v${MODULES[${ORDERS[$MOD]}]}"
     # Attempt module upgrade. If that fails try installing the module.
-    if ! puppet module upgrade ${MOD} --version ${MODULES[$MOD]} >/dev/null 2>&1
+    if ! puppet module upgrade ${ORDERS[$MOD]} --version ${MODULES[${ORDERS[$MOD]}]} >/dev/null 2>&1
     then
       # This will get run in cron, so silence non-error output
-      puppet module install ${MOD} --version ${MODULES[$MOD]} >/dev/null
+      puppet module install ${ORDERS[$MOD]} --version ${MODULES[${ORDERS[$MOD]}]} >/dev/null
     fi
   else
     echo "already exists."
@@ -155,43 +158,43 @@ done
 MODULE_LIST=`puppet module list`
 
 # Make a second pass, just installing modules from source
-for MOD in ${!SOURCE_MODULES[*]} ; do
+for MOD in ${!SOURCE_ORDERS[@]} ; do
   # get the name of the module directory
-  if [ `echo ${MOD} | awk -F. '{print $NF}'` = 'git' ]; then
-    echo "Remote repos of the form repo.git are not supported: ${MOD}"
+  if [ `echo ${SOURCE_ORDERS[$MOD]} | awk -F. '{print $NF}'` = 'git' ]; then
+    echo "Remote repos of the form repo.git are not supported: ${SOURCE_ORDERS[$MOD]}"
     exit 1
   fi
-  MODULE_NAME=`echo ${MOD} | awk -F- '{print $NF}'`
+  MODULE_NAME=`echo ${SOURCE_ORDERS[$MOD]} | awk -F- '{print $NF}'`
   echo "Installing module ${MODULE_NAME} (from git source)..."
   # set up git base command to use the correct path
   GIT_CMD_BASE="git --git-dir=${MODULE_PATH}/${MODULE_NAME}/.git --work-tree ${MODULE_PATH}/${MODULE_NAME}"
   # treat any occurrence of the module as a match
   if ! echo ${MODULE_LIST} | grep "${MODULE_NAME}" >/dev/null 2>&1; then
     # clone modules that are not installed
-    git clone ${MOD} "${MODULE_PATH}/${MODULE_NAME}"
+    git clone ${SOURCE_ORDERS[$MOD]} "${MODULE_PATH}/${MODULE_NAME}"
   else
     if [ ! -d ${MODULE_PATH}/${MODULE_NAME}/.git ]; then
       echo "Found directory ${MODULE_PATH}/${MODULE_NAME} that is not a git repo, deleting it and reinstalling from source"
       remove_module ${MODULE_NAME}
-      git clone ${MOD} "${MODULE_PATH}/${MODULE_NAME}"
-    elif [ `${GIT_CMD_BASE} remote show origin | grep 'Fetch URL' | awk -F'URL: ' '{print $2}'` != ${MOD} ]; then
-      echo "Found remote in ${MODULE_PATH}/${MODULE_NAME} that does not match desired remote ${MOD}, deleting dir and re-cloning"
+      git clone ${SOURCE_ORDERS[$MOD]} "${MODULE_PATH}/${MODULE_NAME}"
+    elif [ `${GIT_CMD_BASE} remote show origin | grep 'Fetch URL' | awk -F'URL: ' '{print $2}'` != ${SOURCE_ORDERS[$MOD]} ]; then
+      echo "Found remote in ${MODULE_PATH}/${MODULE_NAME} that does not match desired remote ${SOURCE_ORDERS[$MOD]}, deleting dir and re-cloning"
       remove_module ${MODULE_NAME}
-      git clone ${MOD} "${MODULE_PATH}/${MODULE_NAME}"
+      git clone ${SOURCE_ORDERS[$MOD]} "${MODULE_PATH}/${MODULE_NAME}"
     fi
   fi
 
   # fetch the latest refs from the repo
   ${GIT_CMD_BASE} remote update
 
-  test-box "${MODULE_PATH}" "${MODULE_NAME}" "$(echo "${MOD}"| awk -F/ '{print $NF}')"
+  test-box "${MODULE_PATH}" "${MODULE_NAME}" "$(echo "${SOURCE_ORDERS[$MOD]}"| awk -F/ '{print $NF}')"
 
   if [ $? -eq 0 ]
   then
     # make sure the correct revision is installed, I have to use rev-list b/c rev-parse does not work with tags
-    if [ `${GIT_CMD_BASE} rev-list HEAD --max-count=1` != `${GIT_CMD_BASE} rev-list ${SOURCE_MODULES[$MOD]} --max-count=1` ]; then
+    if [ `${GIT_CMD_BASE} rev-list HEAD --max-count=1` != `${GIT_CMD_BASE} rev-list ${SOURCE_MODULES[${SOURCE_ORDERS[$MOD]}]} --max-count=1` ]; then
       # checkout correct revision
-      ${GIT_CMD_BASE} checkout ${SOURCE_MODULES[$MOD]}
+      ${GIT_CMD_BASE} checkout ${SOURCE_MODULES[${SOURCE_ORDERS[$MOD]}]}
     fi
   fi
 
