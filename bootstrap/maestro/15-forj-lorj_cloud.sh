@@ -87,7 +87,7 @@ then
    echo "Lorj is disabled. To-re-enable it, update /opt/config/lorj/config.yaml"
 fi
 
-lorj_account_import.rb /opt/config/lorj=cloud "$(cat $LORJ_TMP_KEY)" ${LORJ_TMP_FILE} cloud.yaml
+lorj_account_import.rb /opt/config/lorj "$(cat $LORJ_TMP_KEY)" ${LORJ_TMP_FILE} cloud.yaml
 
 ###########################################################################################
 
