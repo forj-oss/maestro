@@ -88,6 +88,7 @@ then
 fi
 
 lorj_account_import.rb /opt/config/lorj "$(cat $LORJ_TMP_KEY)" ${LORJ_TMP_FILE} cloud.yaml
+chown -R puppet:puppet /opt/config/lorj
 
 ###########################################################################################
 
