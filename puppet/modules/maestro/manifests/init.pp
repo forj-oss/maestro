@@ -102,6 +102,13 @@ class maestro (
       }
   }
 
+  if $::hostname == 'maestro' {
+    exec { 'Lorj files owned by puppet ONLY':
+      command => 'chown -R puppet:puppet /opt/config/lorj',
+    }
+  }
+
+
   $ddl_home_dir = "${app_dir}/ddl"
 
   if ! defined(File[$app_dir]) {
