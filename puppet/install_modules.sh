@@ -28,7 +28,8 @@ then
 fi
 
 SCRIPT_NAME=$(basename $0)
-SCRIPT_DIR=$(readlink -f "$(dirname $0)")
+#SCRIPT_DIR=$(readlink -f "$(dirname $0)")
+SCRIPT_DIR="${1}"
 MODULE_PATH=/etc/puppet/modules
 
 function remove_module {

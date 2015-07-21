@@ -46,7 +46,7 @@ bash /opt/config/production/git/maestro/puppet/install_puppet.sh
 # we need to set for an older installation version.
 puppet module install puppetlabs-apache --version 0.4.0
 puppet module install puppetlabs-passenger --version 0.3.0
-bash /opt/config/production/git/maestro/puppet/install_modules.sh
+bash /opt/config/production/git/maestro/puppet/install_modules.sh "/opt/config/production/git/maestro/puppet/modules.env"
 bash /opt/config/production/git/maestro/hiera/hiera.sh
 
 
@@ -90,5 +90,3 @@ service puppet-dashboard-workers restart
 run1
 
 puppet agent $PUPPET_FLAGS --waitforcert 60 --test 2>&1 | tee -a /tmp/puppet-agent-test3.log
-
-
