@@ -44,9 +44,7 @@ fi
 bash /opt/config/production/git/maestro/puppet/install_puppet.sh
 # Regarding issues with the latest passenger release and its dependencies
 # we need to set for an older installation version.
-puppet module install puppetlabs-apache --version 0.4.0
-puppet module install puppetlabs-passenger --version 0.3.0
-bash /opt/config/production/git/maestro/puppet/install_modules.sh "/opt/config/production/git/maestro/puppet/modules.env"
+bash /opt/config/production/git/maestro/puppet/install_modules.sh "/opt/config/production/git/maestro/puppet"
 bash /opt/config/production/git/maestro/hiera/hiera.sh
 
 
