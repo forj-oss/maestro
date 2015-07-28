@@ -17,18 +17,19 @@
 # This bootscript configure Maestro Box to become puppet Orchestrator.
 
 if [ -f "$INIT_FUNCTIONS" ]
-then
-   source $INIT_FUNCTIONS
+  then
+  source $INIT_FUNCTIONS
 else
-   echo "Unable to load 'INIT_FUNCTIONS' ($INIT_FUNCTIONS). Script aborted."
-   exit 1
+  echo "Unable to load 'INIT_FUNCTIONS' ($INIT_FUNCTIONS). Script aborted."
+  exit 1
 fi
 
 PUPPET_DEBUG="$(GetJson /meta-boot.js PUPPET_DEBUG)"
 GITBRANCH="$(GetJson /meta-boot.js gitbranch)"
+BLUEPRINT="$(GetJson /meta-boot.js blueprint)"
 
 if [ "$PUPPET_DEBUG" = "True" ]
-then
+  then
   PUPPET_FLAGS="--debug --verbose"
 fi
 
@@ -53,37 +54,36 @@ find /opt/config/production \( -path \*/tools/bin -o -path \*/bootstrap -o -path
 find /opt/config/production -exec chown puppet:puppet {} \;
 find /opt/config/fog -exec chown puppet:puppet {} \;
 
-if [ "$http_proxy" != "" ] && [ -r /etc/default/puppet ] && [ "$(grep http_proxy /etc/default/puppet)" = "" ]
-then
-   grep http_proxy /etc/environment >> /etc/default/puppet
+if [ "$http_proxy" != "" ] && [ -r /etc/default/puppet ] && [ "$(grep http_proxy /etc/default/puppet)" = "" ]; then
+  grep http_proxy /etc/environment >> /etc/default/puppet
 fi
 
 
 function run1
 {
-export environment=production
-export PUPPET_MODULES=/opt/config/$environment/puppet/modules
-export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/maestro/puppet/modules
-export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/config/modules
-export PUPPET_MODULES=$PUPPET_MODULES:/etc/puppet/modules
+  export environment=production
+  export PUPPET_MODULES=/opt/config/$environment/puppet/modules
+  export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/maestro/puppet/modules
+  export PUPPET_MODULES=$PUPPET_MODULES:/opt/config/$environment/git/config/modules
+  export PUPPET_MODULES=$PUPPET_MODULES:/etc/puppet/modules
 
-_FQDN=$(facter fqdn)
-puppet cert generate $_FQDN
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap1.log
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap2.log
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite1.log
-service puppetmaster stop
-service apache2 restart || service httpd restart
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite2.log
-service puppetmaster stop
-service apache2 restart || service httpd restart
-# Added due to npm install sometimes throwing undefined install errors... clears up after subsequent runs.
-# TODO: find how we can delay maestro ui install till after base orchestration is running.... consideration for future release.
-puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite3.log
-# we run puppet with passenger, this service should not start
-service puppetmaster stop
-service apache2 restart || service httpd restart
-service puppet-dashboard-workers restart
+  _FQDN=$(facter fqdn)
+  puppet cert generate $_FQDN
+  puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap1.log
+  puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/bootstrap_hiera.pp 2>&1 | tee -a /tmp/puppet-applybootstrap2.log
+  puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite1.log
+  service puppetmaster stop
+  service apache2 restart || service httpd restart
+  puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite2.log
+  service puppetmaster stop
+  service apache2 restart || service httpd restart
+  # Added due to npm install sometimes throwing undefined install errors... clears up after subsequent runs.
+  # TODO: find how we can delay maestro ui install till after base orchestration is running.... consideration for future release.
+  puppet apply $PUPPET_FLAGS --modulepath=$PUPPET_MODULES /opt/config/production/puppet/manifests/site.pp 2>&1 | tee -a /tmp/puppet-applysite3.log
+  # we run puppet with passenger, this service should not start
+  service puppetmaster stop
+  service apache2 restart || service httpd restart
+  service puppet-dashboard-workers restart
 }
 run1
 

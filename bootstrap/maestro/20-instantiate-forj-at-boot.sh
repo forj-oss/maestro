@@ -54,6 +54,9 @@ then # TODO: Support to receive a different layout then default one.
    echo "Re-applying: puppet apply /opt/config/production/git/maestro/puppet/manifest/site.pp --modulepath=<from puppet.conf>"
    echo "puppet.conf: modulepath = $MODPATH"
 
+# then we install the puppet modules:
+   bash /opt/config/production/git/maestro/puppet/install_modules.sh "/opt/config/production/git/${BLUEPRINT}/puppet"
+
 # TODO: remove after we're done debuggin:
    find /etc/puppet/hieradata
 # run standalone for MODPATH to update in puppet.conf
@@ -62,7 +65,7 @@ then # TODO: Support to receive a different layout then default one.
    service puppet-dashboard-workers restart
    puppet apply --debug --verbose --modulepath=$MODPATH /opt/config/production/git/maestro/puppet/manifests/site.pp
 
-# restart puppet so all new factors and hiera are loaded. 
+# restart puppet so all new factors and hiera are loaded.
    service puppetmaster stop
    service apache2 restart || service httpd restart
    service puppet-dashboard-workers restart
