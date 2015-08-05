@@ -17,7 +17,7 @@
  * create user (i.e. the service account)
  */
 
-GRANT ALL ON kit_info.* TO '<%= @mysql_user %>'@'<%= @mysql_server %>' IDENTIFIED BY '<%= @mysql_password %>';
+GRANT ALL ON kit_info.* TO '<%= @mysql_user %>'@'<%= @mysql_server %>' IDENTIFIED BY '<%= @mysql_kitusr_password %>';
 
 /*
  * kit_info database

@@ -18,9 +18,9 @@
 # Parameters:
 # $mysql_server::     An String, example localhost
 # $mysql_user::       The root user to use.
-# $mysql_password::   The root password to use for running the create scripts.
+# $mysql_root_password::   The root password to use for running the create scripts.
 # $mysql_user::       The application user to use in erb files.
-# $mysql_password::   The application password to use in erb files.
+# $mysql_kitusr_password::   The application password to use in erb files.
 # $ddl_name:: / $title An String with sql ddl file
 # $ddl_source:: source location of the ddl script
 # $ddl_content:: we use this to read template data instead of source data.
@@ -34,17 +34,17 @@
 
 #
 define maestro::app::run_ddl(
-  $ddl_name             = $title,
-  $mysql_server         = undef,
-  $mysql_root_user      = undef,
-  $mysql_root_password  = undef,
-  $mysql_user           = undef,
-  $mysql_password       = undef,
-  $ddl_source           = undef,
-  $ddl_content          = undef,
-  $ddl_home_dir         = undef,
-  $auth_provider        = hiera('maestro::auth_provider', 'launchpad'), # TODO: fix google
-  $openidssourl         = hiera('maestro::openidssourl', 'https://login.launchpad.net/'), # TODO: fix https://www.google.com/accounts/o8/id
+  $ddl_name              = $title,
+  $mysql_server          = undef,
+  $mysql_root_user       = undef,
+  $mysql_root_password   = undef,
+  $mysql_user            = undef,
+  $mysql_kitusr_password = undef,
+  $ddl_source            = undef,
+  $ddl_content           = undef,
+  $ddl_home_dir          = undef,
+  $auth_provider         = hiera('maestro::auth_provider', 'launchpad'), # TODO: fix google
+  $openidssourl          = hiera('maestro::openidssourl', 'https://login.launchpad.net/'), # TODO: fix https://www.google.com/accounts/o8/id
 ){
 
   if $mysql_server == undef
@@ -63,9 +63,9 @@ define maestro::app::run_ddl(
   {
     fail('missing mysql_user.')
   }
-  if $mysql_password == undef
+  if $mysql_kitusr_password == undef
   {
-    fail('missing mysql_password.')
+    fail('missing mysql_kitusr_password.')
   }
   if $ddl_home_dir == undef
   {
@@ -75,16 +75,16 @@ define maestro::app::run_ddl(
   {
     file { "${ddl_home_dir}/${ddl_name}":
       ensure => file,
-      owner  => 'root',
-      mode   => '0755',
+      owner  => puppet,
+      mode   => '0660',
       source => $ddl_source,
     }
   } elsif $ddl_content != undef
   {
     file { "${ddl_home_dir}/${ddl_name}":
       ensure  => file,
-      owner   => 'root',
-      mode    => '0755',
+      owner   => puppet,
+      mode    => '0660',
       content => template($ddl_content),
     }
   }

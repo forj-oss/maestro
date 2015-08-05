@@ -29,18 +29,18 @@
 
 #
 class maestro::app::kits_db(
-  $mysql_server         = hiera('maestro::app::mysql_server','localhost'),
-  $mysql_root_user      = hiera('maestro::app::mysql_root_user','root'),
-  $mysql_root_password  = hiera('mysql_root_password'),
-  $mysql_user           = hiera('maestro::app::mysql_user','kitusr'),
-  $mysql_password       = hiera('maestro::app::mysql_password'),
-  $ddl_home_dir         = undef,
+  $mysql_server          = hiera('maestro::app::mysql_server','localhost'),
+  $mysql_root_user       = hiera('maestro::app::mysql_root_user','root'),
+  $mysql_root_password   = hiera('mysql_root_password'),
+  $mysql_user            = hiera('maestro::app::mysql_user','kitusr'),
+  $mysql_kitusr_password = hiera('mysql_kitusr_password'),
+  $ddl_home_dir          = undef,
 ){
   validate_string($mysql_server)
   validate_string($mysql_root_user)
   validate_string($mysql_root_password)
   validate_string($mysql_user)
-  validate_string($mysql_password)
+  validate_string($mysql_kitusr_password)
 
   if $ddl_home_dir == undef
   {
@@ -51,33 +51,33 @@ class maestro::app::kits_db(
   }
 
   maestro::app::run_ddl{ 'kit_tools_ui.sql':
-    mysql_server        => $mysql_server,
-    mysql_root_user     => $mysql_root_user,
-    mysql_root_password => $mysql_root_password,
-    mysql_user          => $mysql_user,
-    mysql_password      => $mysql_password,
-    ddl_content         => 'maestro/app/ddl/kit_tools_ui.erb.sql',
-    ddl_home_dir        => $ddl_home_dir_use,
-    require             => Class['mysql::server'],
+    mysql_server          => $mysql_server,
+    mysql_root_user       => $mysql_root_user,
+    mysql_root_password   => $mysql_root_password,
+    mysql_user            => $mysql_user,
+    mysql_kitusr_password => $mysql_kitusr_password,
+    ddl_content           => 'maestro/app/ddl/kit_tools_ui.erb.sql',
+    ddl_home_dir          => $ddl_home_dir_use,
+    require               => Class['mysql::server'],
   }
   maestro::app::run_ddl{ 'setup-db.sql':
-    mysql_server        => $mysql_server,
-    mysql_root_user     => $mysql_root_user,
-    mysql_root_password => $mysql_root_password,
-    mysql_user          => $mysql_user,
-    mysql_password      => $mysql_password,
-    ddl_content         => 'maestro/app/ddl/setup-db.erb.sql',
-    ddl_home_dir        => $ddl_home_dir_use,
-    require             => Class['mysql::server'],
+    mysql_server          => $mysql_server,
+    mysql_root_user       => $mysql_root_user,
+    mysql_root_password   => $mysql_root_password,
+    mysql_user            => $mysql_user,
+    mysql_kitusr_password => $mysql_kitusr_password,
+    ddl_content           => 'maestro/app/ddl/setup-db.erb.sql',
+    ddl_home_dir          => $ddl_home_dir_use,
+    require               => Class['mysql::server'],
   }
   maestro::app::run_ddl{ 'forj.config-setup-db.sql':
-    mysql_server        => $mysql_server,
-    mysql_root_user     => $mysql_root_user,
-    mysql_root_password => $mysql_root_password,
-    mysql_user          => $mysql_user,
-    mysql_password      => $mysql_password,
-    ddl_content         => 'maestro/app/ddl/forj.config-setup-db.erb.sql',
-    ddl_home_dir        => $ddl_home_dir_use,
-    require             => Class['mysql::server'],
+    mysql_server          => $mysql_server,
+    mysql_root_user       => $mysql_root_user,
+    mysql_root_password   => $mysql_root_password,
+    mysql_user            => $mysql_user,
+    mysql_kitusr_password => $mysql_kitusr_password,
+    ddl_content           => 'maestro/app/ddl/forj.config-setup-db.erb.sql',
+    ddl_home_dir          => $ddl_home_dir_use,
+    require               => Class['mysql::server'],
   }
 }

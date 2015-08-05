@@ -30,9 +30,12 @@
 
 
 class maestro::app::setup(
-  $user     = hiera('maestro::app::user','puppet'),
-  $app_dir  = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
-  $revision = hiera('maestro::app::setup::revision','master'),
+  $user                  = hiera('maestro::app::user','puppet'),
+  $app_dir               = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
+  $revision              = hiera('maestro::app::setup::revision','master'),
+
+  # password to use in the file conf.yaml
+  $mysql_kitusr_password = hiera('mysql_kitusr_password'),
 ){
   require maestro::app::kits_db
   require maestro::requirements
@@ -40,6 +43,7 @@ class maestro::app::setup(
   validate_string($user)
   validate_string($app_dir)
   validate_string($revision)
+  validate_string($mysql_kitusr_password)
 
   vcsrepo {"${app_dir}/forj.config":
     ensure   => latest,
@@ -53,6 +57,15 @@ class maestro::app::setup(
                   Package['js-yaml'],
                   Package['pm2'],
                 ]
+  } ->
+
+  # creates the file conf.yaml with the dynamically assigned password in it
+  file { "${app_dir}/forj.config/config/conf.yaml":
+    ensure  => present,
+    owner   => $user,
+    group   => $user,
+    mode    => '0660',
+    content => template('maestro/app/conf_yaml.erb'),
   } ->
   nodejs_wrap::pm2instance{'kitops.js':
     script_dir => "${app_dir}/forj.config",

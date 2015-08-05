@@ -16,7 +16,7 @@
  *
  */
 CREATE DATABASE IF NOT EXISTS kit_info;
-GRANT ALL ON kit_info.* TO '<%= @mysql_user %>'@'<%= @mysql_server %>' IDENTIFIED BY '<%= @mysql_password %>';
+GRANT ALL ON kit_info.* TO '<%= @mysql_user %>'@'<%= @mysql_server %>' IDENTIFIED BY '<%= @mysql_kitusr_password %>';
 USE kit_info;
 CREATE TABLE IF NOT EXISTS kit_tools_ui (
   tool_id       smallint(5) unsigned NOT NULL AUTO_INCREMENT,

@@ -28,42 +28,44 @@
 
 
 class maestro::ui::setup(
-  $user                = hiera('maestro::ui::setup::user','puppet'),
-  $app_dir             = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
-  $revision            = hiera('maestro::ui::setup::revision','master'),
+  $user                  = hiera('maestro::ui::setup::user','puppet'),
+  $app_dir               = hiera('maestro::app::app_dir',"/opt/config/${::environment}/app"),
+  $revision              = hiera('maestro::ui::setup::revision','master'),
 
   # Repos
-  $common_repo         = hiera('maestro::ui::setup::common_repo','https://review.forj.io/p/forj-oss/node-common'),
-  $notifications_repo  = hiera('maestro::ui::setup::notifications_repo','https://review.forj.io/p/forj-oss/broker-notifications'),
-  $projects_repo       = hiera('maestro::ui::setup::projects_repo','https://review.forj.io/p/forj-oss/broker-projects'),
-  $maestro_repo        = hiera('maestro::ui::setup::maestro_repo','https://review.forj.io/p/forj-oss/maestro'),
+  $common_repo           = hiera('maestro::ui::setup::common_repo','https://review.forj.io/p/forj-oss/node-common'),
+  $notifications_repo    = hiera('maestro::ui::setup::notifications_repo','https://review.forj.io/p/forj-oss/broker-notifications'),
+  $projects_repo         = hiera('maestro::ui::setup::projects_repo','https://review.forj.io/p/forj-oss/broker-projects'),
+  $maestro_repo          = hiera('maestro::ui::setup::maestro_repo','https://review.forj.io/p/forj-oss/maestro'),
 
   # Project Names
-  $common              = hiera('maestro::ui::setup::common','node-common'),
-  $notifications       = hiera('maestro::ui::setup::notifications','broker-notifications'),
-  $projects            = hiera('maestro::ui::setup::projects','broker-projects'),
-  $maestro             = hiera('maestro::ui::setup::maestro','maestro'),
+  $common                = hiera('maestro::ui::setup::common','node-common'),
+  $notifications         = hiera('maestro::ui::setup::notifications','broker-notifications'),
+  $projects              = hiera('maestro::ui::setup::projects','broker-projects'),
+  $maestro               = hiera('maestro::ui::setup::maestro','maestro'),
 
   # Npm modules from node-common project
-  $msg_util            = hiera('maestro::ui::setup::msg_util','msg-util'),
-  $queue_util          = hiera('maestro::ui::setup::queue_util','queue-util'),
-  $crypto_util         = hiera('maestro::ui::setup::crypto_util','crypto-util'),
-  $project_util        = hiera('maestro::ui::setup::project_util','project-util'),
+  $msg_util              = hiera('maestro::ui::setup::msg_util','msg-util'),
+  $queue_util            = hiera('maestro::ui::setup::queue_util','queue-util'),
+  $crypto_util           = hiera('maestro::ui::setup::crypto_util','crypto-util'),
+  $project_util          = hiera('maestro::ui::setup::project_util','project-util'),
 
   # Applications Js app
-  $maestro_api_js      = hiera('maestro::ui::setup::maestro_api_js','maestro-api.js'),
-  $maestro_js          = hiera('maestro::ui::setup::maestro_js','maestro-app.js'),
-  $bp_api_js           = hiera('maestro::ui::setup::bp_api_js','bp-app.js'),
-  $projects_js         = hiera('maestro::ui::setup::projects_js','projects-broker.js'),
-  $notifications_js    = hiera('maestro::ui::setup::maestro_api_js','user-notifcation-broker.js'),
+  $maestro_api_js        = hiera('maestro::ui::setup::maestro_api_js','maestro-api.js'),
+  $maestro_js            = hiera('maestro::ui::setup::maestro_js','maestro-app.js'),
+  $bp_api_js             = hiera('maestro::ui::setup::bp_api_js','bp-app.js'),
+  $projects_js           = hiera('maestro::ui::setup::projects_js','projects-broker.js'),
+  $notifications_js      = hiera('maestro::ui::setup::maestro_api_js','user-notifcation-broker.js'),
 
   # Applications path starting from $app_dir
-  $maestro_api_dir     = hiera('maestro::ui::setup::maestro_api_dir','maestro/api/maestro-api'),
-  $maestro_dir         = hiera('maestro::ui::setup::maestro_dir','maestro/ui'),
-  $bp_api_dir          = hiera('maestro::ui::setup::bp_api_dir','maestro/api/bp-api'),
-  $projects_dir        = hiera('maestro::ui::setup::projects_dir','broker-projects/projects-broker'),
-  $notifications_dir   = hiera('maestro::ui::setup::notifications_dir','broker-notifications/user-notifications'),
+  $maestro_api_dir       = hiera('maestro::ui::setup::maestro_api_dir','maestro/api/maestro-api'),
+  $maestro_dir           = hiera('maestro::ui::setup::maestro_dir','maestro/ui'),
+  $bp_api_dir            = hiera('maestro::ui::setup::bp_api_dir','maestro/api/bp-api'),
+  $projects_dir          = hiera('maestro::ui::setup::projects_dir','broker-projects/projects-broker'),
+  $notifications_dir     = hiera('maestro::ui::setup::notifications_dir','broker-notifications/user-notifications'),
 
+  # password to use in the file connections.js
+  $mysql_kitusr_password = hiera('mysql_kitusr_password'),
 ){
   require maestro::app::kits_db
   require maestro::requirements
@@ -71,6 +73,7 @@ class maestro::ui::setup(
   validate_string($user)
   validate_string($app_dir)
   validate_string($revision)
+  validate_string($mysql_kitusr_password)
 
   # forj-oss/node-common
   vcsrepo {"${app_dir}/${common}":
@@ -173,6 +176,15 @@ class maestro::ui::setup(
     target => "/opt/config/${::settings::environment}/config.json",
     owner  => $user,
     group  => $user,
+  } ->
+
+  # creates the file connections.js with the dynamically assigned password in it
+  file { "/opt/config/production/git/${bp_api_dir}/config/connections.js":
+    ensure  => present,
+    owner   => $user,
+    group   => $user,
+    mode    => '0660',
+    content => template('maestro/ui/connections_js.erb'),
   } ->
   nodejs_wrap::pm2instance{$maestro_api_js:
     script_dir => "${app_dir}/${maestro_api_dir}",
