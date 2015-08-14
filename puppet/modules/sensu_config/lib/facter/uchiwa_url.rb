@@ -19,7 +19,8 @@ Facter.add("uchiwa_url") do
  setcode do
    begin
      http_name = Facter.value("helion_public_ipv4")
-     Facter::Util::Resolution.exec("echo http://#{http_name}:3010")
+     ret = Facter::Util::Resolution.exec(Facter.value('forj_script_path') + 'toolstatus.sh uchiwa')
+     ret == '0' ? Facter::Util::Resolution.exec("echo http://#{http_name}:3010") : Facter::Util::Resolution.exec('echo')
    rescue Exception => e
      Facter.warn("Error at uchiwa_url facter: #{e}")
      Facter::Util::Resolution.exec("echo #")

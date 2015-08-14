@@ -19,7 +19,8 @@ Facter.add("rabbitmq_url") do
  setcode do
    begin
      http_name = Facter.value("helion_public_ipv4")
-     Facter::Util::Resolution.exec("echo http://#{http_name}:15672")
+     ret = Facter::Util::Resolution.exec(Facter.value('forj_script_path') + 'toolstatus.sh rabbitmq')
+     ret == '0' ? Facter::Util::Resolution.exec("echo http://#{http_name}:15672") : Facter::Util::Resolution.exec('echo')
    rescue Exception => e
      Facter.warn("Error at rabbitmq_url facter: #{e}")
      Facter::Util::Resolution.exec("echo #")
