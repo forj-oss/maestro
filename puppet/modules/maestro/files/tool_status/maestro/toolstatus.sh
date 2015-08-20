@@ -34,7 +34,7 @@ rabbitmq() {
 }
 
 uchiwa() {
-  sudo -i pm2 list|grep uchiwa.js|grep online
+  sudo -i pm2 list|grep uchiwa.js|grep online > /dev/null 2>&1
   RETVAL=$?
   echo $RETVAL
 }
